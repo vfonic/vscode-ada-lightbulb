@@ -10,14 +10,15 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:extension.helloWorld"
+    "*"
   ],
   "main": "./src/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "extension.helloWorld",
-        "title": "Hello World"
+        "category": "Git Graph",
+        "command": "ada-git.view",
+        "title": "View Git Graph (git log)"
       }
     ]
   },
