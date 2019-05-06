@@ -165,7 +165,7 @@ class AvatarManager {
             repo +
             "/commits/" +
             avatarRequest.commits[commitIndex],
-          headers: { "User-Agent": "vscode-git-graph" },
+          headers: { "User-Agent": "vscode-ada-git" },
           agent: false,
           timeout: 15000
         },
@@ -229,7 +229,7 @@ class AvatarManager {
           hostname: "gitlab.com",
           path: "/api/v4/users?search=" + avatarRequest.email,
           headers: {
-            "User-Agent": "vscode-git-graph",
+            "User-Agent": "vscode-ada-git",
             "Private-Token": "w87U_3gAxWWaPtFgCcus"
           },
           agent: false,
@@ -258,11 +258,19 @@ class AvatarManager {
                   return;
                 }
               } else if (res.statusCode === 429) {
-                this.queue.addItem(avatarRequest, this.gitLabTimeout, false);
+                this.queue.addItem(
+                  avatarRequest,
+                  this.gitLabTimeout,
+                  false
+                );
                 return;
               } else if (res.statusCode >= 500) {
                 this.gitLabTimeout = t + 600000;
-                this.queue.addItem(avatarRequest, this.gitLabTimeout, false);
+                this.queue.addItem(
+                  avatarRequest,
+                  this.gitLabTimeout,
+                  false
+                );
                 return;
               }
               this.fetchFromGravatar(avatarRequest);
@@ -309,7 +317,7 @@ class AvatarManager {
             {
               hostname: imgUrl.hostname,
               path: imgUrl.path,
-              headers: { "User-Agent": "vscode-git-graph" },
+              headers: { "User-Agent": "vscode-ada-git" },
               agent: false,
               timeout: 15000
             },
@@ -320,9 +328,15 @@ class AvatarManager {
               });
               res.on("end", () => {
                 if (res.statusCode === 200) {
-                  let format = res.headers["content-type"].split("/")[1];
+                  let format = res.headers["content-type"].split(
+                    "/"
+                  )[1];
                   fs.writeFile(
-                    this.avatarStorageFolder + "/" + hash + "." + format,
+                    this.avatarStorageFolder +
+                      "/" +
+                      hash +
+                      "." +
+                      format,
                     Buffer.concat(imageBufferArray),
                     err => {
                       resolve(err ? null : hash + "." + format);

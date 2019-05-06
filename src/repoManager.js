@@ -11,7 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const vscode = require("vscode");
 const config_1 = require("./config");
-const utils_1 = require("./utils2");
+const utils_1 = require("./utils");
 class RepoManager {
     constructor(dataSource, extensionState, statusBarItem) {
         this.folderWatchers = {};

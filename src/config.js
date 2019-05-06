@@ -3,7 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const vscode = require("vscode");
 class Config {
     constructor() {
-        this.workspaceConfiguration = vscode.workspace.getConfiguration('git-graph');
+        this.workspaceConfiguration = vscode.workspace.getConfiguration(
+          "ada-git"
+        );
     }
     autoCenterCommitDetailsView() {
         return this.workspaceConfiguration.get('autoCenterCommitDetailsView', true);

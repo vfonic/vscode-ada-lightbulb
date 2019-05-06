@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
-const utils_1 = require("./utils2");
+const utils_1 = require("./utils");
 const AVATAR_STORAGE_FOLDER = '/avatars';
 const AVATAR_CACHE = 'avatarCache';
 const LAST_ACTIVE_REPO = 'lastActiveRepo';

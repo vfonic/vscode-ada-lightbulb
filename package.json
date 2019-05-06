@@ -2,7 +2,12 @@
   "name": "ada-git",
   "displayName": "ada-git",
   "description": "",
-  "version": "0.0.1",
+  "version": "0.1.0",
+	"publisher": "vfonic",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/vfonic/ada-git.git"
+	},
   "engines": {
     "vscode": "^1.33.0"
   },
@@ -151,6 +156,7 @@
     }
   },
   "scripts": {
+    "package-and-install": "vsce package && node ./.vscode/install-package.js",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "test": "node ./node_modules/vscode/bin/test"
   },
@@ -159,7 +165,6 @@
     "vscode": "^1.1.28",
     "eslint": "^5.13.0",
     "@types/node": "^10.12.21",
-    "@types/mocha": "^2.2.42",
-    "uglify-js": "^3.4.9"
+    "@types/mocha": "^2.2.42"
   }
 }

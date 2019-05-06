@@ -6,9 +6,9 @@ class StatusBarItem {
     constructor(context) {
         this.numRepos = 0;
         this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 1);
-        this.statusBarItem.text = 'Git Graph';
-        this.statusBarItem.tooltip = 'View Git Graph';
-        this.statusBarItem.command = 'git-graph.view';
+        this.statusBarItem.text = 'Ada Git';
+        this.statusBarItem.tooltip = 'View Ada Git';
+        this.statusBarItem.command = "ada-git.view";
         context.subscriptions.push(this.statusBarItem);
     }
     setNumRepos(numRepos) {

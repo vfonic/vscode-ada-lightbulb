@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const cp = require("child_process");
 const config_1 = require("./config");
-const utils_1 = require("./utils2");
+const utils_1 = require("./utils");
 const eolRegex = /\r\n|\r|\n/g;
 const headRegex = /^\(HEAD detached at [0-9A-Za-z]+\)/g;
 const gitLogSeparator = 'XX7Nal-YARtTpjCikii9nJxER19D6diSyk-AWkPb';

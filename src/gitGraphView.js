@@ -13,7 +13,7 @@ const vscode = require("vscode");
 const config_1 = require("./config");
 const diffDocProvider_1 = require("./diffDocProvider");
 const repoFileWatcher_1 = require("./repoFileWatcher");
-const utils_1 = require("./utils2");
+const utils_1 = require("./utils");
 class GitGraphView {
     constructor(panel, extensionPath, dataSource, extensionState, avatarManager, repoManager) {
         this.disposables = [];
@@ -203,12 +203,17 @@ class GitGraphView {
             GitGraphView.currentPanel.panel.reveal(column);
             return;
         }
-        const panel = vscode.window.createWebviewPanel('git-graph', 'Git Graph', column || vscode.ViewColumn.One, {
+        const panel = vscode.window.createWebviewPanel(
+          "ada-git",
+          "Ada Git",
+          column || vscode.ViewColumn.One,
+          {
             enableScripts: true,
             localResourceRoots: [
-                vscode.Uri.file(path.join(extensionPath, 'media'))
+              vscode.Uri.file(path.join(extensionPath, "media"))
             ]
-        });
+          }
+        );
         GitGraphView.currentPanel = new GitGraphView(panel, extensionPath, dataSource, extensionState, avatarManager, repoManager);
     }
     sendMessage(msg) {
@@ -247,8 +252,18 @@ class GitGraphView {
         };
         let body, numRepos = Object.keys(viewState.repos).length, colorVars = '', colorParams = '';
         for (let i = 0; i < viewState.graphColours.length; i++) {
-            colorVars += '--git-graph-color' + i + ':' + viewState.graphColours[i] + '; ';
-            colorParams += '[data-color="' + i + '"]{--git-graph-color:var(--git-graph-color' + i + ');} ';
+            colorVars +=
+              "--ada-git-color" +
+              i +
+              ":" +
+              viewState.graphColours[i] +
+              "; ";
+            colorParams +=
+              '[data-color="' +
+              i +
+              '"]{--ada-git-color:var(--ada-git-color' +
+              i +
+              ");} ";
         }
         if (numRepos > 0) {
             body = `<body style="${colorVars}">
@@ -268,12 +283,12 @@ class GitGraphView {
 			<div id="dialog"></div>
 			<div id="scrollShadow"></div>
 			<script nonce="${nonce}">var viewState = ${JSON.stringify(viewState)};</script>
-			<script src="${this.getMediaUri('out.min.js')}"></script>
+			<script src="${this.getMediaUri('web.js')}"></script>
 			</body>`;
         }
         else {
             body = `<body class="unableToLoad" style="${colorVars}">
-			<h2>Unable to load Git Graph</h2>
+			<h2>Unable to load Ada Git</h2>
 			<p>Either the current workspace does not contain a Git repository, or the Git executable could not be found.</p>
 			<p>If you are using a portable Git installation, make sure you have set the Visual Studio Code Setting "git.path" to the path of your portable installation (e.g. "C:\\Program Files\\Git\\bin\\git.exe" on Windows).</p>
 			</body>`;
@@ -287,7 +302,7 @@ class GitGraphView {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				<link rel="stylesheet" type="text/css" href="${this.getMediaUri('main.css')}">
 				<link rel="stylesheet" type="text/css" href="${this.getMediaUri('dropdown.css')}">
-				<title>Git Graph</title>
+				<title>Ada Git</title>
 				<style>${colorParams}"</style>
 			</head>
 			${body}

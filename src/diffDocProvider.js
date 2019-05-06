@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const vscode = require("vscode");
-const utils_1 = require("./utils2");
+const utils_1 = require("./utils");
 class DiffDocProvider {
     constructor(dataSource) {
         this.onDidChangeEventEmitter = new vscode.EventEmitter();
@@ -29,7 +29,7 @@ class DiffDocProvider {
         });
     }
 }
-DiffDocProvider.scheme = 'git-graph';
+DiffDocProvider.scheme = "ada-git";
 exports.DiffDocProvider = DiffDocProvider;
 class DiffDocument {
     constructor(body) {
