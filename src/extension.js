@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const vscode = require("vscode");
 const avatarManager_1 = require("./avatarManager");
 const dataSource_1 = require("./dataSource");
-// const diffDocProvider_1 = require("./diffDocProvider");
+const diffDocProvider_1 = require("./diffDocProvider");
 const extensionState_1 = require("./extensionState");
 const gitGraphView_1 = require("./gitGraphView");
 const repoManager_1 = require("./repoManager");
@@ -32,31 +32,31 @@ function activate(context) {
       );
     })
   );
-  // context.subscriptions.push(
-  //   vscode.commands.registerCommand("git-graph.clearAvatarCache", () => {
-  //     avatarManager.clearCache();
-  //   })
-  // );
-  // context.subscriptions.push(
-  //   vscode.workspace.registerTextDocumentContentProvider(
-  //     diffDocProvider_1.DiffDocProvider.scheme,
-  //     new diffDocProvider_1.DiffDocProvider(dataSource)
-  //   )
-  // );
-  // context.subscriptions.push(
-  //   vscode.workspace.onDidChangeConfiguration(e => {
-  //     if (e.affectsConfiguration("git-graph.showStatusBarItem")) {
-  //       statusBarItem.refresh();
-  //     } else if (e.affectsConfiguration("git-graph.dateType")) {
-  //       dataSource.generateGitCommandFormats();
-  //     } else if (e.affectsConfiguration("git-graph.maxDepthOfRepoSearch")) {
-  //       repoManager.maxDepthOfRepoSearchChanged();
-  //     } else if (e.affectsConfiguration("git.path")) {
-  //       dataSource.registerGitPath();
-  //     }
-  //   })
-  // );
-  // context.subscriptions.push(repoManager);
+  context.subscriptions.push(
+    vscode.commands.registerCommand("ada-git.clearAvatarCache", () => {
+      avatarManager.clearCache();
+    })
+  );
+  context.subscriptions.push(
+    vscode.workspace.registerTextDocumentContentProvider(
+      diffDocProvider_1.DiffDocProvider.scheme,
+      new diffDocProvider_1.DiffDocProvider(dataSource)
+    )
+  );
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration(e => {
+      if (e.affectsConfiguration("ada-git.showStatusBarItem")) {
+        statusBarItem.refresh();
+      } else if (e.affectsConfiguration("ada-git.dateType")) {
+        dataSource.generateGitCommandFormats();
+      } else if (e.affectsConfiguration("ada-git.maxDepthOfRepoSearch")) {
+        repoManager.maxDepthOfRepoSearchChanged();
+      } else if (e.affectsConfiguration("git.path")) {
+        dataSource.registerGitPath();
+      }
+    })
+  );
+  context.subscriptions.push(repoManager);
 }
 // exports.activate = activate;
 // exports.deactivate = deactivate;
