@@ -315,7 +315,9 @@ svg.openFolderIcon, svg.closedFolderIcon, svg.fileIcon{
 	cursor:default;
 }
 .gitRef.active{
-	border-color:var(--ada-git-color);
+  background-color: var(--ada-git-color);
+  border-color:var(--ada-git-color);
+  font-weight: bold;
 }
 .gitRef > svg{
 	background-color:var(--ada-git-color);

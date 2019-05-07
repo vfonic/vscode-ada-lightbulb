@@ -888,7 +888,12 @@
                     refHtml = '<span class="gitRef ' + this.commits[i].refs[j].type + (refActive ? " active" : "") + '" data-name="' + refName + '">' + (this.commits[i].refs[j].type === "tag" ? svgIcons.tag : svgIcons.branch) + refName + "</span>";
                     refs = refActive ? refHtml + refs : refs + refHtml;
                 }
-                html += "<tr " + (this.commits[i].hash !== "*" ? 'class="commit" data-hash="' + this.commits[i].hash + '"' : 'class="unsavedChanges"') + ' data-id="' + i + '" data-color="' + this.graph.getVertexColour(i) + '"><td></td><td>' + (this.commits[i].hash === this.commitHead ? '<span class="commitHeadDot"></span>' : "") + refs + (this.commits[i].hash === currentHash ? "<b>" + message + "</b>" : message) + '</td><td title="' + date.title + '">' + date.value + '</td><td title="' + escapeHtml(this.commits[i].author + " <" + this.commits[i].email + ">") + '">' + (this.config.fetchAvatars ? '<span class="avatar" data-email="' + escapeHtml(this.commits[i].email) + '">' + (typeof this.avatars[this.commits[i].email] === "string" ? '<img class="avatarImg" src="' + this.avatars[this.commits[i].email] + '">' : "") + "</span>" : "") + escapeHtml(this.commits[i].author) + '</td><td title="' + escapeHtml(this.commits[i].hash) + '">' + abbrevCommit(this.commits[i].hash) + "</td></tr>";
+                html += '<tr class="commit" data-hash="' + this.commits[i].hash + '"' +
+                  ' data-id="' + i + '" data-color="' + this.graph.getVertexColour(i) + '"><td></td><td>' + refs +
+                  (this.commits[i].hash === currentHash ? "<b>" + message + "</b>" : message) + '</td><td title="' + date.title + '">' + date.value + '</td><td title="' +
+                  escapeHtml(this.commits[i].author + " <" + this.commits[i].email + ">") + '">' +
+                  (this.config.fetchAvatars ? '<span class="avatar" data-email="' + escapeHtml(this.commits[i].email) + '">' + (typeof this.avatars[this.commits[i].email] === "string" ? '<img class="avatarImg" src="' + this.avatars[this.commits[i].email] + '">' : "") + "</span>" : "") +
+                  escapeHtml(this.commits[i].author) + '</td><td title="' + escapeHtml(this.commits[i].hash) + '">' + abbrevCommit(this.commits[i].hash) + "</td></tr>";
             }
             this.tableElem.innerHTML = "<table>" + html + "</table>";
             this.footerElem.innerHTML = this.moreCommitsAvailable ? '<div id="loadMoreCommitsBtn" class="roundedBtn">Load More Commits</div>' : "";
@@ -1090,9 +1095,13 @@
             addListenerToClass("commit", "click", function(e) {
                 var sourceElem = e.target.closest(".commit");
                 if (_this.expandedCommit !== null && _this.expandedCommit.hash === sourceElem.dataset.hash) {
-                    _this.hideCommitDetails();
+                    // _this.hideCommitDetails();
                 } else {
+                  if (sourceElem.dataset.hash === '*') {
+                    _this.loadUncommittedChanges();
+                  } else {
                     _this.loadCommitDetails(sourceElem);
+                  }
                 }
             });
             addListenerToClass("gitRef", "contextmenu", function(e) {
@@ -1198,9 +1207,9 @@
                 });
                 showContextMenu(e, menu, sourceElem);
             });
-            addListenerToClass("gitRef", "click", function(e) {
-                return e.stopPropagation();
-            });
+            // addListenerToClass("gitRef", "click", function(e) {
+            //     return e.stopPropagation();
+            // });
             addListenerToClass("gitRef", "dblclick", function(e) {
                 e.stopPropagation();
                 hideDialogAndContextMenu();
@@ -1210,7 +1219,10 @@
         };
         GitGraphView.prototype.renderUncommitedChanges = function() {
             var date = getCommitDate(this.commits[0].date);
-            document.getElementsByClassName("unsavedChanges")[0].innerHTML = "<td></td><td><b>" + escapeHtml(this.commits[0].message) + '</b></td><td title="' + date.title + '">' + date.value + '</td><td title="* <>">*</td><td title="*">*</td>';
+            document.getElementsByClassName("unsavedChanges")[0].innerHTML =
+              "<td></td><td><b>" + escapeHtml(this.commits[0].message) +
+                '</b></td><td title="' + date.title + '">' +
+                date.value + '</td><td title="* <>">*</td><td title="*">*</td>';
         };
         GitGraphView.prototype.renderShowLoading = function() {
             hideDialogAndContextMenu();
@@ -1357,6 +1369,8 @@
                     _this.scrollShadowElem.className = active ? "active" : "";
                 }
             });
+        };
+        GitGraphView.prototype.loadUncommittedChanges = function() {
         };
         GitGraphView.prototype.loadCommitDetails = function(sourceElem) {
             this.hideCommitDetails();
