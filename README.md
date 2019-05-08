@@ -1,12 +1,12 @@
 # Ada Lightbulb extension for Visual Studio Code
 
-View a Ada Lightbulb of your repository, and easily perform Git actions from the graph. Configurable to look the way you want!
+View a git graph of your repository, and easily perform Git actions from the graph. Configurable to look the way you want!
 
 ![Despicable Me Lightbulb](https://github.com/vfonic/vscode-ada-lightbulb/raw/master/resources/Lightbolb.gif)
 
 ## Features
 
-- Ada Lightbulb View:
+- Graph View:
   - Display:
     - Local & Remote Branches
     - Local Refs: Heads, Tags & Remotes
@@ -19,7 +19,6 @@ View a Ada Lightbulb of your repository, and easily perform Git actions from the
     - Checkout, Cherry Pick, Merge & Revert commits
     - Reset current branch to commit
     - Copy commit hashes, tag names & branch names to the clipboard
-- Configurable settings (e.g. graph style, branch colours, and more...)
 - "Ada Lightbulb: View Graph" launch command in the Command Palette
 - "Ada Lightbulb" launch button in the Status Bar
 
@@ -60,4 +59,9 @@ Detailed Release Notes are available [here](CHANGELOG.md).
 
 ## Visual Studio Marketplace
 
-This extension is available on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=mhutchie.ada-lightbulb) for Visual Studio Code.
+This extension is available on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=vfonic.ada-lightbulb) for Visual Studio Code.
+
+## TODO
+
+- [ ] Rethink config options (for now)
+- [ ] Publish to VS Code Marketplace
