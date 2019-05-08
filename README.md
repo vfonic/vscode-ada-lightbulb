@@ -65,3 +65,10 @@ This extension is available on the [Visual Studio Marketplace](https://marketpla
 
 - [ ] Rethink config options (for now)
 - [ ] Publish to VS Code Marketplace
+- [ ] Add config option to show all git commands being run
+- [ ] Show diff panel for selected commit in the panel at the bottom
+- [ ] Check possible integration with Gitlens
+- [ ] Add index.html test file that renders webview contents
+- [ ] Add support for github PRs and comments
+- [ ] Replace 'vscode.diff' with https://github.com/rtfpessoa/diff2html
+- [ ] Create Patreon account
