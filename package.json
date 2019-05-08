@@ -1,13 +1,13 @@
 {
-  "name": "ada-git",
-  "displayName": "ada-git",
-  "description": "",
+  "name": "ada-lightbulb",
+  "displayName": "Ada Lightbulb",
+  "description": "The only git GUI you'll ever need",
   "version": "0.1.0",
-	"publisher": "vfonic",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/vfonic/ada-git.git"
-	},
+  "publisher": "vfonic",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vfonic/ada-lightbulb.git"
+  },
   "engines": {
     "vscode": "^1.33.0"
   },
@@ -21,26 +21,26 @@
   "contributes": {
     "commands": [
       {
-        "category": "Ada Git",
-        "command": "ada-git.view",
-        "title": "View Ada Git (git log)"
+        "category": "Ada Lightbulb",
+        "command": "ada-lightbulb.view",
+        "title": "Open graph"
       },
       {
-        "category": "Ada Git",
-        "command": "ada-git.clearAvatarCache",
+        "category": "Ada Lightbulb",
+        "command": "ada-lightbulb.clearAvatarCache",
         "title": "Clear Avatar Cache"
       }
     ],
     "configuration": {
       "type": "object",
-      "title": "Ada Git",
+      "title": "Ada Lightbulb",
       "properties": {
-        "ada-git.autoCenterCommitDetailsView": {
+        "ada-lightbulb.autoCenterCommitDetailsView": {
           "type": "boolean",
           "default": true,
           "description": "Automatically center the commit details view when it is opened."
         },
-        "ada-git.dateFormat": {
+        "ada-lightbulb.dateFormat": {
           "type": "string",
           "enum": [
             "Date & Time",
@@ -53,9 +53,9 @@
             "Show relative times, for example \"5 minutes ago\""
           ],
           "default": "Date & Time",
-          "description": "Specifies the date format to be used in the date column of Ada Git."
+          "description": "Specifies the date format to be used in the date column of Ada Lightbulb."
         },
-        "ada-git.dateType": {
+        "ada-lightbulb.dateType": {
           "type": "string",
           "enum": [
             "Author Date",
@@ -66,14 +66,14 @@
             "Use the committer date of a commit"
           ],
           "default": "Author Date",
-          "description": "Specifies the date type to be displayed throughout Ada Git."
+          "description": "Specifies the date type to be displayed throughout Ada Lightbulb."
         },
-        "ada-git.fetchAvatars": {
+        "ada-lightbulb.fetchAvatars": {
           "type": "boolean",
           "default": false,
           "description": "Fetch avatars of commit authors and committers. By enabling this setting, you consent to commit author and committer email addresses being sent GitHub, GitLab or Gravatar, depending on the repositories remote origin."
         },
-        "ada-git.graphColours": {
+        "ada-lightbulb.graphColours": {
           "type": "array",
           "items": {
             "type": "string",
@@ -96,7 +96,7 @@
           ],
           "description": "Specifies the colours used on the graph."
         },
-        "ada-git.graphStyle": {
+        "ada-lightbulb.graphStyle": {
           "type": "string",
           "enum": [
             "rounded",
@@ -109,37 +109,37 @@
           "default": "rounded",
           "description": "Specifies the style of the graph."
         },
-        "ada-git.initialLoadCommits": {
+        "ada-lightbulb.initialLoadCommits": {
           "type": "number",
           "default": 300,
           "description": "Specifies the number of commits to initially load."
         },
-        "ada-git.loadMoreCommits": {
+        "ada-lightbulb.loadMoreCommits": {
           "type": "number",
           "default": 100,
           "description": "Specifies the number of commits to load when the \"Load More Commits\" button is pressed (only shown when more commits are available)."
         },
-        "ada-git.maxDepthOfRepoSearch": {
+        "ada-lightbulb.maxDepthOfRepoSearch": {
           "type": "number",
           "default": 0,
           "description": "Specifies the maximum depth of subfolders to search when discovering repositories in the workspace."
         },
-        "ada-git.showCurrentBranchByDefault": {
+        "ada-lightbulb.showCurrentBranchByDefault": {
           "type": "boolean",
           "default": false,
-          "description": "Show the current branch by default when Ada Git is opened. Default: false (show all branches)"
+          "description": "Show the current branch by default when Ada Lightbulb is opened. Default: false (show all branches)"
         },
-        "ada-git.showStatusBarItem": {
+        "ada-lightbulb.showStatusBarItem": {
           "type": "boolean",
           "default": true,
-          "description": "Show a Status Bar item which opens Ada Git when clicked."
+          "description": "Show a Status Bar item which opens Ada Lightbulb when clicked."
         },
-        "ada-git.showUncommittedChanges": {
+        "ada-lightbulb.showUncommittedChanges": {
           "type": "boolean",
           "default": true,
           "description": "Show uncommitted changes (set to false to decrease load time on large repositories)."
         },
-        "ada-git.tabIconColourTheme": {
+        "ada-lightbulb.tabIconColourTheme": {
           "type": "string",
           "enum": [
             "colour",
@@ -150,7 +150,7 @@
             "Show a grey icon which suits Visual Studio Code colour themes that are predominantly grayscale"
           ],
           "default": "colour",
-          "description": "Specifies the colour theme of the icon displayed on the Ada Git tab."
+          "description": "Specifies the colour theme of the icon displayed on the Ada Lightbulb tab."
         }
       }
     }
@@ -161,10 +161,11 @@
     "test": "node ./node_modules/vscode/bin/test"
   },
   "devDependencies": {
-    "typescript": "^3.3.1",
-    "vscode": "^1.1.28",
-    "eslint": "^5.13.0",
+    "@types/mocha": "^2.2.42",
     "@types/node": "^10.12.21",
-    "@types/mocha": "^2.2.42"
+    "eslint": "^5.13.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "typescript": "^3.3.1",
+    "vscode": "^1.1.28"
   }
 }

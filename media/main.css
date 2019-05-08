@@ -312,7 +312,7 @@ svg.fileIcon {
 .commitHeadDot {
   width: 6px;
   height: 6px;
-  border: 2px solid var(--ada-git-color);
+  border: 2px solid var(--ada-lightbulb-color);
   display: inline-block;
   border-radius: 6px;
   margin-right: 5px;
@@ -336,12 +336,12 @@ svg.fileIcon {
   cursor: default;
 }
 .gitRef.active {
-  background-color: var(--ada-git-color);
-  border-color: var(--ada-git-color);
+  background-color: var(--ada-lightbulb-color);
+  border-color: var(--ada-lightbulb-color);
   font-weight: bold;
 }
 .gitRef > svg {
-  background-color: var(--ada-git-color);
+  background-color: var(--ada-lightbulb-color);
   fill: var(--vscode-editor-background);
   width: 14px;
   height: 14px;
