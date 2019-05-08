@@ -350,6 +350,10 @@ svg.fileIcon {
   border-radius: 4px 0 0 4px;
   vertical-align: top;
 }
+.gitRef.active > svg {
+  fill: #ffffff;
+  margin-right: 0;
+}
 
 /* Loader */
 #loadingHeader {
