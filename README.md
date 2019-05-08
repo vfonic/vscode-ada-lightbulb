@@ -72,3 +72,4 @@ This extension is available on the [Visual Studio Marketplace](https://marketpla
 - [ ] Add support for github PRs and comments
 - [ ] Replace 'vscode.diff' with https://github.com/rtfpessoa/diff2html
 - [ ] Create Patreon account
+- [ ] Register as a source control provider
