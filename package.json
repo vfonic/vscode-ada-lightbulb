@@ -12,7 +12,7 @@
     "vscode": "^1.33.0"
   },
   "categories": [
-    "Other"
+    "SCM Providers"
   ],
   "activationEvents": [
     "*"
