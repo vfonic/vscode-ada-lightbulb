@@ -5,12 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Test Webview</title>
+    <link rel="stylesheet" href="./default-styles.css" />
+    <link rel="stylesheet" href="./vs-code-variables.css" />
+    <link rel="stylesheet" href="../media/main.css" />
+    <link rel="stylesheet" href="../media/dropdown.css" />
   </head>
-  <body style="background-color: #555">
-    <script src="../src/gitGraphView.js"></script>
+  <body>
+    <script src="./dummyData.js"></script>
+    <script src="../src/webviewHtmlGenerator.js"></script>
     <script>
-      window.acquireVsCodeApi = () => {};
+      const htmlBody = new WebviewHtmlGenerator(viewState).getHtmlBodyForWebview('nonce');
+      document.write(htmlBody);
     </script>
-    <script src="../media/web.js"></script>
   </body>
 </html>
