@@ -40,6 +40,7 @@ class WebviewHtmlGenerator {
       <div id="content">
         <div id="commitGraph"></div>
         <div id="commitTable"></div>
+        <div id="commitDetails"></div>
       </div>
       <div id="footer"></div>
       <ul id="contextMenu"></ul>
@@ -55,7 +56,9 @@ class WebviewHtmlGenerator {
         };
       </script>
       <script nonce="${nonce}">var viewState = ${JSON.stringify(this.state)};</script>
+      <script src="${this.getMediaUri('gitFileTreeView.js')}"></script>
       <script src="${this.getMediaUri('commitView.js')}"></script>
+      <script src="${this.getMediaUri('html_utils.js')}"></script>
       <script src="${this.getMediaUri('web.js')}"></script>
       </body>`;
     } else {

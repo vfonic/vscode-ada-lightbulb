@@ -150,8 +150,12 @@ body.unableToLoad p {
 
 /* Commit Details View */
 #commitDetails {
+  position: fixed;
   height: 250px;
-  vertical-align: top;
+  bottom: 0;
+  z-index: 99999;
+  width: 100%;
+  background: var(--vscode-editor-background);
 }
 #commitDetails td {
   background-color: rgba(128, 128, 128, 0.1);

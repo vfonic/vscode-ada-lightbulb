@@ -3,33 +3,6 @@
 (function() {
   'use strict';
   var vscode = acquireVsCodeApi();
-  var svgIcons = {
-    alert:
-      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"/></svg>',
-    branch:
-      '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="16" viewBox="0 0 10 16"><path fill-rule="evenodd" d="M10 5c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v.3c-.02.52-.23.98-.63 1.38-.4.4-.86.61-1.38.63-.83.02-1.48.16-2 .45V4.72a1.993 1.993 0 0 0-1-3.72C.88 1 0 1.89 0 3a2 2 0 0 0 1 1.72v6.56c-.59.35-1 .99-1 1.72 0 1.11.89 2 2 2 1.11 0 2-.89 2-2 0-.53-.2-1-.53-1.36.09-.06.48-.41.59-.47.25-.11.56-.17.94-.17 1.05-.05 1.95-.45 2.75-1.25S8.95 7.77 9 6.73h-.02C9.59 6.37 10 5.73 10 5zM2 1.8c.66 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2C1.35 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2zm0 12.41c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm6-8c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"/></svg>',
-    close:
-      '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="16" viewBox="0 0 12 16"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48L7.48 8z"/></svg>',
-    info:
-      '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="16" viewBox="0 0 14 16"><path fill-rule="evenodd" d="M6.3 5.69a.942.942 0 0 1-.28-.7c0-.28.09-.52.28-.7.19-.18.42-.28.7-.28.28 0 .52.09.7.28.18.19.28.42.28.7 0 .28-.09.52-.28.7a1 1 0 0 1-.7.3c-.28 0-.52-.11-.7-.3zM8 7.99c-.02-.25-.11-.48-.31-.69-.2-.19-.42-.3-.69-.31H6c-.27.02-.48.13-.69.31-.2.2-.3.44-.31.69h1v3c.02.27.11.5.31.69.2.2.42.31.69.31h1c.27 0 .48-.11.69-.31.2-.19.3-.42.31-.69H8V7.98v.01zM7 2.3c-3.14 0-5.7 2.54-5.7 5.68 0 3.14 2.56 5.7 5.7 5.7s5.7-2.55 5.7-5.7c0-3.15-2.56-5.69-5.7-5.69v.01zM7 .98c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.12-7-7 3.14-7 7-7z"/></svg>',
-    tag:
-      '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16"><path fill-rule="evenodd" d="M7.73 1.73C7.26 1.26 6.62 1 5.96 1H3.5C2.13 1 1 2.13 1 3.5v2.47c0 .66.27 1.3.73 1.77l6.06 6.06c.39.39 1.02.39 1.41 0l4.59-4.59a.996.996 0 0 0 0-1.41L7.73 1.73zM2.38 7.09c-.31-.3-.47-.7-.47-1.13V3.5c0-.88.72-1.59 1.59-1.59h2.47c.42 0 .83.16 1.13.47l6.14 6.13-4.73 4.73-6.13-6.15zM3.01 3h2v2H3V3h.01z"/></svg>',
-    loading:
-      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="32" viewBox="0 0 12 16"><path fill-rule="evenodd" d="M10.24 7.4a4.15 4.15 0 0 1-1.2 3.6 4.346 4.346 0 0 1-5.41.54L4.8 10.4.5 9.8l.6 4.2 1.31-1.26c2.36 1.74 5.7 1.57 7.84-.54a5.876 5.876 0 0 0 1.74-4.46l-1.75-.34zM2.96 5a4.346 4.346 0 0 1 5.41-.54L7.2 5.6l4.3.6-.6-4.2-1.31 1.26c-2.36-1.74-5.7-1.57-7.85.54C.5 5.03-.06 6.65.01 8.26l1.75.35A4.17 4.17 0 0 1 2.96 5z"/></svg>',
-    openFolder:
-      '<svg xmlns="http://www.w3.org/2000/svg" class="openFolderIcon" viewBox="0 0 30 30"><path d="M 5 4 C 3.895 4 3 4.895 3 6 L 3 9 L 3 11 L 22 11 L 27 11 L 27 8 C 27 6.895 26.105 6 25 6 L 12.199219 6 L 11.582031 4.9707031 C 11.221031 4.3687031 10.570187 4 9.8671875 4 L 5 4 z M 2.5019531 13 C 1.4929531 13 0.77040625 13.977406 1.0664062 14.941406 L 4.0351562 24.587891 C 4.2941563 25.426891 5.0692656 26 5.9472656 26 L 15 26 L 24.052734 26 C 24.930734 26 25.705844 25.426891 25.964844 24.587891 L 28.933594 14.941406 C 29.229594 13.977406 28.507047 13 27.498047 13 L 15 13 L 2.5019531 13 z"/></svg>',
-    closedFolder:
-      '<svg xmlns="http://www.w3.org/2000/svg" class="closedFolderIcon" viewBox="0 0 30 30"><path d="M 4 3 C 2.895 3 2 3.895 2 5 L 2 8 L 13 8 L 28 8 L 28 7 C 28 5.895 27.105 5 26 5 L 11.199219 5 L 10.582031 3.9707031 C 10.221031 3.3687031 9.5701875 3 8.8671875 3 L 4 3 z M 3 10 C 2.448 10 2 10.448 2 11 L 2 23 C 2 24.105 2.895 25 4 25 L 26 25 C 27.105 25 28 24.105 28 23 L 28 11 C 28 10.448 27.552 10 27 10 L 3 10 z"/></svg>',
-    file:
-      '<svg xmlns="http://www.w3.org/2000/svg" class="fileIcon" viewBox="0 0 30 30"><path d="M24.707,8.793l-6.5-6.5C18.019,2.105,17.765,2,17.5,2H7C5.895,2,5,2.895,5,4v22c0,1.105,0.895,2,2,2h16c1.105,0,2-0.895,2-2 V9.5C25,9.235,24.895,8.981,24.707,8.793z M18,10c-0.552,0-1-0.448-1-1V3.904L23.096,10H18z"/></svg>',
-  };
-  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  var htmlEscapes = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '/': '&#x2F;' };
-  var htmlUnescapes = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#x27;': "'", '&#x2F;': '/' };
-  var htmlEscaper = /[&<>"'\/]/g;
-  var htmlUnescaper = /&lt;|&gt;|&amp;|&quot;|&#x27;|&#x2F;/g;
-  var refInvalid = /^[-\/].*|[\\" ><~^:?*[]|\.\.|\/\/|\/\.|@{|[.\/]$|\.lock$|^@$/g;
-  var ELLIPSIS = '&#8230;';
 
   function arraysEqual(a, b, equalElements) {
     if (a.length !== b.length) {
@@ -47,28 +20,12 @@
     return i > 9 ? i : '0' + i;
   }
 
-  function escapeHtml(str) {
-    return str.replace(htmlEscaper, function(match) {
-      return htmlEscapes[match];
-    });
-  }
-
-  function unescapeHtml(str) {
-    return str.replace(htmlUnescaper, function(match) {
-      return htmlUnescapes[match];
-    });
-  }
-
   function addListenerToClass(className, event, eventListener) {
     var elems = document.getElementsByClassName(className),
       i;
     for (i = 0; i < elems.length; i++) {
       elems[i].addEventListener(event, eventListener);
     }
-  }
-
-  function insertAfter(newNode, referenceNode) {
-    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
   }
 
   function sendMessage(msg) {
@@ -1177,7 +1134,7 @@
           e,
           [
             {
-              title: 'Add Tag' + ELLIPSIS,
+              title: 'Add Tag',
               onClick: function() {
                 showFormDialog(
                   'Add tag to commit <b><i>' + abbrevCommit(hash) + '</i></b>:',
@@ -1225,7 +1182,7 @@
               },
             },
             {
-              title: 'Create Branch' + ELLIPSIS,
+              title: 'Create Branch',
               onClick: function() {
                 showRefInputDialog(
                   'Enter the name of the branch you would like to create from commit <b><i>' +
@@ -1247,7 +1204,7 @@
             },
             null,
             {
-              title: 'Checkout' + ELLIPSIS,
+              title: 'Checkout',
               onClick: function() {
                 showConfirmationDialog(
                   'Are you sure you want to checkout commit <b><i>' +
@@ -1265,7 +1222,7 @@
               },
             },
             {
-              title: 'Cherry Pick' + ELLIPSIS,
+              title: 'Cherry Pick',
               onClick: function() {
                 if (_this.commits[_this.commitLookup[hash]].parentHashes.length === 1) {
                   showConfirmationDialog(
@@ -1312,7 +1269,7 @@
               },
             },
             {
-              title: 'Revert' + ELLIPSIS,
+              title: 'Revert',
               onClick: function() {
                 if (_this.commits[_this.commitLookup[hash]].parentHashes.length === 1) {
                   showConfirmationDialog(
@@ -1360,7 +1317,7 @@
             },
             null,
             {
-              title: 'Merge into current branch' + ELLIPSIS,
+              title: 'Merge into current branch',
               onClick: function() {
                 showCheckboxDialog(
                   'Are you sure you want to merge commit <b><i>' +
@@ -1382,7 +1339,7 @@
               },
             },
             {
-              title: 'Reset current branch to this Commit' + ELLIPSIS,
+              title: 'Reset current branch to this Commit',
               onClick: function() {
                 showSelectDialog(
                   'Are you sure you want to reset the <b>current branch</b> to commit <b><i>' +
@@ -1454,7 +1411,7 @@
         if (sourceElem.classList.contains('tag')) {
           menu = [
             {
-              title: 'Delete Tag' + ELLIPSIS,
+              title: 'Delete Tag',
               onClick: function() {
                 showConfirmationDialog(
                   'Are you sure you want to delete the tag <b><i>' + escapeHtml(refName) + '</i></b>?',
@@ -1470,7 +1427,7 @@
               },
             },
             {
-              title: 'Push Tag' + ELLIPSIS,
+              title: 'Push Tag',
               onClick: function() {
                 showConfirmationDialog(
                   'Are you sure you want to push the tag <b><i>' + escapeHtml(refName) + '</i></b>?',
@@ -1500,7 +1457,7 @@
               });
             }
             menu.push({
-              title: 'Rename Branch' + ELLIPSIS,
+              title: 'Rename Branch',
               onClick: function() {
                 showRefInputDialog(
                   'Enter the new name for branch <b><i>' + escapeHtml(refName) + '</i></b>:',
@@ -1521,7 +1478,7 @@
             if (_this.gitBranchHead !== refName) {
               menu.push(
                 {
-                  title: 'Delete Branch' + ELLIPSIS,
+                  title: 'Delete Branch',
                   onClick: function() {
                     showCheckboxDialog(
                       'Are you sure you want to delete the branch <b><i>' + escapeHtml(refName) + '</i></b>?',
@@ -1541,7 +1498,7 @@
                   },
                 },
                 {
-                  title: 'Merge into current branch' + ELLIPSIS,
+                  title: 'Merge into current branch',
                   onClick: function() {
                     showCheckboxDialog(
                       'Are you sure you want to merge branch <b><i>' +
@@ -1567,7 +1524,7 @@
           } else {
             menu = [
               {
-                title: 'Checkout Branch' + ELLIPSIS,
+                title: 'Checkout Branch',
                 onClick: function() {
                   return _this.checkoutBranchAction(sourceElem, refName);
                 },
@@ -1802,7 +1759,6 @@
       this.expandedCommit = {
         id: parseInt(sourceElem.dataset.id),
         hash: sourceElem.dataset.hash,
-        srcElem: sourceElem,
         commitDetails: null,
         fileTree: null,
       };
@@ -1817,12 +1773,7 @@
     hideCommitDetails() {
       if (this.expandedCommit !== null) {
         var elem = document.getElementById('commitDetails');
-        if (typeof elem === 'object' && elem !== null) {
-          elem.remove();
-        }
-        if (typeof this.expandedCommit.srcElem === 'object' && this.expandedCommit.srcElem !== null) {
-          this.expandedCommit.srcElem.classList.remove('commitDetailsOpen');
-        }
+        emptyElement(elem);
         this.expandedCommit = null;
         this.saveState();
         this.renderGraph();
@@ -1830,83 +1781,67 @@
     }
 
     showCommitDetails(commitDetails, fileTree) {
-      new CommitView(commitDetails, fileTree, this.expandedCommit);
-      var _this = this;
+      const commitView = new CommitView(commitDetails, fileTree, this.expandedCommit, this.avatars);
       var elem = document.getElementById('commitDetails');
-      if (typeof elem === 'object' && elem !== null) {
-        elem.remove();
-      }
-      this.expandedCommit.commitDetails = commitDetails;
-      this.expandedCommit.fileTree = fileTree;
-      // this.expandedCommit.srcElem.classList.add('commitDetailsOpen');
+      emptyElement(elem);
       this.saveState();
-      var newElem = document.createElement('tr'),
-        html = '<td></td><td colspan="4"><div id="commitDetailsSummary">';
-      html +=
-        '<span class="commitDetailsSummaryTop' +
-        (typeof this.avatars[commitDetails.email] === 'string' ? ' withAvatar' : '') +
-        '"><span class="commitDetailsSummaryTopRow"><span class="commitDetailsSummaryKeyValues">';
-      html += '<b>Commit: </b>' + escapeHtml(commitDetails.hash) + '<br>';
-      html += '<b>Parents: </b>' + commitDetails.parents.join(', ') + '<br>';
-      html +=
-        '<b>Author: </b>' +
-        escapeHtml(commitDetails.author) +
-        ' &lt;<a href="mailto:' +
-        encodeURIComponent(commitDetails.email) +
-        '">' +
-        escapeHtml(commitDetails.email) +
-        '</a>&gt;<br>';
-      html += '<b>Date: </b>' + new Date(commitDetails.date * 1e3).toString() + '<br>';
-      html += '<b>Committer: </b>' + escapeHtml(commitDetails.committer) + '</span>';
-      if (typeof this.avatars[commitDetails.email] === 'string') {
-        html += '<span class="commitDetailsSummaryAvatar"><img src="' + this.avatars[commitDetails.email] + '"></span>';
-      }
-      html += '</span></span><br><br>';
-      html += escapeHtml(commitDetails.body).replace(/\n/g, '<br>') + '</div>';
-      html +=
-        '<div id="commitDetailsFiles">' +
-        generateGitFileTreeHtml(fileTree, commitDetails.fileChanges) +
-        '</table></div>';
-      html += '<div id="commitDetailsClose">' + svgIcons.close + '</div>';
-      html += '</td>';
-      newElem.id = 'commitDetails';
-      newElem.innerHTML = html;
-      insertAfter(newElem, this.expandedCommit.srcElem);
+
+      elem.innerHTML = commitView.render();
+      console.log(commitView.render());
+
+      // let html = '<div><div id="commitDetailsSummary">';
+      // html +=
+      //   '<span class="commitDetailsSummaryTop' +
+      //   (typeof this.avatars[commitDetails.email] === 'string' ? ' withAvatar' : '') +
+      //   '">';
+      // html += '<span class="commitDetailsSummaryTopRow"><span class="commitDetailsSummaryKeyValues">';
+      // html += '<b>Commit: </b>' + escapeHtml(commitDetails.hash) + '<br>';
+      // html += '<b>Parents: </b>' + commitDetails.parents.join(', ') + '<br>';
+      // html +=
+      //   '<b>Author: </b>' + escapeHtml(commitDetails.author) + ' &lt;' + escapeHtml(commitDetails.email) + '&gt;<br>';
+      // html += '<b>Date: </b>' + new Date(commitDetails.date * 1e3).toString() + '<br>';
+      // html += '<b>Committer: </b>' + escapeHtml(commitDetails.committer) + '</span>';
+      // if (typeof this.avatars[commitDetails.email] === 'string') {
+      //   html += '<span class="commitDetailsSummaryAvatar"><img src="' + this.avatars[commitDetails.email] + '"></span>';
+      // }
+      // html += '</span></span><br><br>';
+      // html += escapeHtml(commitDetails.body).replace(/\n/g, '<br>') + '</div>';
+      // html += '<div id="commitDetailsFiles">' + new GitFileTreeView(fileTree, commitDetails.fileChanges).render() + '</div>';
+      // html += '<div id="commitDetailsClose">' + svgIcons.close + '</div>';
+      // html += '</div>';
+      // elem.innerHTML = html;
+      // console.log(html);
+
       this.renderGraph();
-      if (this.config.autoCenterCommitDetailsView) {
-        window.scrollTo(0, newElem.offsetTop + 177 - window.innerHeight / 2);
-      } else if (newElem.offsetTop + 8 < window.pageYOffset) {
-        window.scrollTo(0, newElem.offsetTop + 8);
-      } else if (newElem.offsetTop + this.config.grid.expandY - window.innerHeight + 48 > window.pageYOffset) {
-        window.scrollTo(0, newElem.offsetTop + this.config.grid.expandY - window.innerHeight + 48);
-      }
-      document.getElementById('commitDetailsClose').addEventListener('click', function() {
-        _this.hideCommitDetails();
-      });
-      addListenerToClass('gitFolder', 'click', function(e) {
-        var sourceElem = e.target.closest('.gitFolder');
-        var parent = sourceElem.parentElement;
-        parent.classList.toggle('closed');
-        var isOpen = !parent.classList.contains('closed');
-        parent.children[0].children[0].innerHTML = isOpen ? svgIcons.openFolder : svgIcons.closedFolder;
-        parent.children[1].classList.toggle('hidden');
-        alterGitFileTree(_this.expandedCommit.fileTree, decodeURIComponent(sourceElem.dataset.folderpath), isOpen);
-        _this.saveState();
-      });
-      addListenerToClass('gitFile', 'click', function(e) {
-        var sourceElem = e.target.closest('.gitFile');
-        if (_this.expandedCommit === null || !sourceElem.classList.contains('gitDiffPossible')) {
-          return;
-        }
-        sendMessage({
-          command: 'viewDiff',
-          repo: _this.currentRepo,
-          commitHash: _this.expandedCommit.hash,
-          oldFilePath: decodeURIComponent(sourceElem.dataset.oldfilepath),
-          newFilePath: decodeURIComponent(sourceElem.dataset.newfilepath),
-          type: sourceElem.dataset.type,
-        });
-      });
+
+      // var _this = this;
+      // document.getElementById('commitDetailsClose').addEventListener('click', function() {
+      //   _this.hideCommitDetails();
+      // });
+      // addListenerToClass('gitFolder', 'click', function(e) {
+      //   var sourceElem = e.target.closest('.gitFolder');
+      //   var parent = sourceElem.parentElement;
+      //   parent.classList.toggle('closed');
+      //   var isOpen = !parent.classList.contains('closed');
+      //   parent.children[0].children[0].innerHTML = isOpen ? svgIcons.openFolder : svgIcons.closedFolder;
+      //   parent.children[1].classList.toggle('hidden');
+      //   alterGitFileTree(_this.expandedCommit.fileTree, decodeURIComponent(sourceElem.dataset.folderpath), isOpen);
+      //   _this.saveState();
+      // });
+      // addListenerToClass('gitFile', 'click', function(e) {
+      //   var sourceElem = e.target.closest('.gitFile');
+      //   if (_this.expandedCommit === null || !sourceElem.classList.contains('gitDiffPossible')) {
+      //     return;
+      //   }
+      //   sendMessage({
+      //     command: 'viewDiff',
+      //     repo: _this.currentRepo,
+      //     commitHash: _this.expandedCommit.hash,
+      //     oldFilePath: decodeURIComponent(sourceElem.dataset.oldfilepath),
+      //     newFilePath: decodeURIComponent(sourceElem.dataset.newfilepath),
+      //     type: sourceElem.dataset.type,
+      //   });
+      // });
     }
   }
 
@@ -2045,7 +1980,8 @@
   function getCommitDate(dateVal) {
     var date = new Date(dateVal * 1e3),
       value;
-    var dateStr = date.getDate() + ' ' + months[date.getMonth()] + ' ' + date.getFullYear();
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var dateStr = date.getDate() + ' ' + MONTHS[date.getMonth()] + ' ' + date.getFullYear();
     var timeStr = pad2(date.getHours()) + ':' + pad2(date.getMinutes());
     switch (viewState.dateFormat) {
       case 'Date Only':
@@ -2130,90 +2066,6 @@
     return files;
   }
 
-  function generateGitFileTreeHtml(folder, gitFiles) {
-    var html =
-        (folder.name !== ''
-          ? '<span class="gitFolder" data-folderpath="' +
-            encodeURIComponent(folder.folderPath) +
-            '"><span class="gitFolderIcon">' +
-            (folder.open ? svgIcons.openFolder : svgIcons.closedFolder) +
-            '</span><span class="gitFolderName">' +
-            folder.name +
-            '</span></span>'
-          : '') +
-        '<ul class="gitFolderContents' +
-        (!folder.open ? ' hidden' : '') +
-        '">',
-      keys = Object.keys(folder.contents),
-      i,
-      gitFile,
-      gitFolder;
-    keys.sort(function(a, b) {
-      return folder.contents[a].type === 'folder' && folder.contents[b].type === 'file'
-        ? -1
-        : folder.contents[a].type === 'file' && folder.contents[b].type === 'folder'
-        ? 1
-        : folder.contents[a].name < folder.contents[b].name
-        ? -1
-        : folder.contents[a].name > folder.contents[b].name
-        ? 1
-        : 0;
-    });
-    for (i = 0; i < keys.length; i++) {
-      if (folder.contents[keys[i]].type === 'folder') {
-        gitFolder = folder.contents[keys[i]];
-        html +=
-          '<li' +
-          (!gitFolder.open ? ' class="closed"' : '') +
-          '>' +
-          generateGitFileTreeHtml(gitFolder, gitFiles) +
-          '</li>';
-      } else {
-        gitFile = gitFiles[folder.contents[keys[i]].index];
-        html +=
-          '<li class="gitFile ' +
-          gitFile.type +
-          (gitFile.additions !== null && gitFile.deletions !== null ? ' gitDiffPossible' : '') +
-          '" data-oldfilepath="' +
-          encodeURIComponent(gitFile.oldFilePath) +
-          '" data-newfilepath="' +
-          encodeURIComponent(gitFile.newFilePath) +
-          '" data-type="' +
-          gitFile.type +
-          '"' +
-          (gitFile.additions === null || gitFile.deletions === null
-            ? ' title="This is a binary file, unable to view diff."'
-            : '') +
-          '><span class="gitFileIcon">' +
-          svgIcons.file +
-          '</span>' +
-          folder.contents[keys[i]].name +
-          (gitFile.type === 'R'
-            ? ' <span class="gitFileRename" title="' +
-              escapeHtml(gitFile.oldFilePath + ' was renamed to ' + gitFile.newFilePath) +
-              '">R</span>'
-            : '') +
-          (gitFile.type !== 'A' && gitFile.type !== 'D' && gitFile.additions !== null && gitFile.deletions !== null
-            ? '<span class="gitFileAddDel">(<span class="gitFileAdditions" title="' +
-              gitFile.additions +
-              ' addition' +
-              (gitFile.additions !== 1 ? 's' : '') +
-              '">+' +
-              gitFile.additions +
-              '</span>|<span class="gitFileDeletions" title="' +
-              gitFile.deletions +
-              ' deletion' +
-              (gitFile.deletions !== 1 ? 's' : '') +
-              '">-' +
-              gitFile.deletions +
-              '</span>)</span>'
-            : '') +
-          '</li>';
-      }
-    }
-    return html + '</ul>';
-  }
-
   function alterGitFileTree(folder, folderPath, open) {
     var path = folderPath.split('/'),
       i,
@@ -2239,10 +2091,11 @@
     var html = '',
       i,
       event = e;
+    const ELLIPSIS = '&#8230;';
     for (i = 0; i < items.length; i++) {
       html +=
         items[i] !== null
-          ? '<li class="contextMenuItem" data-index="' + i + '">' + items[i].title + '</li>'
+          ? '<li class="contextMenuItem" data-index="' + i + '">' + items[i].title + ELLIPSIS + '</li>'
           : '<li class="contextMenuDivider"></li>';
     }
     hideContextMenuListener();
@@ -2431,8 +2284,9 @@
       }
       dialogInput_1.focus();
       dialogInput_1.addEventListener('keyup', function() {
+        const REF_INVALID_MATCHER = /^[-\/].*|[\\" ><~^:?*[]|\.\.|\/\/|\/\.|@{|[.\/]$|\.lock$|^@$/g;
         var noInput = dialogInput_1.value === '',
-          invalidInput = dialogInput_1.value.match(refInvalid) !== null;
+          invalidInput = dialogInput_1.value.match(REF_INVALID_MATCHER) !== null;
         var newClassName = 'active' + (noInput ? ' noInput' : invalidInput ? ' inputInvalid' : '');
         if (dialog.className !== newClassName) {
           dialog.className = newClassName;
