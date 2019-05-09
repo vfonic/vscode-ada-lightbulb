@@ -46,7 +46,8 @@ class WebviewHtmlGenerator {
       <ul id="contextMenu"></ul>
       <div id="dialogBacking"></div>
       <div id="dialog"></div>
-      <div id="scrollShadow"></div>
+      <div id="scrollShadow-top"></div>
+      <div id="scrollShadow-bottom"></div>
       <script>
         window.exports = class {
           set default(klass) {
@@ -57,6 +58,7 @@ class WebviewHtmlGenerator {
       </script>
       <script nonce="${nonce}">var viewState = ${JSON.stringify(this.state)};</script>
       <script src="${this.getMediaUri('gitFileTreeView.js')}"></script>
+      <script src="${this.getMediaUri('scrollShadow.js')}"></script>
       <script src="${this.getMediaUri('commitView.js')}"></script>
       <script src="${this.getMediaUri('html_utils.js')}"></script>
       <script src="${this.getMediaUri('web.js')}"></script>

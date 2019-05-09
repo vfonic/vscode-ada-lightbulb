@@ -725,7 +725,7 @@
         _this.saveState();
         _this.refresh(true);
       });
-      this.scrollShadowElem = document.getElementById('scrollShadow');
+      this.scrollShadowElem = new ScrollShadow();
       document.getElementById('refreshBtn').addEventListener('click', function() {
         _this.refresh(true);
       });

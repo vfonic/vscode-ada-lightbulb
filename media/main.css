@@ -1,18 +1,21 @@
 /* variables */
 body {
-  --controls-line-height: 32px;
-  --controls-padding-topBottom: 4px;
-  --controls-border-width: 1px;
-  --controls-height: calc(
-    var(--controls-line-height) + var(--controls-padding-topBottom) + var(--controls-border-width)
+  --ada-lightbulb-controls-line-height: 32px;
+  --ada-lightbulb-controls-padding-topBottom: 4px;
+  --ada-lightbulb-controls-border-width: 1px;
+  --ada-lightbulb-controls-height: calc(
+    var(--ada-lightbulb-controls-line-height) + var(--ada-lightbulb-controls-padding-topBottom) +
+    var(--ada-lightbulb-controls-border-width)
   );
-  --tableTh-height: 30px;
-  --z-index-commitGraph: -1;
-  --z-index-scrollShadow: 5;
-  --z-index-commitTable: 7;
-  --z-index-controls: 8;
-  --z-index-dialogBacking: 9;
-  --z-index-dialog: 10;
+  --ada-lightbulb-border: 1px solid rgba(128, 128, 128, 0.5);
+  --ada-lightbulb-tableTh-height: 30px;
+  --ada-lightbulb-commitDetails-height: 250px;
+  --ada-lightbulb-z-index-commitGraph: -1;
+  --ada-lightbulb-z-index-scrollShadow: 5;
+  --ada-lightbulb-z-index-commitTable: 7;
+  --ada-lightbulb-z-index-controls: 8;
+  --ada-lightbulb-z-index-dialogBacking: 9;
+  --ada-lightbulb-z-index-dialog: 10;
 }
 
 /* Body */
@@ -27,20 +30,27 @@ body.unableToLoad h2,
 body.unableToLoad p {
   text-align: center;
 }
-#scrollShadow.active {
+#scrollShadow-top.active,
+#scrollShadow-bottom.active {
   position: fixed;
-  top: calc(var(--controls-height) + var(--tableTh-height));
   left: 0;
   width: 100%;
   height: 0;
+  z-index: var(--ada-lightbulb-z-index-scrollShadow);
+}
+#scrollShadow-top {
+  top: calc(var(--ada-lightbulb-controls-height) + var(--ada-lightbulb-tableTh-height));
   box-shadow: 0 -6px 6px 6px var(--vscode-scrollbar-shadow);
-  z-index: var(--z-index-scrollShadow);
+}
+#scrollShadow-bottom {
+  bottom: var(--ada-lightbulb-commitDetails-height);
+  box-shadow: -6px 6px 6px 6px var(--vscode-scrollbar-shadow);
 }
 
 /* Content */
 #content {
   position: relative;
-  margin-top: calc(var(--controls-height) - var(--controls-border-width));
+  margin-top: calc(var(--ada-lightbulb-controls-height) - var(--ada-lightbulb-controls-border-width));
 }
 
 /* Commit Graph */
@@ -49,7 +59,7 @@ body.unableToLoad p {
   position: absolute;
   left: 8px;
   top: 0;
-  z-index: var(--z-index-commitGraph);
+  z-index: var(--ada-lightbulb-z-index-commitGraph);
 }
 #commitGraph circle.current {
   fill: var(--vscode-editor-background);
@@ -107,9 +117,9 @@ body.unableToLoad p {
 }
 #commitTable th {
   position: sticky;
-  top: calc(var(--controls-height) - var(--controls-border-width));
-  z-index: var(--z-index-commitTable);
-  border-bottom: 1px solid rgba(128, 128, 128, 0.5);
+  top: calc(var(--ada-lightbulb-controls-height) - var(--ada-lightbulb-controls-border-width));
+  z-index: var(--ada-lightbulb-z-index-commitTable);
+  border-bottom: var(--ada-lightbulb-border);
   background-color: var(--vscode-editor-background);
   line-height: 18px;
   padding: 6px 12px;
@@ -151,11 +161,12 @@ body.unableToLoad p {
 /* Commit Details View */
 #commitDetails {
   position: fixed;
-  height: 250px;
+  height: var(--ada-lightbulb-commitDetails-height);
   bottom: 0;
   z-index: 99999;
   width: 100%;
   background: var(--vscode-editor-background);
+  border-top: var(--ada-lightbulb-border);
 }
 #commitDetails td {
   background-color: rgba(128, 128, 128, 0.1);
@@ -402,11 +413,11 @@ svg.fileIcon {
   left: 0;
   right: 0;
   top: 0;
-  padding: var(--controls-padding-topBottom) 96px var(--controls-padding-topBottom) 0;
-  border-bottom: var(--controls-border-width) solid rgba(128, 128, 128, 0.5);
+  padding: var(--ada-lightbulb-controls-padding-topBottom) 96px var(--ada-lightbulb-controls-padding-topBottom) 0;
+  border-bottom: var(--ada-lightbulb-border);
   background-color: var(--vscode-editor-background);
-  z-index: var(--z-index-controls);
-  line-height: var(--controls-line-height);
+  z-index: var(--ada-lightbulb-z-index-controls);
+  line-height: var(--ada-lightbulb-controls-line-height);
   text-align: center;
   font-weight: 700;
   font-size: 13px;
@@ -494,12 +505,12 @@ svg.fileIcon {
   left: 50%;
   top: 50%;
   transform: translateX(-50%) translateY(-50%);
-  border: 1px solid rgba(128, 128, 128, 0.5);
+  border: var(--ada-lightbulb-border);
   border-radius: 5px;
   text-align: center;
   max-width: 360px;
   max-height: 80%;
-  z-index: var(--z-index-dialog);
+  z-index: var(--ada-lightbulb-z-index-dialog);
   box-shadow: 0 0 30px 5px var(--vscode-widget-shadow);
   overflow-y: auto;
 }
@@ -564,7 +575,7 @@ svg.fileIcon {
   right: 0;
   top: 0;
   bottom: 0;
-  z-index: var(--z-index-dialogBacking);
+  z-index: var(--ada-lightbulb-z-index-dialogBacking);
 }
 #dialog.noInput #dialogAction,
 #dialog.inputInvalid #dialogAction {
@@ -602,7 +613,7 @@ svg.fileIcon {
 .roundedBtn {
   display: block;
   background-color: rgba(128, 128, 128, 0.1);
-  border: 1px solid rgba(128, 128, 128, 0.5);
+  border: var(--ada-lightbulb-border);
   font-size: 13px;
   text-align: center;
   cursor: pointer;
