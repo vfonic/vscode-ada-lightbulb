@@ -51,6 +51,7 @@ body.unableToLoad p {
 #content {
   position: relative;
   margin-top: calc(var(--ada-lightbulb-controls-height) - var(--ada-lightbulb-controls-border-width));
+  margin-bottom: calc(var(--ada-lightbulb-commitDetails-height) + 6px);
 }
 
 /* Commit Graph */
