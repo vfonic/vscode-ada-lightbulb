@@ -10,6 +10,7 @@ var __awaiter =
           reject(e);
         }
       }
+
       function rejected(value) {
         try {
           step(generator['throw'](value));
@@ -17,6 +18,7 @@ var __awaiter =
           reject(e);
         }
       }
+
       function step(result) {
         result.done
           ? resolve(result.value)
@@ -24,6 +26,7 @@ var __awaiter =
               resolve(result.value);
             }).then(fulfilled, rejected);
       }
+
       step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
   };
@@ -57,7 +60,7 @@ class GitGraphView {
         ? this.assetLoader.getUri('resources', 'webview-icon.svg')
         : {
             light: this.assetLoader.getUri('resources', 'webview-icon-light.svg'),
-            dark: this.assetLoader.getUri('resources', 'webview-icon-dark.svg')
+            dark: this.assetLoader.getUri('resources', 'webview-icon-dark.svg'),
           };
     this.update();
     this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
@@ -82,7 +85,9 @@ class GitGraphView {
       }
     });
     this.repoManager.registerViewCallback((repos, numRepos) => {
-      if (!this.panel.visible) return;
+      if (!this.panel.visible) {
+        return;
+      }
       if ((numRepos === 0 && this.isGraphViewLoaded) || (numRepos > 0 && !this.isGraphViewLoaded)) {
         this.update();
       } else {
@@ -92,7 +97,9 @@ class GitGraphView {
     this.panel.webview.onDidReceiveMessage(
       msg =>
         __awaiter(this, void 0, void 0, function*() {
-          if (this.dataSource === null) return;
+          if (this.dataSource === null) {
+            return;
+          }
           this.repoFileWatcher.mute();
           switch (msg.command) {
             case 'addTag':
@@ -104,7 +111,7 @@ class GitGraphView {
                   msg.commitHash,
                   msg.lightweight,
                   msg.message
-                )
+                ),
               });
               break;
             case 'fetchAvatar':
@@ -113,50 +120,50 @@ class GitGraphView {
             case 'checkoutBranch':
               this.sendMessage({
                 command: 'checkoutBranch',
-                status: yield this.dataSource.checkoutBranch(msg.repo, msg.branchName, msg.remoteBranch)
+                status: yield this.dataSource.checkoutBranch(msg.repo, msg.branchName, msg.remoteBranch),
               });
               break;
             case 'checkoutCommit':
               this.sendMessage({
                 command: 'checkoutCommit',
-                status: yield this.dataSource.checkoutCommit(msg.repo, msg.commitHash)
+                status: yield this.dataSource.checkoutCommit(msg.repo, msg.commitHash),
               });
               break;
             case 'cherrypickCommit':
               this.sendMessage({
                 command: 'cherrypickCommit',
-                status: yield this.dataSource.cherrypickCommit(msg.repo, msg.commitHash, msg.parentIndex)
+                status: yield this.dataSource.cherrypickCommit(msg.repo, msg.commitHash, msg.parentIndex),
               });
               break;
             case 'commitDetails':
               this.sendMessage({
                 command: 'commitDetails',
-                commitDetails: yield this.dataSource.commitDetails(msg.repo, msg.commitHash)
+                commitDetails: yield this.dataSource.commitDetails(msg.repo, msg.commitHash),
               });
               break;
             case 'copyToClipboard':
               this.sendMessage({
                 command: 'copyToClipboard',
                 type: msg.type,
-                success: yield utils_1.copyToClipboard(msg.data)
+                success: yield utils_1.copyToClipboard(msg.data),
               });
               break;
             case 'createBranch':
               this.sendMessage({
                 command: 'createBranch',
-                status: yield this.dataSource.createBranch(msg.repo, msg.branchName, msg.commitHash)
+                status: yield this.dataSource.createBranch(msg.repo, msg.branchName, msg.commitHash),
               });
               break;
             case 'deleteBranch':
               this.sendMessage({
                 command: 'deleteBranch',
-                status: yield this.dataSource.deleteBranch(msg.repo, msg.branchName, msg.forceDelete)
+                status: yield this.dataSource.deleteBranch(msg.repo, msg.branchName, msg.forceDelete),
               });
               break;
             case 'deleteTag':
               this.sendMessage({
                 command: 'deleteTag',
-                status: yield this.dataSource.deleteTag(msg.repo, msg.tagName)
+                status: yield this.dataSource.deleteTag(msg.repo, msg.tagName),
               });
               break;
             case 'loadBranches':
@@ -170,7 +177,7 @@ class GitGraphView {
                 branches: branchData.branches,
                 head: branchData.head,
                 hard: msg.hard,
-                isRepo: isRepo
+                isRepo: isRepo,
               });
               if (msg.repo !== this.currentRepo) {
                 this.currentRepo = msg.repo;
@@ -195,37 +202,37 @@ class GitGraphView {
             case 'mergeBranch':
               this.sendMessage({
                 command: 'mergeBranch',
-                status: yield this.dataSource.mergeBranch(msg.repo, msg.branchName, msg.createNewCommit)
+                status: yield this.dataSource.mergeBranch(msg.repo, msg.branchName, msg.createNewCommit),
               });
               break;
             case 'mergeCommit':
               this.sendMessage({
                 command: 'mergeCommit',
-                status: yield this.dataSource.mergeCommit(msg.repo, msg.commitHash, msg.createNewCommit)
+                status: yield this.dataSource.mergeCommit(msg.repo, msg.commitHash, msg.createNewCommit),
               });
               break;
             case 'pushTag':
               this.sendMessage({
                 command: 'pushTag',
-                status: yield this.dataSource.pushTag(msg.repo, msg.tagName)
+                status: yield this.dataSource.pushTag(msg.repo, msg.tagName),
               });
               break;
             case 'renameBranch':
               this.sendMessage({
                 command: 'renameBranch',
-                status: yield this.dataSource.renameBranch(msg.repo, msg.oldName, msg.newName)
+                status: yield this.dataSource.renameBranch(msg.repo, msg.oldName, msg.newName),
               });
               break;
             case 'resetToCommit':
               this.sendMessage({
                 command: 'resetToCommit',
-                status: yield this.dataSource.resetToCommit(msg.repo, msg.commitHash, msg.resetMode)
+                status: yield this.dataSource.resetToCommit(msg.repo, msg.commitHash, msg.resetMode),
               });
               break;
             case 'revertCommit':
               this.sendMessage({
                 command: 'revertCommit',
-                status: yield this.dataSource.revertCommit(msg.repo, msg.commitHash, msg.parentIndex)
+                status: yield this.dataSource.revertCommit(msg.repo, msg.commitHash, msg.parentIndex),
               });
               break;
             case 'saveRepoState':
@@ -234,7 +241,7 @@ class GitGraphView {
             case 'viewDiff':
               this.sendMessage({
                 command: 'viewDiff',
-                success: yield this.viewDiff(msg.repo, msg.commitHash, msg.oldFilePath, msg.newFilePath, msg.type)
+                success: yield this.viewDiff(msg.repo, msg.commitHash, msg.oldFilePath, msg.newFilePath, msg.type),
               });
               break;
           }
@@ -244,6 +251,7 @@ class GitGraphView {
       this.disposables
     );
   }
+
   static createOrShow(extensionPath, dataSource, extensionState, avatarManager, repoManager) {
     const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : vscode.ViewColumn.One;
     if (GitGraphView.currentPanel) {
@@ -252,7 +260,7 @@ class GitGraphView {
     }
     const panel = vscode.window.createWebviewPanel('ada-lightbulb', 'Ada Lightbulb', column, {
       enableScripts: true,
-      localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media'))]
+      localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media'))],
     });
     GitGraphView.currentPanel = new GitGraphView(
       panel,
@@ -263,9 +271,11 @@ class GitGraphView {
       repoManager
     );
   }
+
   sendMessage(msg) {
     this.panel.webview.postMessage(msg);
   }
+
   dispose() {
     GitGraphView.currentPanel = undefined;
     this.panel.dispose();
@@ -274,7 +284,9 @@ class GitGraphView {
     this.repoManager.deregisterViewCallback();
     while (this.disposables.length) {
       const x = this.disposables.pop();
-      if (x) x.dispose();
+      if (x) {
+        x.dispose();
+      }
     }
   }
 
@@ -290,7 +302,7 @@ class GitGraphView {
       lastActiveRepo: this.extensionState.getLastActiveRepo(),
       loadMoreCommits: configuration.loadMoreCommits,
       repos: this.repoManager.getRepos(),
-      showCurrentBranchByDefault: configuration.showCurrentBranchByDefault
+      showCurrentBranchByDefault: configuration.showCurrentBranchByDefault,
     };
     this.panel.webview.html = new WebviewHtmlGenerator(viewState).getHtmlForWebview();
 
@@ -302,9 +314,10 @@ class GitGraphView {
     this.sendMessage({
       command: 'loadRepos',
       repos: repos,
-      lastActiveRepo: this.extensionState.getLastActiveRepo()
+      lastActiveRepo: this.extensionState.getLastActiveRepo(),
     });
   }
+
   viewDiff(repo, commitHash, oldFilePath, newFilePath, type) {
     let abbrevHash = utils_1.abbrevCommit(commitHash);
     let pathComponents = newFilePath.split('/');
@@ -331,4 +344,5 @@ class GitGraphView {
     });
   }
 }
+
 exports.GitGraphView = GitGraphView;

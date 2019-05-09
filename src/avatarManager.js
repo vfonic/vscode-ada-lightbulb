@@ -10,6 +10,7 @@ var __awaiter =
           reject(e);
         }
       }
+
       function rejected(value) {
         try {
           step(generator['throw'](value));
@@ -17,6 +18,7 @@ var __awaiter =
           reject(e);
         }
       }
+
       function step(result) {
         result.done
           ? resolve(result.value)
@@ -24,6 +26,7 @@ var __awaiter =
               resolve(result.value);
             }).then(fulfilled, rejected);
       }
+
       step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
   };
@@ -32,6 +35,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const https = require('https');
 const url = require('url');
+
 class AvatarManager {
   constructor(dataSource, extensionState) {
     this.view = null;
@@ -44,13 +48,16 @@ class AvatarManager {
     this.avatarStorageFolder = this.extensionState.getAvatarStoragePath();
     this.avatars = this.extensionState.getAvatarCache();
     this.queue = new AvatarRequestQueue(() => {
-      if (this.interval !== null) return;
+      if (this.interval !== null) {
+        return;
+      }
       this.interval = setInterval(() => {
         this.fetchAvatarsInterval();
       }, 10000);
       this.fetchAvatarsInterval();
     });
   }
+
   fetchAvatarImage(email, repo, commits) {
     if (typeof this.avatars[email] !== 'undefined') {
       let t = new Date().getTime();
@@ -70,25 +77,32 @@ class AvatarManager {
       this.queue.add(email, repo, commits, true);
     }
   }
+
   registerView(view) {
     this.view = view;
   }
+
   deregisterView() {
     this.view = null;
   }
+
   removeAvatarFromCache(email) {
     delete this.avatars[email];
     this.extensionState.removeAvatarFromCache(email);
   }
+
   clearCache() {
     this.avatars = {};
     this.extensionState.clearAvatarCache();
   }
+
   fetchAvatarsInterval() {
     return __awaiter(this, void 0, void 0, function*() {
       if (this.queue.hasItems()) {
         let avatarRequest = this.queue.takeItem();
-        if (avatarRequest === null) return;
+        if (avatarRequest === null) {
+          return;
+        }
         let remoteSource = yield this.getRemoteSource(avatarRequest);
         switch (remoteSource.type) {
           case 'github':
@@ -106,6 +120,7 @@ class AvatarManager {
       }
     });
   }
+
   getRemoteSource(avatarRequest) {
     return __awaiter(this, void 0, void 0, function*() {
       if (typeof this.remoteSourceCache[avatarRequest.repo] === 'string') {
@@ -119,7 +134,7 @@ class AvatarManager {
             remoteSource = {
               type: 'github',
               owner: remoteUrlComps[3],
-              repo: remoteUrlComps[4].replace(/\.git$/, '')
+              repo: remoteUrlComps[4].replace(/\.git$/, ''),
             };
           } else if (remoteUrl.startsWith('https://gitlab.com/')) {
             remoteSource = { type: 'gitlab' };
@@ -134,6 +149,7 @@ class AvatarManager {
       }
     });
   }
+
   fetchFromGithub(avatarRequest, owner, repo) {
     let t = new Date().getTime();
     if (t < this.githubTimeout) {
@@ -152,7 +168,7 @@ class AvatarManager {
           path: '/repos/' + owner + '/' + repo + '/commits/' + avatarRequest.commits[commitIndex],
           headers: { 'User-Agent': 'vscode-ada-lightbulb' },
           agent: false,
-          timeout: 15000
+          timeout: 15000,
         },
         res => {
           let respBody = '';
@@ -168,7 +184,9 @@ class AvatarManager {
                 let commit = JSON.parse(respBody);
                 if (commit.author && commit.author.avatar_url) {
                   let img = yield this.downloadAvatarImage(avatarRequest.email, commit.author.avatar_url + '&size=54');
-                  if (img !== null) this.saveAvatar(avatarRequest.email, img, false);
+                  if (img !== null) {
+                    this.saveAvatar(avatarRequest.email, img, false);
+                  }
                   return;
                 }
               } else if (res.statusCode === 403) {
@@ -196,6 +214,7 @@ class AvatarManager {
         this.queue.addItem(avatarRequest, this.githubTimeout, false);
       });
   }
+
   fetchFromGitLab(avatarRequest) {
     let t = new Date().getTime();
     if (t < this.gitLabTimeout) {
@@ -210,10 +229,10 @@ class AvatarManager {
           path: '/api/v4/users?search=' + avatarRequest.email,
           headers: {
             'User-Agent': 'vscode-ada-lightbulb',
-            'Private-Token': 'w87U_3gAxWWaPtFgCcus'
+            'Private-Token': 'w87U_3gAxWWaPtFgCcus',
           },
           agent: false,
-          timeout: 15000
+          timeout: 15000,
         },
         res => {
           let respBody = '';
@@ -229,7 +248,9 @@ class AvatarManager {
                 let users = JSON.parse(respBody);
                 if (users.length > 0 && users[0].avatar_url) {
                   let img = yield this.downloadAvatarImage(avatarRequest.email, users[0].avatar_url);
-                  if (img !== null) this.saveAvatar(avatarRequest.email, img, false);
+                  if (img !== null) {
+                    this.saveAvatar(avatarRequest.email, img, false);
+                  }
                   return;
                 }
               } else if (res.statusCode === 429) {
@@ -250,6 +271,7 @@ class AvatarManager {
         this.queue.addItem(avatarRequest, this.gitLabTimeout, false);
       });
   }
+
   fetchFromGravatar(avatarRequest) {
     return __awaiter(this, void 0, void 0, function*() {
       let hash = crypto
@@ -268,9 +290,12 @@ class AvatarManager {
         );
         identicon = true;
       }
-      if (img !== null) this.saveAvatar(avatarRequest.email, img, identicon);
+      if (img !== null) {
+        this.saveAvatar(avatarRequest.email, img, identicon);
+      }
     });
   }
+
   downloadAvatarImage(email, imageUrl) {
     return __awaiter(this, void 0, void 0, function*() {
       let hash = crypto
@@ -286,7 +311,7 @@ class AvatarManager {
               path: imgUrl.path,
               headers: { 'User-Agent': 'vscode-ada-lightbulb' },
               agent: false,
-              timeout: 15000
+              timeout: 15000,
             },
             res => {
               let imageBufferArray = [];
@@ -315,6 +340,7 @@ class AvatarManager {
       });
     });
   }
+
   saveAvatar(email, image, identicon) {
     if (typeof this.avatars[email] === 'string') {
       if (!identicon || this.avatars[email].identicon) {
@@ -326,12 +352,13 @@ class AvatarManager {
       this.avatars[email] = {
         image: image,
         timestamp: new Date().getTime(),
-        identicon: identicon
+        identicon: identicon,
       };
     }
     this.extensionState.saveAvatar(email, this.avatars[email]);
     this.sendAvatarToWebview(email, () => {});
   }
+
   sendAvatarToWebview(email, onError) {
     if (this.view !== null) {
       fs.readFile(this.avatarStorageFolder + '/' + this.avatars[email].image, (err, data) => {
@@ -341,19 +368,22 @@ class AvatarManager {
           this.view.sendMessage({
             command: 'fetchAvatar',
             email: email,
-            image: 'data:image/' + this.avatars[email].image.split('.')[1] + ';base64,' + data.toString('base64')
+            image: 'data:image/' + this.avatars[email].image.split('.')[1] + ';base64,' + data.toString('base64'),
           });
         }
       });
     }
   }
 }
+
 exports.AvatarManager = AvatarManager;
+
 class AvatarRequestQueue {
   constructor(itemsAvailableCallback) {
     this.queue = [];
     this.itemsAvailableCallback = itemsAvailableCallback;
   }
+
   add(email, repo, commits, immediate) {
     let emailIndex = this.queue.findIndex(v => v.email === email && v.repo === repo);
     if (emailIndex > -1) {
@@ -367,22 +397,30 @@ class AvatarRequestQueue {
         repo: repo,
         commits: commits,
         checkAfter: immediate || this.queue.length === 0 ? 0 : this.queue[this.queue.length - 1].checkAfter + 1,
-        attempts: 0
+        attempts: 0,
       });
     }
   }
+
   addItem(item, checkAfter, failedAttempt) {
     item.checkAfter = checkAfter;
-    if (failedAttempt) item.attempts++;
+    if (failedAttempt) {
+      item.attempts++;
+    }
     this.insertItem(item);
   }
+
   hasItems() {
     return this.queue.length > 0;
   }
+
   takeItem() {
-    if (this.queue.length > 0 && this.queue[0].checkAfter < new Date().getTime()) return this.queue.shift();
+    if (this.queue.length > 0 && this.queue[0].checkAfter < new Date().getTime()) {
+      return this.queue.shift();
+    }
     return null;
   }
+
   insertItem(item) {
     var l = 0,
       r = this.queue.length - 1,
@@ -390,10 +428,15 @@ class AvatarRequestQueue {
       prevLength = this.queue.length;
     while (l <= r) {
       c = (l + r) >> 1;
-      if (this.queue[c].checkAfter <= item.checkAfter) l = c + 1;
-      else r = c - 1;
+      if (this.queue[c].checkAfter <= item.checkAfter) {
+        l = c + 1;
+      } else {
+        r = c - 1;
+      }
     }
     this.queue.splice(l, 0, item);
-    if (prevLength === 0) this.itemsAvailableCallback();
+    if (prevLength === 0) {
+      this.itemsAvailableCallback();
+    }
   }
 }

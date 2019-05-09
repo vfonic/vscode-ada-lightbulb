@@ -8,6 +8,7 @@ const ExtensionState = require('./extensionState').default;
 const gitGraphView_1 = require('./gitGraphView');
 const repoManager_1 = require('./repoManager');
 const statusBarItem_1 = require('./statusBarItem');
+
 function activate(context) {
   const extensionState = new ExtensionState(context);
   const dataSource = new dataSource_1.DataSource();
@@ -51,11 +52,12 @@ function activate(context) {
   );
   context.subscriptions.push(repoManager);
 }
+
 exports.activate = activate;
 
 function deactivate() {}
 
 module.exports = {
   activate,
-  deactivate
+  deactivate,
 };

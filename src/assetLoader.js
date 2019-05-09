@@ -10,4 +10,5 @@ class AssetLoader {
     return vscode.Uri.file(path.join(this.extensionPath, ...pathComps));
   }
 }
+
 exports.default = AssetLoader;

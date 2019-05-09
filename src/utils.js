@@ -2,24 +2,33 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 const vscode = require('vscode');
 const FS_REGEX = /\\/g;
+
 function abbrevCommit(commitHash) {
   return commitHash.substring(0, 8);
 }
+
 exports.abbrevCommit = abbrevCommit;
+
 function copyToClipboard(text) {
   return new Promise(resolve => {
     vscode.env.clipboard.writeText(text).then(() => resolve(true), () => resolve(false));
   });
 }
+
 exports.copyToClipboard = copyToClipboard;
+
 function getPathFromUri(uri) {
   return uri.fsPath.replace(FS_REGEX, '/');
 }
+
 exports.getPathFromUri = getPathFromUri;
+
 function getPathFromStr(str) {
   return str.replace(FS_REGEX, '/');
 }
+
 exports.getPathFromStr = getPathFromStr;
+
 function evalPromises(data, maxParallel, createPromise) {
   return new Promise((resolve, reject) => {
     if (data.length === 1) {
@@ -33,6 +42,7 @@ function evalPromises(data, maxParallel, createPromise) {
         nextPromise = 0,
         rejected = false,
         completed = 0;
+
       function startNext() {
         let cur = nextPromise;
         nextPromise++;
@@ -41,8 +51,11 @@ function evalPromises(data, maxParallel, createPromise) {
             if (!rejected) {
               results[cur] = result;
               completed++;
-              if (nextPromise < data.length) startNext();
-              else if (completed === data.length) resolve(results);
+              if (nextPromise < data.length) {
+                startNext();
+              } else if (completed === data.length) {
+                resolve(results);
+              }
             }
           })
           .catch(() => {
@@ -50,10 +63,14 @@ function evalPromises(data, maxParallel, createPromise) {
             rejected = true;
           });
       }
-      for (let i = 0; i < maxParallel && i < data.length; i++) startNext();
+
+      for (let i = 0; i < maxParallel && i < data.length; i++) {
+        startNext();
+      }
     }
   });
 }
+
 exports.evalPromises = evalPromises;
 var svgIcons = {
   alert:
@@ -73,7 +90,7 @@ var svgIcons = {
   closedFolder:
     '<svg xmlns="http://www.w3.org/2000/svg" class="closedFolderIcon" viewBox="0 0 30 30"><path d="M 4 3 C 2.895 3 2 3.895 2 5 L 2 8 L 13 8 L 28 8 L 28 7 C 28 5.895 27.105 5 26 5 L 11.199219 5 L 10.582031 3.9707031 C 10.221031 3.3687031 9.5701875 3 8.8671875 3 L 4 3 z M 3 10 C 2.448 10 2 10.448 2 11 L 2 23 C 2 24.105 2.895 25 4 25 L 26 25 C 27.105 25 28 24.105 28 23 L 28 11 C 28 10.448 27.552 10 27 10 L 3 10 z"/></svg>',
   file:
-    '<svg xmlns="http://www.w3.org/2000/svg" class="fileIcon" viewBox="0 0 30 30"><path d="M24.707,8.793l-6.5-6.5C18.019,2.105,17.765,2,17.5,2H7C5.895,2,5,2.895,5,4v22c0,1.105,0.895,2,2,2h16c1.105,0,2-0.895,2-2 V9.5C25,9.235,24.895,8.981,24.707,8.793z M18,10c-0.552,0-1-0.448-1-1V3.904L23.096,10H18z"/></svg>'
+    '<svg xmlns="http://www.w3.org/2000/svg" class="fileIcon" viewBox="0 0 30 30"><path d="M24.707,8.793l-6.5-6.5C18.019,2.105,17.765,2,17.5,2H7C5.895,2,5,2.895,5,4v22c0,1.105,0.895,2,2,2h16c1.105,0,2-0.895,2-2 V9.5C25,9.235,24.895,8.981,24.707,8.793z M18,10c-0.552,0-1-0.448-1-1V3.904L23.096,10H18z"/></svg>',
 };
 var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 var htmlEscapes = {
@@ -82,7 +99,7 @@ var htmlEscapes = {
   '>': '&gt;',
   '"': '&quot;',
   "'": '&#x27;',
-  '/': '&#x2F;'
+  '/': '&#x2F;',
 };
 var htmlUnescapes = {
   '&amp;': '&',
@@ -90,32 +107,41 @@ var htmlUnescapes = {
   '&gt;': '>',
   '&quot;': '"',
   '&#x27;': "'",
-  '&#x2F;': '/'
+  '&#x2F;': '/',
 };
 var htmlEscaper = /[&<>"'\/]/g;
 var htmlUnescaper = /&lt;|&gt;|&amp;|&quot;|&#x27;|&#x2F;/g;
 var refInvalid = /^[-\/].*|[\\" ><~^:?*[]|\.\.|\/\/|\/\.|@{|[.\/]$|\.lock$|^@$/g;
 var ELLIPSIS = '&#8230;';
+
 function arraysEqual(a, b, equalElements) {
-  if (a.length !== b.length) return false;
+  if (a.length !== b.length) {
+    return false;
+  }
   for (var i = 0; i < a.length; i++) {
-    if (!equalElements(a[i], b[i])) return false;
+    if (!equalElements(a[i], b[i])) {
+      return false;
+    }
   }
   return true;
 }
+
 function pad2(i) {
   return i > 9 ? i : '0' + i;
 }
+
 function escapeHtml(str) {
   return str.replace(htmlEscaper, function(match) {
     return htmlEscapes[match];
   });
 }
+
 function unescapeHtml(str) {
   return str.replace(htmlUnescaper, function(match) {
     return htmlUnescapes[match];
   });
 }
+
 function addListenerToClass(className, event, eventListener) {
   var elems = document.getElementsByClassName(className),
     i;
@@ -123,12 +149,15 @@ function addListenerToClass(className, event, eventListener) {
     elems[i].addEventListener(event, eventListener);
   }
 }
+
 function insertAfter(newNode, referenceNode) {
   referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 }
+
 function sendMessage(msg) {
   vscode.postMessage(msg);
 }
+
 function getVSCodeStyle(name) {
   return document.documentElement.style.getPropertyValue(name);
 }

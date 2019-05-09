@@ -21,7 +21,7 @@
     closedFolder:
       '<svg xmlns="http://www.w3.org/2000/svg" class="closedFolderIcon" viewBox="0 0 30 30"><path d="M 4 3 C 2.895 3 2 3.895 2 5 L 2 8 L 13 8 L 28 8 L 28 7 C 28 5.895 27.105 5 26 5 L 11.199219 5 L 10.582031 3.9707031 C 10.221031 3.3687031 9.5701875 3 8.8671875 3 L 4 3 z M 3 10 C 2.448 10 2 10.448 2 11 L 2 23 C 2 24.105 2.895 25 4 25 L 26 25 C 27.105 25 28 24.105 28 23 L 28 11 C 28 10.448 27.552 10 27 10 L 3 10 z"/></svg>',
     file:
-      '<svg xmlns="http://www.w3.org/2000/svg" class="fileIcon" viewBox="0 0 30 30"><path d="M24.707,8.793l-6.5-6.5C18.019,2.105,17.765,2,17.5,2H7C5.895,2,5,2.895,5,4v22c0,1.105,0.895,2,2,2h16c1.105,0,2-0.895,2-2 V9.5C25,9.235,24.895,8.981,24.707,8.793z M18,10c-0.552,0-1-0.448-1-1V3.904L23.096,10H18z"/></svg>'
+      '<svg xmlns="http://www.w3.org/2000/svg" class="fileIcon" viewBox="0 0 30 30"><path d="M24.707,8.793l-6.5-6.5C18.019,2.105,17.765,2,17.5,2H7C5.895,2,5,2.895,5,4v22c0,1.105,0.895,2,2,2h16c1.105,0,2-0.895,2-2 V9.5C25,9.235,24.895,8.981,24.707,8.793z M18,10c-0.552,0-1-0.448-1-1V3.904L23.096,10H18z"/></svg>',
   };
   var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   var htmlEscapes = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '/': '&#x2F;' };
@@ -30,26 +30,35 @@
   var htmlUnescaper = /&lt;|&gt;|&amp;|&quot;|&#x27;|&#x2F;/g;
   var refInvalid = /^[-\/].*|[\\" ><~^:?*[]|\.\.|\/\/|\/\.|@{|[.\/]$|\.lock$|^@$/g;
   var ELLIPSIS = '&#8230;';
+
   function arraysEqual(a, b, equalElements) {
-    if (a.length !== b.length) return false;
+    if (a.length !== b.length) {
+      return false;
+    }
     for (var i = 0; i < a.length; i++) {
-      if (!equalElements(a[i], b[i])) return false;
+      if (!equalElements(a[i], b[i])) {
+        return false;
+      }
     }
     return true;
   }
+
   function pad2(i) {
     return i > 9 ? i : '0' + i;
   }
+
   function escapeHtml(str) {
     return str.replace(htmlEscaper, function(match) {
       return htmlEscapes[match];
     });
   }
+
   function unescapeHtml(str) {
     return str.replace(htmlUnescaper, function(match) {
       return htmlUnescapes[match];
     });
   }
+
   function addListenerToClass(className, event, eventListener) {
     var elems = document.getElementsByClassName(className),
       i;
@@ -57,18 +66,21 @@
       elems[i].addEventListener(event, eventListener);
     }
   }
+
   function insertAfter(newNode, referenceNode) {
     referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
   }
+
   function sendMessage(msg) {
     vscode.postMessage(msg);
   }
+
   function getVSCodeStyle(name) {
     return document.documentElement.style.getPropertyValue(name);
   }
-  ('use strict');
-  var Dropdown = (function() {
-    function Dropdown(id, showInfo, dropdownType, changeCallback) {
+
+  class Dropdown {
+    constructor(id, showInfo, dropdownType, changeCallback) {
       var _this = this;
       this.options = [];
       this.selectedOption = 0;
@@ -99,7 +111,9 @@
       document.addEventListener(
         'click',
         function(e) {
-          if (!e.target) return;
+          if (!e.target) {
+            return;
+          }
           if (e.target === _this.currentValueElem) {
             _this.dropdownVisible = !_this.dropdownVisible;
             if (_this.dropdownVisible) {
@@ -107,7 +121,9 @@
               _this.filter();
             }
             _this.elem.classList.toggle('dropdownOpen');
-            if (_this.dropdownVisible) _this.filterInput.focus();
+            if (_this.dropdownVisible) {
+              _this.filterInput.focus();
+            }
           } else if (_this.dropdownVisible) {
             if (e.target.closest('.dropdown') !== _this.elem) {
               _this.close();
@@ -141,7 +157,9 @@
       document.addEventListener(
         'keyup',
         function(e) {
-          if (e.key === 'Escape') _this.close();
+          if (e.key === 'Escape') {
+            _this.close();
+          }
         },
         true
       );
@@ -149,7 +167,8 @@
         return _this.filter();
       });
     }
-    Dropdown.prototype.setOptions = function(options, selected) {
+
+    setOptions(options, selected) {
       this.options = options;
       var selectedOption = 0;
       for (var i = 0; i < options.length; i++) {
@@ -158,13 +177,19 @@
         }
       }
       this.selectedOption = selectedOption;
-      if (options.length <= 1) this.close();
+      if (options.length <= 1) {
+        this.close();
+      }
       this.render();
-    };
-    Dropdown.prototype.refresh = function() {
-      if (this.options.length > 0) this.render();
-    };
-    Dropdown.prototype.render = function() {
+    }
+
+    refresh() {
+      if (this.options.length > 0) {
+        this.render();
+      }
+    }
+
+    render() {
       this.elem.classList.add('loaded');
       this.currentValueElem.innerHTML = this.options[this.selectedOption].name;
       var html = '';
@@ -193,56 +218,68 @@
       this.currentValueElem.style.width =
         Math.max(this.menuElem.offsetWidth + (this.showInfo && this.menuElem.offsetHeight < 272 ? 0 : 12), 130) + 'px';
       this.menuElem.style.cssText = 'right:0; overflow-y:auto; max-height:297px;';
-      if (this.dropdownVisible) this.filter();
-    };
-    Dropdown.prototype.filter = function() {
+      if (this.dropdownVisible) {
+        this.filter();
+      }
+    }
+
+    filter() {
       var val = this.filterInput.value.toLowerCase(),
         match,
         matches = false;
       for (var i = 0; i < this.options.length; i++) {
         match = this.options[i].name.toLowerCase().indexOf(val) > -1;
         this.optionsElem.children[i].style.display = match ? 'block' : 'none';
-        if (match) matches = true;
+        if (match) {
+          matches = true;
+        }
       }
       this.filterInput.style.display = 'block';
       this.noResultsElem.style.display = matches ? 'none' : 'block';
-    };
-    Dropdown.prototype.close = function() {
+    }
+
+    close() {
       this.elem.classList.remove('dropdownOpen');
       this.dropdownVisible = false;
-    };
-    return Dropdown;
-  })();
-  ('use strict');
-  var Branch = (function() {
-    function Branch(colour) {
+    }
+  }
+
+  class Branch {
+    constructor(colour) {
       this.lines = [];
       this.end = 0;
       this.numUncommitted = 0;
       this.colour = colour;
     }
-    Branch.prototype.addLine = function(p1, p2, isCommitted, lockedFirst) {
+
+    addLine(p1, p2, isCommitted, lockedFirst) {
       this.lines.push({
         p1: p1,
         p2: p2,
-        lockedFirst: lockedFirst
+        lockedFirst: lockedFirst,
       });
       if (isCommitted) {
-        if (p2.y < this.numUncommitted) this.numUncommitted = p2.y;
+        if (p2.y < this.numUncommitted) {
+          this.numUncommitted = p2.y;
+        }
       } else {
         this.numUncommitted++;
       }
-    };
-    Branch.prototype.getColour = function() {
+    }
+
+    getColour() {
       return this.colour;
-    };
-    Branch.prototype.getEnd = function() {
+    }
+
+    getEnd() {
       return this.end;
-    };
-    Branch.prototype.setEnd = function(end) {
+    }
+
+    setEnd(end) {
       this.end = end;
-    };
-    Branch.prototype.draw = function(svg, config) {
+    }
+
+    draw(svg, config) {
       var colour = config.graphColours[this.colour % config.graphColours.length],
         i,
         x1,
@@ -261,14 +298,14 @@
         lines.push({
           p1: {
             x: x1,
-            y: y1
+            y: y1,
           },
           p2: {
             x: x2,
-            y: y2
+            y: y2,
           },
           isCommitted: i >= this.numUncommitted,
-          lockedFirst: this.lines[i].lockedFirst
+          lockedFirst: this.lines[i].lockedFirst,
         });
       }
       i = 0;
@@ -296,9 +333,12 @@
           curPath = '';
           curColour = '';
         }
-        if (curPath === '' || (i > 0 && (x1 !== lines[i - 1].p2.x || y1 !== lines[i - 1].p2.y)))
+        if (curPath === '' || (i > 0 && (x1 !== lines[i - 1].p2.x || y1 !== lines[i - 1].p2.y))) {
           curPath += 'M' + x1.toFixed(0) + ',' + y1.toFixed(1);
-        if (curColour === '') curColour = lines[i].isCommitted ? colour : '#808080';
+        }
+        if (curColour === '') {
+          curColour = lines[i].isCommitted ? colour : '#808080';
+        }
         if (x1 === x2) {
           curPath += 'L' + x2.toFixed(0) + ',' + y2.toFixed(1);
         } else {
@@ -330,8 +370,9 @@
         }
       }
       this.drawPath(svg, curPath, curColour);
-    };
-    Branch.prototype.drawPath = function(svg, path, colour) {
+    }
+
+    drawPath(svg, path, colour) {
       var line1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'),
         line2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       line1.setAttribute('class', 'shadow');
@@ -341,11 +382,11 @@
       line2.setAttribute('stroke', colour);
       svg.appendChild(line1);
       svg.appendChild(line2);
-    };
-    return Branch;
-  })();
-  var Vertex = (function() {
-    function Vertex(y) {
+    }
+  }
+
+  class Vertex {
+    constructor(y) {
       this.x = 0;
       this.parents = [];
       this.nextParent = 0;
@@ -356,86 +397,112 @@
       this.connections = [];
       this.y = y;
     }
-    Vertex.prototype.addParent = function(vertex) {
+
+    addParent(vertex) {
       this.parents.push(vertex);
-    };
-    Vertex.prototype.hasParents = function() {
+    }
+
+    hasParents() {
       return this.parents.length > 0;
-    };
-    Vertex.prototype.getNextParent = function() {
-      if (this.nextParent < this.parents.length) return this.parents[this.nextParent];
+    }
+
+    getNextParent() {
+      if (this.nextParent < this.parents.length) {
+        return this.parents[this.nextParent];
+      }
       return null;
-    };
-    Vertex.prototype.getLastParent = function() {
-      if (this.nextParent < 1) return null;
+    }
+
+    getLastParent() {
+      if (this.nextParent < 1) {
+        return null;
+      }
       return this.parents[this.nextParent - 1];
-    };
-    Vertex.prototype.registerParentProcessed = function() {
+    }
+
+    registerParentProcessed() {
       this.nextParent++;
-    };
-    Vertex.prototype.isMerge = function() {
+    }
+
+    isMerge() {
       return this.parents.length > 1;
-    };
-    Vertex.prototype.addToBranch = function(branch, x) {
+    }
+
+    addToBranch(branch, x) {
       if (this.onBranch === null) {
         this.onBranch = branch;
         this.x = x;
       }
-    };
-    Vertex.prototype.isNotOnBranch = function() {
+    }
+
+    isNotOnBranch() {
       return this.onBranch === null;
-    };
-    Vertex.prototype.isOnThisBranch = function(branch) {
+    }
+
+    isOnThisBranch(branch) {
       return this.onBranch === branch;
-    };
-    Vertex.prototype.getBranch = function() {
+    }
+
+    getBranch() {
       return this.onBranch;
-    };
-    Vertex.prototype.getPoint = function() {
+    }
+
+    getPoint() {
       return {
         x: this.x,
-        y: this.y
+        y: this.y,
       };
-    };
-    Vertex.prototype.getNextPoint = function() {
+    }
+
+    getNextPoint() {
       return {
         x: this.nextX,
-        y: this.y
+        y: this.y,
       };
-    };
-    Vertex.prototype.getIsCommitted = function() {
+    }
+
+    getIsCommitted() {
       return this.isCommitted;
-    };
-    Vertex.prototype.getPointConnectingTo = function(vertex, onBranch) {
+    }
+
+    getPointConnectingTo(vertex, onBranch) {
       for (var i = 0; i < this.connections.length; i++) {
-        if (this.connections[i].connectsTo === vertex && this.connections[i].onBranch === onBranch)
+        if (this.connections[i].connectsTo === vertex && this.connections[i].onBranch === onBranch) {
           return {
             x: i,
-            y: this.y
+            y: this.y,
           };
+        }
       }
       return null;
-    };
-    Vertex.prototype.registerUnavailablePoint = function(x, connectsToVertex, onBranch) {
+    }
+
+    registerUnavailablePoint(x, connectsToVertex, onBranch) {
       if (x === this.nextX) {
         this.nextX = x + 1;
         this.connections[x] = {
           connectsTo: connectsToVertex,
-          onBranch: onBranch
+          onBranch: onBranch,
         };
       }
-    };
-    Vertex.prototype.getColour = function() {
+    }
+
+    getColour() {
       return this.onBranch !== null ? this.onBranch.getColour() : 0;
-    };
-    Vertex.prototype.setNotCommited = function() {
+    }
+
+    setNotCommited() {
       this.isCommitted = false;
-    };
-    Vertex.prototype.setCurrent = function() {
+    }
+
+    setCurrent() {
       this.isCurrent = true;
-    };
-    Vertex.prototype.draw = function(svg, config) {
-      if (this.onBranch === null) return;
+    }
+
+    draw(svg, config) {
+      if (this.onBranch === null) {
+        return;
+      }
       var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       var colour = this.isCommitted
         ? config.graphColours[this.onBranch.getColour() % config.graphColours.length]
@@ -450,11 +517,11 @@
         circle.setAttribute('fill', colour);
       }
       svg.appendChild(circle);
-    };
-    return Vertex;
-  })();
-  var Graph = (function() {
-    function Graph(id, config) {
+    }
+  }
+
+  class Graph {
+    constructor(id, config) {
       this.svgGroup = null;
       this.maxWidth = -1;
       this.vertices = [];
@@ -483,7 +550,8 @@
       this.setDimensions(0, 0);
       document.getElementById(id).appendChild(this.svg);
     }
-    Graph.prototype.loadCommits = function(commits, commitHead, commitLookup) {
+
+    loadCommits(commits, commitHead, commitLookup) {
       this.vertices = [];
       this.branches = [];
       this.availableColours = [];
@@ -509,8 +577,9 @@
       while ((i = this.findStart()) !== -1) {
         this.determinePath(i);
       }
-    };
-    Graph.prototype.render = function() {
+    }
+
+    render() {
       var group = document.createElementNS('http://www.w3.org/2000/svg', 'g'),
         i,
         width = this.getWidth();
@@ -521,52 +590,64 @@
       for (i = 0; i < this.vertices.length; i++) {
         this.vertices[i].draw(group, this.config);
       }
-      if (this.svgGroup !== null) this.svg.removeChild(this.svgGroup);
+      if (this.svgGroup !== null) {
+        this.svg.removeChild(this.svgGroup);
+      }
       this.svg.appendChild(group);
       this.svgGroup = group;
       this.setDimensions(width, this.getHeight());
       this.applyMaxWidth(width);
-    };
-    Graph.prototype.clear = function() {
+    }
+
+    clear() {
       if (this.svgGroup !== null) {
         this.svg.removeChild(this.svgGroup);
         this.svgGroup = null;
         this.setDimensions(0, 0);
       }
-    };
-    Graph.prototype.getWidth = function() {
+    }
+
+    getWidth() {
       var x = 0,
         i,
         p;
       for (i = 0; i < this.vertices.length; i++) {
         p = this.vertices[i].getNextPoint();
-        if (p.x > x) x = p.x;
+        if (p.x > x) {
+          x = p.x;
+        }
       }
       return x * this.config.grid.x;
-    };
-    Graph.prototype.getHeight = function() {
+    }
+
+    getHeight() {
       return this.vertices.length * this.config.grid.y + this.config.grid.offsetY - this.config.grid.y / 2;
-    };
-    Graph.prototype.getVertexColour = function(v) {
+    }
+
+    getVertexColour(v) {
       return this.vertices[v].getColour() % this.config.graphColours.length;
-    };
-    Graph.prototype.limitMaxWidth = function(maxWidth) {
+    }
+
+    limitMaxWidth(maxWidth) {
       this.maxWidth = maxWidth;
       this.applyMaxWidth(this.getWidth());
-    };
-    Graph.prototype.setDimensions = function(width, height) {
+    }
+
+    setDimensions(width, height) {
       this.svg.setAttribute('width', width.toString());
       this.svg.setAttribute('height', height.toString());
       this.svgMaskRect.setAttribute('width', width.toString());
       this.svgMaskRect.setAttribute('height', height.toString());
-    };
-    Graph.prototype.applyMaxWidth = function(width) {
+    }
+
+    applyMaxWidth(width) {
       var offset1 = this.maxWidth > -1 ? (this.maxWidth - 12) / width : 1;
       var offset2 = this.maxWidth > -1 ? this.maxWidth / width : 1;
       this.svgGradientStop1.setAttribute('offset', offset1.toString());
       this.svgGradientStop2.setAttribute('offset', offset2.toString());
-    };
-    Graph.prototype.determinePath = function(startAt) {
+    }
+
+    determinePath(startAt) {
       var i = startAt;
       var vertex = this.vertices[i],
         parentVertex = this.vertices[i].getNextParent();
@@ -613,21 +694,27 @@
             parentVertex.addToBranch(branch, curPoint.x);
             vertex = parentVertex;
             parentVertex = vertex.getNextParent();
-            if (parentVertexOnBranch) break;
+            if (parentVertexOnBranch) {
+              break;
+            }
           }
         }
         branch.setEnd(i);
         this.branches.push(branch);
         this.availableColours[branch.getColour()] = i;
       }
-    };
-    Graph.prototype.findStart = function() {
+    }
+
+    findStart() {
       for (var i = 0; i < this.vertices.length; i++) {
-        if (this.vertices[i].getNextParent() !== null || this.vertices[i].isNotOnBranch()) return i;
+        if (this.vertices[i].getNextParent() !== null || this.vertices[i].isNotOnBranch()) {
+          return i;
+        }
       }
       return -1;
-    };
-    Graph.prototype.getAvailableColour = function(startAt) {
+    }
+
+    getAvailableColour(startAt) {
       for (var i = 0; i < this.availableColours.length; i++) {
         if (startAt > this.availableColours[i]) {
           return i;
@@ -635,12 +722,11 @@
       }
       this.availableColours.push(0);
       return this.availableColours.length - 1;
-    };
-    return Graph;
-  })();
-  ('use strict');
-  var GitGraphView = (function() {
-    function GitGraphView(repos, lastActiveRepo, config, prevState) {
+    }
+  }
+
+  class GitGraphView {
+    constructor(repos, lastActiveRepo, config, prevState) {
       var _this = this;
       this.gitBranches = [];
       this.gitBranchHead = null;
@@ -706,7 +792,8 @@
       this.loadRepos(this.gitRepos, lastActiveRepo);
       this.requestLoadBranchesAndCommits(false);
     }
-    GitGraphView.prototype.loadRepos = function(repos, lastActiveRepo) {
+
+    loadRepos(repos, lastActiveRepo) {
       this.gitRepos = repos;
       this.saveState();
       var repoPaths = Object.keys(repos),
@@ -724,7 +811,7 @@
         repoComps = repoPaths[i].split('/');
         options.push({
           name: repoComps[repoComps.length - 1],
-          value: repoPaths[i]
+          value: repoPaths[i],
         });
       }
       document.getElementById('repoControl').style.display = repoPaths.length > 1 ? 'inline' : 'none';
@@ -732,8 +819,9 @@
       if (changedRepo) {
         this.refresh(true);
       }
-    };
-    GitGraphView.prototype.loadBranches = function(branchOptions, branchHead, hard, isRepo) {
+    }
+
+    loadBranches(branchOptions, branchHead, hard, isRepo) {
       if (!isRepo) {
         this.triggerLoadBranchesCallback(false, isRepo);
         return;
@@ -761,25 +849,27 @@
       var options = [
         {
           name: 'Show All',
-          value: ''
-        }
+          value: '',
+        },
       ];
       for (var i = 0; i < this.gitBranches.length; i++) {
         options.push({
           name: this.gitBranches[i].indexOf('remotes/') === 0 ? this.gitBranches[i].substring(8) : this.gitBranches[i],
-          value: this.gitBranches[i]
+          value: this.gitBranches[i],
         });
       }
       this.branchDropdown.setOptions(options, this.currentBranch);
       this.triggerLoadBranchesCallback(true, isRepo);
-    };
-    GitGraphView.prototype.triggerLoadBranchesCallback = function(changes, isRepo) {
+    }
+
+    triggerLoadBranchesCallback(changes, isRepo) {
       if (this.loadBranchesCallback !== null) {
         this.loadBranchesCallback(changes, isRepo);
         this.loadBranchesCallback = null;
       }
-    };
-    GitGraphView.prototype.loadCommits = function(commits, commitHead, moreAvailable, hard) {
+    }
+
+    loadCommits(commits, commitHead, moreAvailable, hard) {
       if (
         !hard &&
         this.moreCommitsAvailable === moreAvailable &&
@@ -814,8 +904,9 @@
         avatarsNeeded = {};
       for (i = 0; i < this.commits.length; i++) {
         this.commitLookup[this.commits[i].hash] = i;
-        if (this.expandedCommit !== null && this.expandedCommit.hash === this.commits[i].hash)
+        if (this.expandedCommit !== null && this.expandedCommit.hash === this.commits[i].hash) {
           expandedCommitVisible = true;
+        }
         if (
           this.config.fetchAvatars &&
           typeof this.avatars[this.commits[i].email] !== 'string' &&
@@ -836,14 +927,16 @@
       this.render();
       this.triggerLoadCommitsCallback(true);
       this.fetchAvatars(avatarsNeeded);
-    };
-    GitGraphView.prototype.triggerLoadCommitsCallback = function(changes) {
+    }
+
+    triggerLoadCommitsCallback(changes) {
       if (this.loadCommitsCallback !== null) {
         this.loadCommitsCallback(changes);
         this.loadCommitsCallback = null;
       }
-    };
-    GitGraphView.prototype.loadAvatar = function(email, image) {
+    }
+
+    loadAvatar(email, image) {
       this.avatars[email] = image;
       this.saveState();
       var avatarsElems = document.getElementsByClassName('avatar'),
@@ -853,8 +946,9 @@
           avatarsElems[i].innerHTML = '<img class="avatarImg" src="' + image + '">';
         }
       }
-    };
-    GitGraphView.prototype.refresh = function(hard) {
+    }
+
+    refresh(hard) {
       if (hard) {
         if (this.expandedCommit !== null) {
           this.expandedCommit = null;
@@ -863,19 +957,25 @@
         this.renderShowLoading();
       }
       this.requestLoadBranchesAndCommits(hard);
-    };
-    GitGraphView.prototype.requestLoadBranches = function(hard, loadedCallback) {
-      if (this.loadBranchesCallback !== null) return;
+    }
+
+    requestLoadBranches(hard, loadedCallback) {
+      if (this.loadBranchesCallback !== null) {
+        return;
+      }
       this.loadBranchesCallback = loadedCallback;
       sendMessage({
         command: 'loadBranches',
         repo: this.currentRepo,
         showRemoteBranches: this.showRemoteBranches,
-        hard: hard
+        hard: hard,
       });
-    };
-    GitGraphView.prototype.requestLoadCommits = function(hard, loadedCallback) {
-      if (this.loadCommitsCallback !== null) return;
+    }
+
+    requestLoadCommits(hard, loadedCallback) {
+      if (this.loadCommitsCallback !== null) {
+        return;
+      }
       this.loadCommitsCallback = loadedCallback;
       sendMessage({
         command: 'loadCommits',
@@ -883,10 +983,11 @@
         branchName: this.currentBranch !== null ? this.currentBranch : '',
         maxCommits: this.maxCommits,
         showRemoteBranches: this.showRemoteBranches,
-        hard: hard
+        hard: hard,
       });
-    };
-    GitGraphView.prototype.requestLoadBranchesAndCommits = function(hard) {
+    }
+
+    requestLoadBranchesAndCommits(hard) {
       var _this = this;
       this.requestLoadBranches(hard, function(branchChanges, isRepo) {
         if (isRepo) {
@@ -898,23 +999,25 @@
         } else {
           sendMessage({
             command: 'loadRepos',
-            check: true
+            check: true,
           });
         }
       });
-    };
-    GitGraphView.prototype.fetchAvatars = function(avatars) {
+    }
+
+    fetchAvatars(avatars) {
       var emails = Object.keys(avatars);
       for (var i = 0; i < emails.length; i++) {
         sendMessage({
           command: 'fetchAvatar',
           repo: this.currentRepo,
           email: emails[i],
-          commits: avatars[emails[i]]
+          commits: avatars[emails[i]],
         });
       }
-    };
-    GitGraphView.prototype.saveState = function() {
+    }
+
+    saveState() {
       vscode.setState({
         gitRepos: this.gitRepos,
         gitBranches: this.gitBranches,
@@ -927,16 +1030,20 @@
         moreCommitsAvailable: this.moreCommitsAvailable,
         maxCommits: this.maxCommits,
         showRemoteBranches: this.showRemoteBranches,
-        expandedCommit: this.expandedCommit
+        expandedCommit: this.expandedCommit,
       });
-    };
-    GitGraphView.prototype.render = function() {
+    }
+
+    render() {
       this.renderTable();
       this.renderGraph();
-    };
-    GitGraphView.prototype.renderGraph = function() {
+    }
+
+    renderGraph() {
       var colHeadersElem = document.getElementById('tableColHeaders');
-      if (colHeadersElem === null) return;
+      if (colHeadersElem === null) {
+        return;
+      }
       var headerHeight = colHeadersElem.clientHeight + 1,
         expandedCommitElem = this.expandedCommit !== null ? document.getElementById('commitDetails') : null;
       this.config.grid.expandY =
@@ -950,8 +1057,9 @@
           : this.config.grid.y;
       this.config.grid.offsetY = headerHeight + this.config.grid.y / 2;
       this.graph.render();
-    };
-    GitGraphView.prototype.renderTable = function() {
+    }
+
+    renderTable() {
       var _this = this;
       var html = `
         <thead>
@@ -1077,7 +1185,7 @@
                     {
                       type: 'text-ref',
                       name: 'Name: ',
-                      default: ''
+                      default: '',
                     },
                     {
                       type: 'select',
@@ -1086,20 +1194,20 @@
                       options: [
                         {
                           name: 'Annotated',
-                          value: 'annotated'
+                          value: 'annotated',
                         },
                         {
                           name: 'Lightweight',
-                          value: 'lightweight'
-                        }
-                      ]
+                          value: 'lightweight',
+                        },
+                      ],
                     },
                     {
                       type: 'text',
                       name: 'Message: ',
                       default: '',
-                      placeholder: 'Optional'
-                    }
+                      placeholder: 'Optional',
+                    },
                   ],
                   'Add Tag',
                   function(values) {
@@ -1109,12 +1217,12 @@
                       tagName: values[0],
                       commitHash: hash,
                       lightweight: values[1] === 'lightweight',
-                      message: values[2]
+                      message: values[2],
                     });
                   },
                   sourceElem
                 );
-              }
+              },
             },
             {
               title: 'Create Branch' + ELLIPSIS,
@@ -1130,12 +1238,12 @@
                       command: 'createBranch',
                       repo: _this.currentRepo,
                       branchName: name,
-                      commitHash: hash
+                      commitHash: hash,
                     });
                   },
                   sourceElem
                 );
-              }
+              },
             },
             null,
             {
@@ -1149,12 +1257,12 @@
                     sendMessage({
                       command: 'checkoutCommit',
                       repo: _this.currentRepo,
-                      commitHash: hash
+                      commitHash: hash,
                     });
                   },
                   sourceElem
                 );
-              }
+              },
             },
             {
               title: 'Cherry Pick' + ELLIPSIS,
@@ -1167,7 +1275,7 @@
                         command: 'cherrypickCommit',
                         repo: _this.currentRepo,
                         commitHash: hash,
-                        parentIndex: 0
+                        parentIndex: 0,
                       });
                     },
                     sourceElem
@@ -1180,7 +1288,7 @@
                         (typeof _this.commitLookup[hash] === 'number'
                           ? ': ' + _this.commits[_this.commitLookup[hash]].message
                           : ''),
-                      value: (index + 1).toString()
+                      value: (index + 1).toString(),
                     };
                   });
                   showSelectDialog(
@@ -1195,13 +1303,13 @@
                         command: 'cherrypickCommit',
                         repo: _this.currentRepo,
                         commitHash: hash,
-                        parentIndex: parseInt(parentIndex)
+                        parentIndex: parseInt(parentIndex),
                       });
                     },
                     sourceElem
                   );
                 }
-              }
+              },
             },
             {
               title: 'Revert' + ELLIPSIS,
@@ -1214,7 +1322,7 @@
                         command: 'revertCommit',
                         repo: _this.currentRepo,
                         commitHash: hash,
-                        parentIndex: 0
+                        parentIndex: 0,
                       });
                     },
                     sourceElem
@@ -1227,7 +1335,7 @@
                         (typeof _this.commitLookup[hash] === 'number'
                           ? ': ' + _this.commits[_this.commitLookup[hash]].message
                           : ''),
-                      value: (index + 1).toString()
+                      value: (index + 1).toString(),
                     };
                   });
                   showSelectDialog(
@@ -1242,13 +1350,13 @@
                         command: 'revertCommit',
                         repo: _this.currentRepo,
                         commitHash: hash,
-                        parentIndex: parseInt(parentIndex)
+                        parentIndex: parseInt(parentIndex),
                       });
                     },
                     sourceElem
                   );
                 }
-              }
+              },
             },
             null,
             {
@@ -1266,12 +1374,12 @@
                       command: 'mergeCommit',
                       repo: _this.currentRepo,
                       commitHash: hash,
-                      createNewCommit: createNewCommit
+                      createNewCommit: createNewCommit,
                     });
                   },
                   null
                 );
-              }
+              },
             },
             {
               title: 'Reset current branch to this Commit' + ELLIPSIS,
@@ -1284,16 +1392,16 @@
                   [
                     {
                       name: 'Soft - Keep all changes, but reset head',
-                      value: 'soft'
+                      value: 'soft',
                     },
                     {
                       name: 'Mixed - Keep working tree, but reset index',
-                      value: 'mixed'
+                      value: 'mixed',
                     },
                     {
                       name: 'Hard - Discard all changes',
-                      value: 'hard'
-                    }
+                      value: 'hard',
+                    },
                   ],
                   'Yes, reset',
                   function(mode) {
@@ -1301,12 +1409,12 @@
                       command: 'resetToCommit',
                       repo: _this.currentRepo,
                       commitHash: hash,
-                      resetMode: mode
+                      resetMode: mode,
                     });
                   },
                   sourceElem
                 );
-              }
+              },
             },
             null,
             {
@@ -1315,10 +1423,10 @@
                 sendMessage({
                   command: 'copyToClipboard',
                   type: 'Commit Hash',
-                  data: hash
+                  data: hash,
                 });
-              }
-            }
+              },
+            },
           ],
           sourceElem
         );
@@ -1343,7 +1451,6 @@
           copyType;
         console.log(sourceElem);
         console.log(refName);
-
         if (sourceElem.classList.contains('tag')) {
           menu = [
             {
@@ -1355,12 +1462,12 @@
                     sendMessage({
                       command: 'deleteTag',
                       repo: _this.currentRepo,
-                      tagName: refName
+                      tagName: refName,
                     });
                   },
                   null
                 );
-              }
+              },
             },
             {
               title: 'Push Tag' + ELLIPSIS,
@@ -1371,14 +1478,14 @@
                     sendMessage({
                       command: 'pushTag',
                       repo: _this.currentRepo,
-                      tagName: refName
+                      tagName: refName,
                     });
                     showActionRunningDialog('Pushing Tag');
                   },
                   null
                 );
-              }
-            }
+              },
+            },
           ];
           copyType = 'Tag Name';
         } else {
@@ -1389,7 +1496,7 @@
                 title: 'Checkout Branch',
                 onClick: function() {
                   return _this.checkoutBranchAction(sourceElem, refName);
-                }
+                },
               });
             }
             menu.push({
@@ -1404,12 +1511,12 @@
                       command: 'renameBranch',
                       repo: _this.currentRepo,
                       oldName: refName,
-                      newName: newName
+                      newName: newName,
                     });
                   },
                   null
                 );
-              }
+              },
             });
             if (_this.gitBranchHead !== refName) {
               menu.push(
@@ -1426,12 +1533,12 @@
                           command: 'deleteBranch',
                           repo: _this.currentRepo,
                           branchName: refName,
-                          forceDelete: forceDelete
+                          forceDelete: forceDelete,
                         });
                       },
                       null
                     );
-                  }
+                  },
                 },
                 {
                   title: 'Merge into current branch' + ELLIPSIS,
@@ -1448,12 +1555,12 @@
                           command: 'mergeBranch',
                           repo: _this.currentRepo,
                           branchName: refName,
-                          createNewCommit: createNewCommit
+                          createNewCommit: createNewCommit,
                         });
                       },
                       null
                     );
-                  }
+                  },
                 }
               );
             }
@@ -1463,8 +1570,8 @@
                 title: 'Checkout Branch' + ELLIPSIS,
                 onClick: function() {
                   return _this.checkoutBranchAction(sourceElem, refName);
-                }
-              }
+                },
+              },
             ];
           }
           copyType = 'Branch Name';
@@ -1475,9 +1582,9 @@
             sendMessage({
               command: 'copyToClipboard',
               type: copyType,
-              data: refName
+              data: refName,
             });
-          }
+          },
         });
         showContextMenu(e, menu, sourceElem);
       });
@@ -1490,8 +1597,9 @@
         var sourceElem = e.target.closest('.gitRef');
         _this.checkoutBranchAction(sourceElem, unescapeHtml(sourceElem.dataset.name));
       });
-    };
-    GitGraphView.prototype.renderUncommitedChanges = function() {
+    }
+
+    renderUncommitedChanges() {
       var date = getCommitDate(this.commits[0].date);
       document.getElementsByClassName('unsavedChanges')[0].innerHTML =
         '<td></td><td><b>' +
@@ -1501,21 +1609,23 @@
         '">' +
         date.value +
         '</td><td title="* <>">*</td><td title="*">*</td>';
-    };
-    GitGraphView.prototype.renderShowLoading = function() {
+    }
+
+    renderShowLoading() {
       hideDialogAndContextMenu();
       this.graph.clear();
       this.tableElem.innerHTML = '<h2 id="loadingHeader">' + svgIcons.loading + 'Loading ...</h2>';
       this.footerElem.innerHTML = '';
-    };
-    GitGraphView.prototype.checkoutBranchAction = function(sourceElem, refName) {
+    }
+
+    checkoutBranchAction(sourceElem, refName) {
       var _this = this;
       if (sourceElem.classList.contains('head')) {
         sendMessage({
           command: 'checkoutBranch',
           repo: this.currentRepo,
           branchName: refName,
-          remoteBranch: null
+          remoteBranch: null,
         });
       } else if (sourceElem.classList.contains('remote')) {
         var refNameComps = refName.split('/');
@@ -1530,14 +1640,15 @@
               command: 'checkoutBranch',
               repo: _this.currentRepo,
               branchName: newBranch,
-              remoteBranch: refName
+              remoteBranch: refName,
             });
           },
           null
         );
       }
-    };
-    GitGraphView.prototype.makeTableResizable = function() {
+    }
+
+    makeTableResizable() {
       var _this = this;
       var colHeadersElem = document.getElementById('tableColHeaders'),
         cols = document.getElementsByClassName('tableColHeader');
@@ -1566,7 +1677,7 @@
             cols[0].clientWidth - 24,
             cols[2].clientWidth - 24,
             cols[3].clientWidth - 24,
-            cols[4].clientWidth - 24
+            cols[4].clientWidth - 24,
           ];
           makeTableFixedLayout();
         }
@@ -1578,23 +1689,33 @@
           var mouseDeltaX = mouseEvent.clientX - mouseX;
           switch (col) {
             case 0:
-              if (columnWidths[0] + mouseDeltaX < 40) mouseDeltaX = -columnWidths[0] + 40;
-              if (cols[1].clientWidth - mouseDeltaX < 64) mouseDeltaX = cols[1].clientWidth - 64;
+              if (columnWidths[0] + mouseDeltaX < 40) {
+                mouseDeltaX = -columnWidths[0] + 40;
+              }
+              if (cols[1].clientWidth - mouseDeltaX < 64) {
+                mouseDeltaX = cols[1].clientWidth - 64;
+              }
               columnWidths[0] += mouseDeltaX;
               cols[0].style.width = columnWidths[0] + 'px';
               _this.graph.limitMaxWidth(columnWidths[0] + 16);
               break;
-
             case 1:
-              if (cols[1].clientWidth + mouseDeltaX < 64) mouseDeltaX = -cols[1].clientWidth + 64;
-              if (columnWidths[1] - mouseDeltaX < 40) mouseDeltaX = columnWidths[1] - 40;
+              if (cols[1].clientWidth + mouseDeltaX < 64) {
+                mouseDeltaX = -cols[1].clientWidth + 64;
+              }
+              if (columnWidths[1] - mouseDeltaX < 40) {
+                mouseDeltaX = columnWidths[1] - 40;
+              }
               columnWidths[1] -= mouseDeltaX;
               cols[2].style.width = columnWidths[1] + 'px';
               break;
-
             default:
-              if (columnWidths[col - 1] + mouseDeltaX < 40) mouseDeltaX = -columnWidths[col - 1] + 40;
-              if (columnWidths[col] - mouseDeltaX < 40) mouseDeltaX = columnWidths[col] - 40;
+              if (columnWidths[col - 1] + mouseDeltaX < 40) {
+                mouseDeltaX = -columnWidths[col - 1] + 40;
+              }
+              if (columnWidths[col] - mouseDeltaX < 40) {
+                mouseDeltaX = columnWidths[col] - 40;
+              }
               columnWidths[col - 1] += mouseDeltaX;
               columnWidths[col] -= mouseDeltaX;
               cols[col].style.width = columnWidths[col - 1] + 'px';
@@ -1605,6 +1726,7 @@
       });
       colHeadersElem.addEventListener('mouseup', stopResizing);
       colHeadersElem.addEventListener('mouseleave', stopResizing);
+
       function stopResizing() {
         if (col > -1 && columnWidths !== null) {
           col = -1;
@@ -1614,10 +1736,11 @@
           sendMessage({
             command: 'saveRepoState',
             repo: that.currentRepo,
-            state: that.gitRepos[that.currentRepo]
+            state: that.gitRepos[that.currentRepo],
           });
         }
       }
+
       function makeTableFixedLayout() {
         if (columnWidths !== null) {
           cols[0].style.width = columnWidths[0] + 'px';
@@ -1629,8 +1752,9 @@
           that.graph.limitMaxWidth(columnWidths[0] + 16);
         }
       }
-    };
-    GitGraphView.prototype.observeWindowSizeChanges = function() {
+    }
+
+    observeWindowSizeChanges() {
       var _this = this;
       var windowWidth = window.outerWidth,
         windowHeight = window.outerHeight;
@@ -1642,8 +1766,9 @@
           windowHeight = window.outerHeight;
         }
       });
-    };
-    GitGraphView.prototype.observeWebviewStyleChanges = function() {
+    }
+
+    observeWebviewStyleChanges() {
       var _this = this;
       var fontFamily = getVSCodeStyle('--vscode-editor-font-family');
       new MutationObserver(function() {
@@ -1655,10 +1780,11 @@
         }
       }).observe(document.documentElement, {
         attributes: true,
-        attributeFilter: ['style']
+        attributeFilter: ['style'],
       });
-    };
-    GitGraphView.prototype.observeWebviewScroll = function() {
+    }
+
+    observeWebviewScroll() {
       var _this = this;
       var active = window.scrollY > 0;
       this.scrollShadowElem.className = active ? 'active' : '';
@@ -1668,47 +1794,57 @@
           _this.scrollShadowElem.className = active ? 'active' : '';
         }
       });
-    };
-    GitGraphView.prototype.loadUncommittedChanges = function() {
+    }
+
+    loadUncommittedChanges() {
       console.log(JSON.stringify(this.commits[0])); //const unsavedChanges = this.getGitUnsavedChanges(repo);
-    };
-    GitGraphView.prototype.loadCommitDetails = function(sourceElem) {
+    }
+
+    loadCommitDetails(sourceElem) {
       this.hideCommitDetails();
       this.expandedCommit = {
         id: parseInt(sourceElem.dataset.id),
         hash: sourceElem.dataset.hash,
         srcElem: sourceElem,
         commitDetails: null,
-        fileTree: null
+        fileTree: null,
       };
       this.saveState();
       sendMessage({
         command: 'commitDetails',
         repo: this.currentRepo,
-        commitHash: sourceElem.dataset.hash
+        commitHash: sourceElem.dataset.hash,
       });
-    };
-    GitGraphView.prototype.hideCommitDetails = function() {
+    }
+
+    hideCommitDetails() {
       if (this.expandedCommit !== null) {
         var elem = document.getElementById('commitDetails');
-        if (typeof elem === 'object' && elem !== null) elem.remove();
-        if (typeof this.expandedCommit.srcElem === 'object' && this.expandedCommit.srcElem !== null)
+        if (typeof elem === 'object' && elem !== null) {
+          elem.remove();
+        }
+        if (typeof this.expandedCommit.srcElem === 'object' && this.expandedCommit.srcElem !== null) {
           this.expandedCommit.srcElem.classList.remove('commitDetailsOpen');
+        }
         this.expandedCommit = null;
         this.saveState();
         this.renderGraph();
       }
-    };
-    GitGraphView.prototype.showCommitDetails = function(commitDetails, fileTree) {
+    }
+
+    showCommitDetails(commitDetails, fileTree) {
       var _this = this;
       if (
         this.expandedCommit === null ||
         this.expandedCommit.srcElem === null ||
         this.expandedCommit.hash !== commitDetails.hash
-      )
+      ) {
         return;
+      }
       var elem = document.getElementById('commitDetails');
-      if (typeof elem === 'object' && elem !== null) elem.remove();
+      if (typeof elem === 'object' && elem !== null) {
+        elem.remove();
+      }
       this.expandedCommit.commitDetails = commitDetails;
       this.expandedCommit.fileTree = fileTree;
       this.expandedCommit.srcElem.classList.add('commitDetailsOpen');
@@ -1731,8 +1867,9 @@
         '</a>&gt;<br>';
       html += '<b>Date: </b>' + new Date(commitDetails.date * 1e3).toString() + '<br>';
       html += '<b>Committer: </b>' + escapeHtml(commitDetails.committer) + '</span>';
-      if (typeof this.avatars[commitDetails.email] === 'string')
+      if (typeof this.avatars[commitDetails.email] === 'string') {
         html += '<span class="commitDetailsSummaryAvatar"><img src="' + this.avatars[commitDetails.email] + '"></span>';
+      }
       html += '</span></span><br><br>';
       html += escapeHtml(commitDetails.body).replace(/\n/g, '<br>') + '</div>';
       html +=
@@ -1767,19 +1904,21 @@
       });
       addListenerToClass('gitFile', 'click', function(e) {
         var sourceElem = e.target.closest('.gitFile');
-        if (_this.expandedCommit === null || !sourceElem.classList.contains('gitDiffPossible')) return;
+        if (_this.expandedCommit === null || !sourceElem.classList.contains('gitDiffPossible')) {
+          return;
+        }
         sendMessage({
           command: 'viewDiff',
           repo: _this.currentRepo,
           commitHash: _this.expandedCommit.hash,
           oldFilePath: decodeURIComponent(sourceElem.dataset.oldfilepath),
           newFilePath: decodeURIComponent(sourceElem.dataset.newfilepath),
-          type: sourceElem.dataset.type
+          type: sourceElem.dataset.type,
         });
       });
-    };
-    return GitGraphView;
-  })();
+    }
+  }
+
   var contextMenu = document.getElementById('contextMenu'),
     contextMenuSource = null;
   var dialog = document.getElementById('dialog'),
@@ -1798,11 +1937,11 @@
         y: 24,
         offsetX: 8,
         offsetY: 12,
-        expandY: 250
+        expandY: 250,
       },
       initialLoadCommits: viewState.initialLoadCommits,
       loadMoreCommits: viewState.loadMoreCommits,
-      showCurrentBranchByDefault: viewState.showCurrentBranchByDefault
+      showCurrentBranchByDefault: viewState.showCurrentBranchByDefault,
     },
     vscode.getState()
   );
@@ -1835,7 +1974,9 @@
         break;
 
       case 'copyToClipboard':
-        if (msg.success === false) showErrorDialog('Unable to Copy ' + msg.type + ' to Clipboard', null, null);
+        if (msg.success === false) {
+          showErrorDialog('Unable to Copy ' + msg.type + ' to Clipboard', null, null);
+        }
         break;
 
       case 'createBranch':
@@ -1895,10 +2036,13 @@
         break;
 
       case 'viewDiff':
-        if (msg.success === false) showErrorDialog('Unable to view diff of file', null, null);
+        if (msg.success === false) {
+          showErrorDialog('Unable to view diff of file', null, null);
+        }
         break;
     }
   });
+
   function refreshGraphOrDisplayError(status, errorMessage) {
     if (status === null) {
       gitGraph.refresh(true);
@@ -1906,6 +2050,7 @@
       showErrorDialog(errorMessage, status, null);
     }
   }
+
   function getCommitDate(dateVal) {
     var date = new Date(dateVal * 1e3),
       value;
@@ -1949,9 +2094,10 @@
     }
     return {
       title: dateStr + ' ' + timeStr,
-      value: value
+      value: value,
     };
   }
+
   function generateGitFileTree(gitFiles) {
     var contents = {},
       i,
@@ -1963,7 +2109,7 @@
       name: '',
       folderPath: '',
       contents: contents,
-      open: true
+      open: true,
     };
     for (i = 0; i < gitFiles.length; i++) {
       cur = files;
@@ -1977,7 +2123,7 @@
               name: path[j],
               folderPath: path.slice(0, j + 1).join('/'),
               contents: contents,
-              open: true
+              open: true,
             };
           }
           cur = cur.contents[path[j]];
@@ -1985,13 +2131,14 @@
           cur.contents[path[j]] = {
             type: 'file',
             name: path[j],
-            index: i
+            index: i,
           };
         }
       }
     }
     return files;
   }
+
   function generateGitFileTreeHtml(folder, gitFiles) {
     var html =
         (folder.name !== ''
@@ -2075,6 +2222,7 @@
     }
     return html + '</ul>';
   }
+
   function alterGitFileTree(folder, folderPath, open) {
     var path = folderPath.split('/'),
       i,
@@ -2091,9 +2239,11 @@
       }
     }
   }
+
   function abbrevCommit(commitHash) {
     return commitHash.substring(0, 8);
   }
+
   function showContextMenu(e, items, sourceElem) {
     var html = '',
       i,
@@ -2126,6 +2276,7 @@
     contextMenuSource = sourceElem;
     contextMenuSource.classList.add('contextMenuActive');
   }
+
   function hideContextMenu() {
     contextMenu.className = '';
     contextMenu.innerHTML = '';
@@ -2136,7 +2287,9 @@
       contextMenuSource = null;
     }
   }
+
   var DIALOG_FORM_ID = 'formDialogForm';
+
   function showConfirmationDialog(message, confirmed, sourceElem) {
     showDialog(
       message,
@@ -2149,6 +2302,7 @@
       sourceElem
     );
   }
+
   function showRefInputDialog(message, defaultValue, actionName, actioned, sourceElem) {
     showFormDialog(
       message,
@@ -2156,8 +2310,8 @@
         {
           type: 'text-ref',
           name: '',
-          default: defaultValue
-        }
+          default: defaultValue,
+        },
       ],
       actionName,
       function(values) {
@@ -2166,6 +2320,7 @@
       sourceElem
     );
   }
+
   function showCheckboxDialog(message, checkboxLabel, checkboxValue, actionName, actioned, sourceElem) {
     showFormDialog(
       message,
@@ -2173,8 +2328,8 @@
         {
           type: 'checkbox',
           name: checkboxLabel,
-          value: checkboxValue
-        }
+          value: checkboxValue,
+        },
       ],
       actionName,
       function(values) {
@@ -2183,6 +2338,7 @@
       sourceElem
     );
   }
+
   function showSelectDialog(message, defaultValue, options, actionName, actioned, sourceElem) {
     showFormDialog(
       message,
@@ -2191,8 +2347,8 @@
           type: 'select',
           name: '',
           options: options,
-          default: defaultValue
-        }
+          default: defaultValue,
+        },
       ],
       actionName,
       function(values) {
@@ -2201,6 +2357,7 @@
       sourceElem
     );
   }
+
   function showFormDialog(message, inputs, actionName, actioned, sourceElem) {
     var textRefInput = -1,
       multiElementForm = inputs.length > 1;
@@ -2243,7 +2400,9 @@
           '"' +
           (input.type === 'text' && input.placeholder !== null ? ' placeholder="' + input.placeholder + '"' : '') +
           '/>';
-        if (input.type === 'text-ref') textRefInput = i;
+        if (input.type === 'text-ref') {
+          textRefInput = i;
+        }
       }
       html += '</td></tr>';
     }
@@ -2253,7 +2412,9 @@
       actionName,
       'Cancel',
       function() {
-        if (dialog.className === 'active noInput' || dialog.className === 'active inputInvalid') return;
+        if (dialog.className === 'active noInput' || dialog.className === 'active inputInvalid') {
+          return;
+        }
         var values = [];
         for (var i = 0; i < inputs.length; i++) {
           var input = inputs[i],
@@ -2274,7 +2435,9 @@
     if (textRefInput > -1) {
       var dialogInput_1 = document.getElementById('dialogInput' + textRefInput),
         dialogAction_1 = document.getElementById('dialogAction');
-      if (dialogInput_1.value === '') dialog.className = 'active noInput';
+      if (dialogInput_1.value === '') {
+        dialog.className = 'active noInput';
+      }
       dialogInput_1.focus();
       dialogInput_1.addEventListener('keyup', function() {
         var noInput = dialogInput_1.value === '',
@@ -2289,6 +2452,7 @@
       });
     }
   }
+
   function showErrorDialog(message, reason, sourceElem) {
     showDialog(
       svgIcons.alert +
@@ -2307,9 +2471,11 @@
       sourceElem
     );
   }
+
   function showActionRunningDialog(command) {
     showDialog('<span id="actionRunning">' + svgIcons.loading + command + ' ...</span>', null, 'Dismiss', null, null);
   }
+
   function showDialog(html, actionName, dismissName, actioned, sourceElem) {
     dialogBacking.className = 'active';
     dialog.className = 'active';
@@ -2329,8 +2495,11 @@
     }
     document.getElementById('dialogDismiss').addEventListener('click', hideDialog);
     dialogMenuSource = sourceElem;
-    if (dialogMenuSource !== null) dialogMenuSource.classList.add('dialogActive');
+    if (dialogMenuSource !== null) {
+      dialogMenuSource.classList.add('dialogActive');
+    }
   }
+
   function hideDialog() {
     dialogBacking.className = '';
     dialog.className = '';
@@ -2340,17 +2509,28 @@
       dialogMenuSource = null;
     }
   }
+
   function hideDialogAndContextMenu() {
-    if (dialog.classList.contains('active')) hideDialog();
-    if (contextMenu.classList.contains('active')) hideContextMenu();
+    if (dialog.classList.contains('active')) {
+      hideDialog();
+    }
+    if (contextMenu.classList.contains('active')) {
+      hideContextMenu();
+    }
   }
+
   document.addEventListener('keyup', function(e) {
-    if (e.key === 'Escape') hideDialogAndContextMenu();
+    if (e.key === 'Escape') {
+      hideDialogAndContextMenu();
+    }
   });
   document.addEventListener('click', hideContextMenuListener);
   document.addEventListener('contextmenu', hideContextMenuListener);
   document.addEventListener('mouseleave', hideContextMenuListener);
+
   function hideContextMenuListener() {
-    if (contextMenu.classList.contains('active')) hideContextMenu();
+    if (contextMenu.classList.contains('active')) {
+      hideContextMenu();
+    }
   }
 })();

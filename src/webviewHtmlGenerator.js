@@ -2,6 +2,7 @@ class WebviewHtmlGenerator {
   constructor(state) {
     this.state = state;
   }
+
   getHtmlForWebview() {
     const nonce = getNonce();
     const colorParams = this.state.graphColours
@@ -21,6 +22,7 @@ class WebviewHtmlGenerator {
       ${this.getHtmlBodyForWebview(nonce)}
     </html>`;
   }
+
   getHtmlBodyForWebview(nonce) {
     let body,
       numRepos = Object.keys(this.state.repos).length;
@@ -59,10 +61,12 @@ class WebviewHtmlGenerator {
     }
     return body;
   }
+
   getMediaUri(file) {
     return this.state.assetLoader.getUri('media', file).with({ scheme: 'vscode-resource' });
   }
 }
+
 exports.default = WebviewHtmlGenerator;
 
 function getNonce() {

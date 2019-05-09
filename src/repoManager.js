@@ -10,6 +10,7 @@ var __awaiter =
           reject(e);
         }
       }
+
       function rejected(value) {
         try {
           step(generator['throw'](value));
@@ -17,6 +18,7 @@ var __awaiter =
           reject(e);
         }
       }
+
       function step(result) {
         result.done
           ? resolve(result.value)
@@ -24,6 +26,7 @@ var __awaiter =
               resolve(result.value);
             }).then(fulfilled, rejected);
       }
+
       step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
   };
@@ -33,6 +36,7 @@ const vscode = require('vscode');
 const Config = require('./config').default;
 const configuration = new Config();
 const utils_1 = require('./utils');
+
 class RepoManager {
   constructor(dataSource, extensionState, statusBarItem) {
     this.folderWatchers = {};
@@ -54,24 +58,33 @@ class RepoManager {
             changes = false;
           for (let i = 0; i < e.added.length; i++) {
             path = utils_1.getPathFromUri(e.added[i].uri);
-            if (yield this.searchDirectoryForRepos(path, this.maxDepthOfRepoSearch)) changes = true;
+            if (yield this.searchDirectoryForRepos(path, this.maxDepthOfRepoSearch)) {
+              changes = true;
+            }
             this.startWatchingFolder(path);
           }
-          if (changes) this.sendRepos();
+          if (changes) {
+            this.sendRepos();
+          }
         }
         if (e.removed.length > 0) {
           let changes = false,
             path;
           for (let i = 0; i < e.removed.length; i++) {
             path = utils_1.getPathFromUri(e.removed[i].uri);
-            if (this.removeReposWithinFolder(path)) changes = true;
+            if (this.removeReposWithinFolder(path)) {
+              changes = true;
+            }
             this.stopWatchingFolder(path);
           }
-          if (changes) this.sendRepos();
+          if (changes) {
+            this.sendRepos();
+          }
         }
       })
     );
   }
+
   dispose() {
     if (this.folderChangeHandler !== null) {
       this.folderChangeHandler.dispose();
@@ -82,12 +95,15 @@ class RepoManager {
       this.stopWatchingFolder(folders[i]);
     }
   }
+
   registerViewCallback(viewCallback) {
     this.viewCallback = viewCallback;
   }
+
   deregisterViewCallback() {
     this.viewCallback = null;
   }
+
   maxDepthOfRepoSearchChanged() {
     let newDepth = configuration.maxDepthOfRepoSearch;
     if (newDepth > this.maxDepthOfRepoSearch) {
@@ -97,14 +113,18 @@ class RepoManager {
       this.maxDepthOfRepoSearch = newDepth;
     }
   }
+
   startupTasks() {
     return __awaiter(this, void 0, void 0, function*() {
       this.removeReposNotInWorkspace();
-      if (!(yield this.checkReposExist())) this.sendRepos();
+      if (!(yield this.checkReposExist())) {
+        this.sendRepos();
+      }
       yield this.searchWorkspaceForRepos();
       this.startWatchingFolders();
     });
   }
+
   removeReposNotInWorkspace() {
     let rootsExact = [],
       rootsFolder = [],
@@ -119,10 +139,12 @@ class RepoManager {
       }
     }
     for (let i = 0; i < repoPaths.length; i++) {
-      if (rootsExact.indexOf(repoPaths[i]) === -1 && !rootsFolder.find(x => repoPaths[i].startsWith(x)))
+      if (rootsExact.indexOf(repoPaths[i]) === -1 && !rootsFolder.find(x => repoPaths[i].startsWith(x))) {
         this.removeRepo(repoPaths[i]);
+      }
     }
   }
+
   getRepos() {
     let repoPaths = Object.keys(this.repos).sort(),
       repos = {};
@@ -131,14 +153,17 @@ class RepoManager {
     }
     return repos;
   }
+
   addRepo(repo) {
     this.repos[repo] = { columnWidths: null };
     this.extensionState.saveRepos(this.repos);
   }
+
   removeRepo(repo) {
     delete this.repos[repo];
     this.extensionState.saveRepos(this.repos);
   }
+
   removeReposWithinFolder(path) {
     let pathFolder = path + '/',
       repoPaths = Object.keys(this.repos),
@@ -151,19 +176,26 @@ class RepoManager {
     }
     return changes;
   }
+
   isDirectoryWithinRepos(path) {
     let repoPaths = Object.keys(this.repos);
     for (let i = 0; i < repoPaths.length; i++) {
-      if (path === repoPaths[i] || path.startsWith(repoPaths[i] + '/')) return true;
+      if (path === repoPaths[i] || path.startsWith(repoPaths[i] + '/')) {
+        return true;
+      }
     }
     return false;
   }
+
   sendRepos() {
     let repos = this.getRepos();
     let numRepos = Object.keys(repos).length;
     this.statusBarItem.setNumRepos(numRepos);
-    if (this.viewCallback !== null) this.viewCallback(repos, numRepos);
+    if (this.viewCallback !== null) {
+      this.viewCallback(repos, numRepos);
+    }
   }
+
   checkReposExist() {
     return new Promise(resolve => {
       let repoPaths = Object.keys(this.repos),
@@ -177,28 +209,38 @@ class RepoManager {
               changes = true;
             }
           }
-          if (changes) this.sendRepos();
+          if (changes) {
+            this.sendRepos();
+          }
           resolve(changes);
         });
     });
   }
+
   setRepoState(repo, state) {
     this.repos[repo] = state;
     this.extensionState.saveRepos(this.repos);
   }
+
   searchWorkspaceForRepos() {
     return __awaiter(this, void 0, void 0, function*() {
       let rootFolders = vscode.workspace.workspaceFolders,
         changes = false;
       if (typeof rootFolders !== 'undefined') {
         for (let i = 0; i < rootFolders.length; i++) {
-          if (yield this.searchDirectoryForRepos(utils_1.getPathFromUri(rootFolders[i].uri), this.maxDepthOfRepoSearch))
+          if (
+            yield this.searchDirectoryForRepos(utils_1.getPathFromUri(rootFolders[i].uri), this.maxDepthOfRepoSearch)
+          ) {
             changes = true;
+          }
         }
       }
-      if (changes) this.sendRepos();
+      if (changes) {
+        this.sendRepos();
+      }
     });
   }
+
   searchDirectoryForRepos(directory, maxDepth) {
     return new Promise(resolve => {
       if (this.isDirectoryWithinRepos(directory)) {
@@ -238,6 +280,7 @@ class RepoManager {
         .catch(() => resolve(false));
     });
   }
+
   startWatchingFolders() {
     let rootFolders = vscode.workspace.workspaceFolders;
     if (typeof rootFolders !== 'undefined') {
@@ -246,6 +289,7 @@ class RepoManager {
       }
     }
   }
+
   startWatchingFolder(path) {
     let watcher = vscode.workspace.createFileSystemWatcher(path + '/**');
     watcher.onDidCreate(uri => this.onWatcherCreate(uri));
@@ -253,64 +297,102 @@ class RepoManager {
     watcher.onDidDelete(uri => this.onWatcherDelete(uri));
     this.folderWatchers[path] = watcher;
   }
+
   stopWatchingFolder(path) {
     this.folderWatchers[path].dispose();
     delete this.folderWatchers[path];
   }
+
   onWatcherCreate(uri) {
     return __awaiter(this, void 0, void 0, function*() {
       let path = utils_1.getPathFromUri(uri);
-      if (path.indexOf('/.git/') > -1) return;
-      if (path.endsWith('/.git')) path = path.slice(0, -5);
-      if (this.createEventPaths.indexOf(path) > -1) return;
+      if (path.indexOf('/.git/') > -1) {
+        return;
+      }
+      if (path.endsWith('/.git')) {
+        path = path.slice(0, -5);
+      }
+      if (this.createEventPaths.indexOf(path) > -1) {
+        return;
+      }
       this.createEventPaths.push(path);
-      if (this.processCreateEventsTimeout !== null) clearTimeout(this.processCreateEventsTimeout);
+      if (this.processCreateEventsTimeout !== null) {
+        clearTimeout(this.processCreateEventsTimeout);
+      }
       this.processCreateEventsTimeout = setTimeout(() => this.processCreateEvents(), 1000);
     });
   }
+
   onWatcherChange(uri) {
     let path = utils_1.getPathFromUri(uri);
-    if (path.indexOf('/.git/') > -1) return;
-    if (path.endsWith('/.git')) path = path.slice(0, -5);
-    if (this.changeEventPaths.indexOf(path) > -1) return;
+    if (path.indexOf('/.git/') > -1) {
+      return;
+    }
+    if (path.endsWith('/.git')) {
+      path = path.slice(0, -5);
+    }
+    if (this.changeEventPaths.indexOf(path) > -1) {
+      return;
+    }
     this.changeEventPaths.push(path);
-    if (this.processChangeEventsTimeout !== null) clearTimeout(this.processChangeEventsTimeout);
+    if (this.processChangeEventsTimeout !== null) {
+      clearTimeout(this.processChangeEventsTimeout);
+    }
     this.processChangeEventsTimeout = setTimeout(() => this.processChangeEvents(), 1000);
   }
+
   onWatcherDelete(uri) {
     let path = utils_1.getPathFromUri(uri);
-    if (path.indexOf('/.git/') > -1) return;
-    if (path.endsWith('/.git')) path = path.slice(0, -5);
-    if (this.removeReposWithinFolder(path)) this.sendRepos();
+    if (path.indexOf('/.git/') > -1) {
+      return;
+    }
+    if (path.endsWith('/.git')) {
+      path = path.slice(0, -5);
+    }
+    if (this.removeReposWithinFolder(path)) {
+      this.sendRepos();
+    }
   }
+
   processCreateEvents() {
     return __awaiter(this, void 0, void 0, function*() {
       let path,
         changes = false;
       while ((path = this.createEventPaths.shift())) {
         if (yield isDirectory(path)) {
-          if (yield this.searchDirectoryForRepos(path, this.maxDepthOfRepoSearch)) changes = true;
+          if (yield this.searchDirectoryForRepos(path, this.maxDepthOfRepoSearch)) {
+            changes = true;
+          }
         }
       }
       this.processCreateEventsTimeout = null;
-      if (changes) this.sendRepos();
+      if (changes) {
+        this.sendRepos();
+      }
     });
   }
+
   processChangeEvents() {
     return __awaiter(this, void 0, void 0, function*() {
       let path,
         changes = false;
       while ((path = this.changeEventPaths.shift())) {
         if (!(yield doesPathExist(path))) {
-          if (this.removeReposWithinFolder(path)) changes = true;
+          if (this.removeReposWithinFolder(path)) {
+            changes = true;
+          }
         }
       }
       this.processChangeEventsTimeout = null;
-      if (changes) this.sendRepos();
+      if (changes) {
+        this.sendRepos();
+      }
     });
   }
 }
+
 exports.RepoManager = RepoManager;
+
 function isDirectory(path) {
   return new Promise(resolve => {
     fs.stat(path, (err, stats) => {
@@ -318,6 +400,7 @@ function isDirectory(path) {
     });
   });
 }
+
 function doesPathExist(path) {
   return new Promise(resolve => {
     fs.stat(path, err => resolve(!err));
