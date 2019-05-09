@@ -13,9 +13,9 @@ body.unableToLoad p {
 #scrollShadow.active {
   position: fixed;
   top: 71px; /* equal to #controls height + thead height */
-  left: 0px;
+  left: 0;
   width: 100%;
-  height: 0px;
+  height: 0;
   box-shadow: 0 -6px 6px 6px var(--vscode-scrollbar-shadow);
   z-index: 5;
 }
@@ -31,7 +31,7 @@ body.unableToLoad p {
   display: block;
   position: absolute;
   left: 8px;
-  top: 0px;
+  top: 0;
   z-index: -1;
 }
 #commitGraph circle.current {
@@ -43,7 +43,7 @@ body.unableToLoad p {
   stroke-width: 1;
   stroke-opacity: 0.75;
 }
-#commitGraph path.shaddow {
+#commitGraph path.shadow {
   fill: none;
   stroke: var(--vscode-editor-background);
   stroke-opacity: 0.75;
@@ -97,7 +97,6 @@ body.unableToLoad p {
   line-height: 18px;
   padding: 6px 12px;
 }
-
 #commitTable.fixedLayout table {
   table-layout: fixed;
 }
@@ -118,18 +117,18 @@ body.unableToLoad p {
 }
 .resizeCol {
   position: absolute;
-  top: 0px;
+  top: 0;
   height: 100%;
   display: block;
   width: 6px;
   cursor: col-resize;
 }
 .resizeCol.left {
-  left: 0px;
+  left: 0;
   border-left: 1px solid rgba(128, 128, 128, 0.25);
 }
 .resizeCol.right {
-  right: 0px;
+  right: 0;
 }
 
 /* Commit Details View */
@@ -188,7 +187,7 @@ body.unableToLoad p {
   vertical-align: top;
 }
 .commitDetailsSummaryKeyValues {
-  max-width: 0px;
+  max-width: 0;
   overflow-x: hidden;
   text-overflow: ellipsis;
 }
@@ -219,8 +218,8 @@ body.unableToLoad p {
   list-style-type: none;
   -webkit-margin-before: 0;
   -webkit-margin-after: 0;
-  -webkit-margin-start: 0px;
-  -webkit-margin-end: 0px;
+  -webkit-margin-start: 0;
+  -webkit-margin-end: 0;
   -webkit-padding-start: 30px;
 }
 #commitDetailsFiles > ul {
@@ -299,7 +298,6 @@ svg.fileIcon {
 .gitFileRename {
   cursor: help;
 }
-
 .commit .avatar > img {
   display: inline-block;
   width: 18px;
@@ -308,7 +306,6 @@ svg.fileIcon {
   margin-top: 3px;
   margin-right: 4px;
 }
-
 .commitHeadDot {
   width: 6px;
   height: 6px;
@@ -351,7 +348,7 @@ svg.fileIcon {
   vertical-align: top;
 }
 .gitRef.active > svg {
-  fill: #ffffff;
+  fill: #fff;
   margin-right: 0;
 }
 
@@ -367,6 +364,7 @@ svg.fileIcon {
   vertical-align: top;
   animation: loadingIconAnimation 2s linear infinite;
 }
+
 @keyframes loadingIconAnimation {
   0% {
     transform: rotate(0deg);
@@ -423,7 +421,6 @@ svg.fileIcon {
   border-radius: 14px;
   line-height: 28px;
 }
-
 #controls select:focus,
 #controls input:focus {
   outline: none;
@@ -485,7 +482,6 @@ svg.fileIcon {
   box-shadow: 0 0 30px 5px var(--vscode-widget-shadow);
   overflow-y: auto;
 }
-
 #dialog > table.dialogForm {
   display: inline-table;
   width: 360px;

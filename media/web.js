@@ -334,7 +334,7 @@
     Branch.prototype.drawPath = function(svg, path, colour) {
       var line1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'),
         line2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      line1.setAttribute('class', 'shaddow');
+      line1.setAttribute('class', 'shadow');
       line1.setAttribute('d', path);
       line2.setAttribute('class', 'line');
       line2.setAttribute('d', path);
@@ -441,10 +441,7 @@
         ? config.graphColours[this.onBranch.getColour() % config.graphColours.length]
         : '#808080';
       circle.setAttribute('cx', (this.x * config.grid.x + config.grid.offsetX).toString());
-      circle.setAttribute(
-        'cy',
-        (this.y * config.grid.y + config.grid.offsetY).toString()
-      );
+      circle.setAttribute('cy', (this.y * config.grid.y + config.grid.offsetY).toString());
       circle.setAttribute('r', '4');
       if (this.isCurrent) {
         circle.setAttribute('class', 'current');
@@ -548,11 +545,7 @@
       return x * this.config.grid.x;
     };
     Graph.prototype.getHeight = function() {
-      return (
-        this.vertices.length * this.config.grid.y +
-        this.config.grid.offsetY -
-        this.config.grid.y / 2
-      );
+      return this.vertices.length * this.config.grid.y + this.config.grid.offsetY - this.config.grid.y / 2;
     };
     Graph.prototype.getVertexColour = function(v) {
       return this.vertices[v].getColour() % this.config.graphColours.length;

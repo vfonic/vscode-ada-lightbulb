@@ -277,27 +277,27 @@ class GitGraphView {
       if (x) x.dispose();
     }
   }
-  update() {
-    return __awaiter(this, void 0, void 0, function*() {
-      const viewState = {
-        assetLoader: this.assetLoader,
-        autoCenterCommitDetailsView: configuration.autoCenterCommitDetailsView,
-        dateFormat: configuration.dateFormat,
-        fetchAvatars: configuration.fetchAvatars && this.extensionState.isAvatarStorageAvailable(),
-        graphColours: configuration.graphColours,
-        graphStyle: configuration.graphStyle,
-        initialLoadCommits: configuration.initialLoadCommits,
-        lastActiveRepo: this.extensionState.getLastActiveRepo(),
-        loadMoreCommits: configuration.loadMoreCommits,
-        repos: this.repoManager.getRepos(),
-        showCurrentBranchByDefault: configuration.showCurrentBranchByDefault
-      };
-      this.panel.webview.html = yield new WebviewGenerator(viewState).getHtmlForWebview();
 
-      const numRepos = this.repoManager.getRepos().length;
-      this.isGraphViewLoaded = numRepos > 0;
-    });
+  async update() {
+    const viewState = {
+      assetLoader: this.assetLoader,
+      autoCenterCommitDetailsView: configuration.autoCenterCommitDetailsView,
+      dateFormat: configuration.dateFormat,
+      fetchAvatars: configuration.fetchAvatars && this.extensionState.isAvatarStorageAvailable(),
+      graphColours: configuration.graphColours,
+      graphStyle: configuration.graphStyle,
+      initialLoadCommits: configuration.initialLoadCommits,
+      lastActiveRepo: this.extensionState.getLastActiveRepo(),
+      loadMoreCommits: configuration.loadMoreCommits,
+      repos: this.repoManager.getRepos(),
+      showCurrentBranchByDefault: configuration.showCurrentBranchByDefault
+    };
+    this.panel.webview.html = new WebviewGenerator(viewState).getHtmlForWebview();
+
+    const numRepos = this.repoManager.getRepos().length;
+    this.isGraphViewLoaded = numRepos > 0;
   }
+
   respondLoadRepos(repos) {
     this.sendMessage({
       command: 'loadRepos',
