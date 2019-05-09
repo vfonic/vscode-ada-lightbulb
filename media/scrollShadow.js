@@ -6,5 +6,3 @@ class ScrollShadow {
     this.elements.forEach(element => (element.className = value));
   }
 }
-
-window.ScrollShadow = ScrollShadow;

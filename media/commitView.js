@@ -37,5 +37,3 @@ class CommitView {
     return html;
   }
 }
-
-window.CommitView = CommitView;

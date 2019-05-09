@@ -49,10 +49,17 @@ class WebviewHtmlGenerator {
       <div id="scrollShadow-top"></div>
       <div id="scrollShadow-bottom"></div>
       <script nonce="${nonce}">var viewState = ${JSON.stringify(this.state)};</script>
-      <script src="${this.getMediaUri('gitFileTreeView.js')}"></script>
-      <script src="${this.getMediaUri('scrollShadow.js')}"></script>
-      <script src="${this.getMediaUri('commitView.js')}"></script>
+      <script src="${this.getMediaUri('utils.js')}"></script>
+      <script src="${this.getMediaUri('commit_utils.js')}"></script>
       <script src="${this.getMediaUri('html_utils.js')}"></script>
+      <script src="${this.getMediaUri('Branch.js')}"></script>
+      <script src="${this.getMediaUri('CommitView.js')}"></script>
+      <script src="${this.getMediaUri('Dropdown.js')}"></script>
+      <script src="${this.getMediaUri('GitFileTreeView.js')}"></script>
+      <script src="${this.getMediaUri('GitGraphView.js')}"></script>
+      <script src="${this.getMediaUri('Graph.js')}"></script>
+      <script src="${this.getMediaUri('Vertex.js')}"></script>
+      <script src="${this.getMediaUri('ScrollShadow.js')}"></script>
       <script src="${this.getMediaUri('web.js')}"></script>
       </body>`;
     } else {
