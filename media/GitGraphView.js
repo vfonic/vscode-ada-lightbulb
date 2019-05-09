@@ -314,7 +314,7 @@ class GitGraphView {
       if (isRepo) {
         _this.requestLoadCommits(hard, function(commitChanges) {
           if (!hard && (branchChanges || commitChanges)) {
-            hideDialogAndContextMenu();
+            ContextMenu.hideDialogAndContextMenu();
           }
         });
       } else {
@@ -494,13 +494,13 @@ class GitGraphView {
       e.stopPropagation();
       var sourceElem = e.target.closest('.commit');
       var hash = sourceElem.dataset.hash;
-      showContextMenu(
+      ContextMenu.showContextMenu(
         e,
         [
           {
             title: 'Add Tag',
             onClick: function() {
-              showFormDialog(
+              Dialog.showFormDialog(
                 'Add tag to commit <b><i>' + abbrevCommit(hash) + '</i></b>:',
                 [
                   {
@@ -548,7 +548,7 @@ class GitGraphView {
           {
             title: 'Create Branch',
             onClick: function() {
-              showRefInputDialog(
+              Dialog.showRefInputDialog(
                 'Enter the name of the branch you would like to create from commit <b><i>' +
                   abbrevCommit(hash) +
                   '</i></b>:',
@@ -570,7 +570,7 @@ class GitGraphView {
           {
             title: 'Checkout',
             onClick: function() {
-              showConfirmationDialog(
+              Dialog.showConfirmationDialog(
                 'Are you sure you want to checkout commit <b><i>' +
                   abbrevCommit(hash) +
                   "</i></b>? This will result in a 'detached HEAD' state.",
@@ -589,7 +589,7 @@ class GitGraphView {
             title: 'Cherry Pick',
             onClick: function() {
               if (_this.commits[_this.commitLookup[hash]].parentHashes.length === 1) {
-                showConfirmationDialog(
+                Dialog.showConfirmationDialog(
                   'Are you sure you want to cherry pick commit <b><i>' + abbrevCommit(hash) + '</i></b>?',
                   function() {
                     sendMessage({
@@ -612,7 +612,7 @@ class GitGraphView {
                     value: (index + 1).toString(),
                   };
                 });
-                showSelectDialog(
+                Dialog.showSelectDialog(
                   'Are you sure you want to cherry pick merge commit <b><i>' +
                     abbrevCommit(hash) +
                     '</i></b>? Choose the parent hash on the main branch, to cherry pick the commit relative to:',
@@ -636,7 +636,7 @@ class GitGraphView {
             title: 'Revert',
             onClick: function() {
               if (_this.commits[_this.commitLookup[hash]].parentHashes.length === 1) {
-                showConfirmationDialog(
+                Dialog.showConfirmationDialog(
                   'Are you sure you want to revert commit <b><i>' + abbrevCommit(hash) + '</i></b>?',
                   function() {
                     sendMessage({
@@ -659,7 +659,7 @@ class GitGraphView {
                     value: (index + 1).toString(),
                   };
                 });
-                showSelectDialog(
+                Dialog.showSelectDialog(
                   'Are you sure you want to revert merge commit <b><i>' +
                     abbrevCommit(hash) +
                     '</i></b>? Choose the parent hash on the main branch, to revert the commit relative to:',
@@ -683,7 +683,7 @@ class GitGraphView {
           {
             title: 'Merge into current branch',
             onClick: function() {
-              showCheckboxDialog(
+              Dialog.showCheckboxDialog(
                 'Are you sure you want to merge commit <b><i>' +
                   abbrevCommit(hash) +
                   '</i></b> into the current branch?',
@@ -705,7 +705,7 @@ class GitGraphView {
           {
             title: 'Reset current branch to this Commit',
             onClick: function() {
-              showSelectDialog(
+              Dialog.showSelectDialog(
                 'Are you sure you want to reset the <b>current branch</b> to commit <b><i>' +
                   abbrevCommit(hash) +
                   '</i></b>?',
@@ -777,7 +777,7 @@ class GitGraphView {
           {
             title: 'Delete Tag',
             onClick: function() {
-              showConfirmationDialog(
+              Dialog.showConfirmationDialog(
                 'Are you sure you want to delete the tag <b><i>' + escapeHtml(refName) + '</i></b>?',
                 function() {
                   sendMessage({
@@ -793,7 +793,7 @@ class GitGraphView {
           {
             title: 'Push Tag',
             onClick: function() {
-              showConfirmationDialog(
+              Dialog.showConfirmationDialog(
                 'Are you sure you want to push the tag <b><i>' + escapeHtml(refName) + '</i></b>?',
                 function() {
                   sendMessage({
@@ -801,7 +801,7 @@ class GitGraphView {
                     repo: _this.currentRepo,
                     tagName: refName,
                   });
-                  showActionRunningDialog('Pushing Tag');
+                  Dialog.showActionRunningDialog('Pushing Tag');
                 },
                 null
               );
@@ -823,7 +823,7 @@ class GitGraphView {
           menu.push({
             title: 'Rename Branch',
             onClick: function() {
-              showRefInputDialog(
+              Dialog.showRefInputDialog(
                 'Enter the new name for branch <b><i>' + escapeHtml(refName) + '</i></b>:',
                 refName,
                 'Rename Branch',
@@ -844,7 +844,7 @@ class GitGraphView {
               {
                 title: 'Delete Branch',
                 onClick: function() {
-                  showCheckboxDialog(
+                  Dialog.showCheckboxDialog(
                     'Are you sure you want to delete the branch <b><i>' + escapeHtml(refName) + '</i></b>?',
                     'Force Delete',
                     false,
@@ -864,7 +864,7 @@ class GitGraphView {
               {
                 title: 'Merge into current branch',
                 onClick: function() {
-                  showCheckboxDialog(
+                  Dialog.showCheckboxDialog(
                     'Are you sure you want to merge branch <b><i>' +
                       escapeHtml(refName) +
                       '</i></b> into the current branch?',
@@ -907,7 +907,7 @@ class GitGraphView {
           });
         },
       });
-      showContextMenu(e, menu, sourceElem);
+      ContextMenu.showContextMenu(e, menu, sourceElem);
     });
     addListenerToClass('gitRef', 'dblclick', function(e) {
       e.stopPropagation();
@@ -947,7 +947,7 @@ class GitGraphView {
       });
     } else if (sourceElem.classList.contains('remote')) {
       var refNameComps = refName.split('/');
-      showRefInputDialog(
+      Dialog.showRefInputDialog(
         'Enter the name of the new branch you would like to create when checking out <b><i>' +
           escapeHtml(sourceElem.dataset.name) +
           '</i></b>:',

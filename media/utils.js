@@ -28,16 +28,14 @@ const sendMessage = msg => {
 
 const getVSCodeStyle = name => document.documentElement.style.getPropertyValue(name);
 
-// var contextMenu = document.getElementById('contextMenu');
-// var dialog = document.getElementById('dialog');
-// var dialogBacking = document.getElementById('dialogBacking');
-
 const hideDialogAndContextMenu = () => {
+  const dialog = Dialog.getDialogElement();
   if (dialog.classList.contains('active')) {
-    hideDialog();
+    Dialog.hideDialog();
   }
+  const contextMenu = ContextMenu.getContextMenuElement();
   if (contextMenu.classList.contains('active')) {
-    hideContextMenu();
+    ContextMenu.hideContextMenu();
   }
 };
 

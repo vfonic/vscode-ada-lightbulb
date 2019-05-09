@@ -54,6 +54,8 @@ class WebviewHtmlGenerator {
       <script src="${this.getMediaUri('html_utils.js')}"></script>
       <script src="${this.getMediaUri('Branch.js')}"></script>
       <script src="${this.getMediaUri('CommitView.js')}"></script>
+      <script src="${this.getMediaUri('ContextMenu.js')}"></script>
+      <script src="${this.getMediaUri('Dialog.js')}"></script>
       <script src="${this.getMediaUri('Dropdown.js')}"></script>
       <script src="${this.getMediaUri('GitFileTreeView.js')}"></script>
       <script src="${this.getMediaUri('GitGraphView.js')}"></script>
