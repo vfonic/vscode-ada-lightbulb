@@ -31,7 +31,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 const path = require('path');
 const vscode = require('vscode');
 const Config = require('./config').default;
-const Configuration = new Config();
+const configuration = new Config();
 const diffDocProvider_1 = require('./diffDocProvider');
 const repoFileWatcher_1 = require('./repoFileWatcher');
 const utils_1 = require('./utils');
@@ -49,7 +49,7 @@ class GitGraphView {
     this.repoManager = repoManager;
     this.avatarManager.registerView(this);
     panel.iconPath =
-      Configuration.tabIconColourTheme() === 'colour'
+      configuration.tabIconColourTheme === 'colour'
         ? this.getUri('resources', 'webview-icon.svg')
         : {
             light: this.getUri('resources', 'webview-icon-light.svg'),
@@ -280,16 +280,16 @@ class GitGraphView {
   }
   getHtmlForWebview() {
     const viewState = {
-      autoCenterCommitDetailsView: Configuration.autoCenterCommitDetailsView(),
-      dateFormat: Configuration.dateFormat(),
-      fetchAvatars: Configuration.fetchAvatars() && this.extensionState.isAvatarStorageAvailable(),
-      graphColours: Configuration.graphColours(),
-      graphStyle: Configuration.graphStyle(),
-      initialLoadCommits: Configuration.initialLoadCommits(),
+      autoCenterCommitDetailsView: configuration.autoCenterCommitDetailsView,
+      dateFormat: configuration.dateFormat,
+      fetchAvatars: configuration.fetchAvatars && this.extensionState.isAvatarStorageAvailable(),
+      graphColours: configuration.graphColours,
+      graphStyle: configuration.graphStyle,
+      initialLoadCommits: configuration.initialLoadCommits,
       lastActiveRepo: this.extensionState.getLastActiveRepo(),
-      loadMoreCommits: Configuration.loadMoreCommits(),
+      loadMoreCommits: configuration.loadMoreCommits,
       repos: this.repoManager.getRepos(),
-      showCurrentBranchByDefault: Configuration.showCurrentBranchByDefault()
+      showCurrentBranchByDefault: configuration.showCurrentBranchByDefault
     };
     const nonce = getNonce();
     const colorParams = viewState.graphColours

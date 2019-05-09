@@ -2,7 +2,7 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 const vscode = require('vscode');
 const Config = require('./config').default;
-const Configuration = new Config();
+const configuration = new Config();
 class StatusBarItem {
   constructor(context) {
     this.numRepos = 0;
@@ -17,7 +17,7 @@ class StatusBarItem {
     this.refresh();
   }
   refresh() {
-    if (Configuration.showStatusBarItem() && this.numRepos > 0) {
+    if (configuration.showStatusBarItem && this.numRepos > 0) {
       this.statusBarItem.show();
     } else {
       this.statusBarItem.hide();

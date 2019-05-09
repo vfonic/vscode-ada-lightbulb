@@ -31,7 +31,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 const fs = require('fs');
 const vscode = require('vscode');
 const Config = require('./config').default;
-const Configuration = new Config();
+const configuration = new Config();
 const utils_1 = require('./utils');
 class RepoManager {
   constructor(dataSource, extensionState, statusBarItem) {
@@ -45,7 +45,7 @@ class RepoManager {
     this.extensionState = extensionState;
     this.statusBarItem = statusBarItem;
     this.repos = extensionState.getRepos();
-    this.maxDepthOfRepoSearch = Configuration.maxDepthOfRepoSearch();
+    this.maxDepthOfRepoSearch = configuration.maxDepthOfRepoSearch;
     this.startupTasks();
     this.folderChangeHandler = vscode.workspace.onDidChangeWorkspaceFolders(e =>
       __awaiter(this, void 0, void 0, function*() {
@@ -89,7 +89,7 @@ class RepoManager {
     this.viewCallback = null;
   }
   maxDepthOfRepoSearchChanged() {
-    let newDepth = Configuration.maxDepthOfRepoSearch();
+    let newDepth = configuration.maxDepthOfRepoSearch;
     if (newDepth > this.maxDepthOfRepoSearch) {
       this.maxDepthOfRepoSearch = newDepth;
       this.searchWorkspaceForRepos();

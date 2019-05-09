@@ -30,7 +30,7 @@ var __awaiter =
 Object.defineProperty(exports, '__esModule', { value: true });
 const cp = require('child_process');
 const Config = require('./config').default;
-const Configuration = new Config();
+const configuration = new Config();
 const utils_1 = require('./utils');
 const eolRegex = /\r\n|\r|\n/g;
 const headRegex = /^\(HEAD detached at [0-9A-Za-z]+\)/g;
@@ -41,11 +41,11 @@ class DataSource {
     this.generateGitCommandFormats();
   }
   registerGitPath() {
-    this.gitPath = Configuration.gitPath();
+    this.gitPath = configuration.gitPath;
     this.gitExecPath = this.gitPath.indexOf(' ') > -1 ? '"' + this.gitPath + '"' : this.gitPath;
   }
   generateGitCommandFormats() {
-    let dateType = Configuration.dateType() === 'Author Date' ? '%at' : '%ct';
+    let dateType = configuration.dateType === 'Author Date' ? '%at' : '%ct';
     this.gitLogFormat = ['%H', '%P', '%an', '%ae', dateType, '%s'].join(gitLogSeparator);
     this.gitCommitDetailsFormat = ['%H', '%P', '%an', '%ae', dateType, '%cn'].join(gitLogSeparator) + '%n%B';
   }
@@ -92,9 +92,7 @@ class DataSource {
           if (refData.head !== null) {
             for (i = 0; i < commits.length; i++) {
               if (refData.head === commits[i].hash) {
-                unsavedChanges = Configuration.showUncommittedChanges()
-                  ? yield this.getGitUnsavedChanges(repo)
-                  : null;
+                unsavedChanges = configuration.showUncommittedChanges ? yield this.getGitUnsavedChanges(repo) : null;
                 if (unsavedChanges !== null) {
                   commits.unshift({
                     hash: '*',
