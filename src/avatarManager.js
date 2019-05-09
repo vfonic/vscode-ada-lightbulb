@@ -61,7 +61,7 @@ class AvatarManager {
         this.queue.add(email, repo, commits, false);
       }
       if (this.avatars[email].image !== null) {
-        this.sendAvatarToWebView(email, () => {
+        this.sendAvatarToWebview(email, () => {
           this.removeAvatarFromCache(email);
           this.queue.add(email, repo, commits, true);
         });
@@ -330,9 +330,9 @@ class AvatarManager {
       };
     }
     this.extensionState.saveAvatar(email, this.avatars[email]);
-    this.sendAvatarToWebView(email, () => {});
+    this.sendAvatarToWebview(email, () => {});
   }
-  sendAvatarToWebView(email, onError) {
+  sendAvatarToWebview(email, onError) {
     if (this.view !== null) {
       fs.readFile(this.avatarStorageFolder + '/' + this.avatars[email].image, (err, data) => {
         if (err) {

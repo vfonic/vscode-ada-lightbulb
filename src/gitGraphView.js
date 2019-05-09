@@ -35,6 +35,9 @@ const configuration = new Config();
 const diffDocProvider_1 = require('./diffDocProvider');
 const RepoFileWatcher = require('./repoFileWatcher').default;
 const utils_1 = require('./utils');
+const AssetLoader = require('./assetLoader').default;
+const WebviewGenerator = require('./webviewGenerator').default;
+
 class GitGraphView {
   constructor(panel, extensionPath, dataSource, extensionState, avatarManager, repoManager) {
     this.disposables = [];
@@ -42,6 +45,7 @@ class GitGraphView {
     this.isPanelVisible = true;
     this.currentRepo = null;
     this.panel = panel;
+    this.assetLoader = new AssetLoader(extensionPath);
     this.extensionPath = extensionPath;
     this.avatarManager = avatarManager;
     this.dataSource = dataSource;
@@ -50,10 +54,10 @@ class GitGraphView {
     this.avatarManager.registerView(this);
     panel.iconPath =
       configuration.tabIconColourTheme === 'colour'
-        ? this.getUri('resources', 'webview-icon.svg')
+        ? this.assetLoader.getUri('resources', 'webview-icon.svg')
         : {
-            light: this.getUri('resources', 'webview-icon-light.svg'),
-            dark: this.getUri('resources', 'webview-icon-dark.svg')
+            light: this.assetLoader.getUri('resources', 'webview-icon-light.svg'),
+            dark: this.assetLoader.getUri('resources', 'webview-icon-dark.svg')
           };
     this.update();
     this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
@@ -275,84 +279,24 @@ class GitGraphView {
   }
   update() {
     return __awaiter(this, void 0, void 0, function*() {
-      this.panel.webview.html = yield this.getHtmlForWebview();
+      const viewState = {
+        assetLoader: this.assetLoader,
+        autoCenterCommitDetailsView: configuration.autoCenterCommitDetailsView,
+        dateFormat: configuration.dateFormat,
+        fetchAvatars: configuration.fetchAvatars && this.extensionState.isAvatarStorageAvailable(),
+        graphColours: configuration.graphColours,
+        graphStyle: configuration.graphStyle,
+        initialLoadCommits: configuration.initialLoadCommits,
+        lastActiveRepo: this.extensionState.getLastActiveRepo(),
+        loadMoreCommits: configuration.loadMoreCommits,
+        repos: this.repoManager.getRepos(),
+        showCurrentBranchByDefault: configuration.showCurrentBranchByDefault
+      };
+      this.panel.webview.html = yield new WebviewGenerator(viewState).getHtmlForWebview();
+
+      const numRepos = this.repoManager.getRepos().length;
+      this.isGraphViewLoaded = numRepos > 0;
     });
-  }
-  getHtmlForWebview() {
-    const viewState = {
-      autoCenterCommitDetailsView: configuration.autoCenterCommitDetailsView,
-      dateFormat: configuration.dateFormat,
-      fetchAvatars: configuration.fetchAvatars && this.extensionState.isAvatarStorageAvailable(),
-      graphColours: configuration.graphColours,
-      graphStyle: configuration.graphStyle,
-      initialLoadCommits: configuration.initialLoadCommits,
-      lastActiveRepo: this.extensionState.getLastActiveRepo(),
-      loadMoreCommits: configuration.loadMoreCommits,
-      repos: this.repoManager.getRepos(),
-      showCurrentBranchByDefault: configuration.showCurrentBranchByDefault
-    };
-    const nonce = getNonce();
-    const colorParams = viewState.graphColours
-      .map(
-        (graphColor, index) =>
-          '[data-color="' + index + '"]{--ada-lightbulb-color:var(--ada-lightbulb-color' + index + ');}'
-      )
-      .join(' ');
-    return `<!DOCTYPE html>
-		<html lang="en">
-			<head>
-				<meta charset="UTF-8">
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src vscode-resource: 'unsafe-inline'; script-src vscode-resource: 'nonce-${nonce}'; img-src data:;">
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				<link rel="stylesheet" type="text/css" href="${this.getMediaUri('main.css')}">
-				<link rel="stylesheet" type="text/css" href="${this.getMediaUri('dropdown.css')}">
-				<title>Ada Lightbulb</title>
-				<style>${colorParams}"</style>
-			</head>
-			${this.getHtmlBodyForWebview(nonce, viewState)}
-		</html>`;
-  }
-  getHtmlBodyForWebview(nonce, viewState) {
-    let body,
-      numRepos = Object.keys(viewState.repos).length;
-    const colorVars = viewState.graphColours
-      .map((graphColor, index) => '--ada-lightbulb-color' + index + ':' + graphColor + ';')
-      .join(' ');
-    if (numRepos > 0) {
-      body = `<body style="${colorVars}">
-			<div id="controls">
-				<span id="repoControl"><span class="unselectable">Repo: </span><div id="repoSelect" class="dropdown"></div></span>
-				<span id="branchControl"><span class="unselectable">Branch: </span><div id="branchSelect" class="dropdown"></div></span>
-				<label id="showRemoteBranchesControl"><input type="checkbox" id="showRemoteBranchesCheckbox" value="1" checked>Show Remote Branches</label>
-				<div id="refreshBtn" class="roundedBtn">Refresh</div>
-			</div>
-			<div id="content">
-				<div id="commitGraph"></div>
-				<div id="commitTable"></div>
-			</div>
-			<div id="footer"></div>
-			<ul id="contextMenu"></ul>
-			<div id="dialogBacking"></div>
-			<div id="dialog"></div>
-			<div id="scrollShadow"></div>
-			<script nonce="${nonce}">var viewState = ${JSON.stringify(viewState)};</script>
-			<script src="${this.getMediaUri('web.js')}"></script>
-			</body>`;
-    } else {
-      body = `<body class="unableToLoad" style="${colorVars}">
-			<h2>Unable to load Ada Lightbulb</h2>
-			<p>Either the current workspace does not contain a Git repository, or the Git executable could not be found.</p>
-			<p>If you are using a portable Git installation, make sure you have set the Visual Studio Code Setting "git.path" to the path of your portable installation (e.g. "C:\\Program Files\\Git\\bin\\git.exe" on Windows).</p>
-			</body>`;
-    }
-    this.isGraphViewLoaded = numRepos > 0;
-    return body;
-  }
-  getMediaUri(file) {
-    return this.getUri('media', file).with({ scheme: 'vscode-resource' });
-  }
-  getUri(...pathComps) {
-    return vscode.Uri.file(path.join(this.extensionPath, ...pathComps));
   }
   respondLoadRepos(repos) {
     this.sendMessage({
@@ -388,11 +332,3 @@ class GitGraphView {
   }
 }
 exports.GitGraphView = GitGraphView;
-function getNonce() {
-  let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
-}

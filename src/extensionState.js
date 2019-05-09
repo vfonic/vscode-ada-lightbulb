@@ -1,5 +1,3 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
 const fs = require('fs');
 const utils_1 = require('./utils');
 const AVATAR_STORAGE_FOLDER = '/avatars';
@@ -65,4 +63,4 @@ class ExtensionState {
     });
   }
 }
-exports.ExtensionState = ExtensionState;
+exports.default = ExtensionState;

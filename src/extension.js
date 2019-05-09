@@ -4,12 +4,12 @@ const vscode = require('vscode');
 const avatarManager_1 = require('./avatarManager');
 const dataSource_1 = require('./dataSource');
 const diffDocProvider_1 = require('./diffDocProvider');
-const extensionState_1 = require('./extensionState');
+const ExtensionState = require('./extensionState').default;
 const gitGraphView_1 = require('./gitGraphView');
 const repoManager_1 = require('./repoManager');
 const statusBarItem_1 = require('./statusBarItem');
 function activate(context) {
-  const extensionState = new extensionState_1.ExtensionState(context);
+  const extensionState = new ExtensionState(context);
   const dataSource = new dataSource_1.DataSource();
   const avatarManager = new avatarManager_1.AvatarManager(dataSource, extensionState);
   const statusBarItem = new statusBarItem_1.StatusBarItem(context);
@@ -51,17 +51,6 @@ function activate(context) {
   );
   context.subscriptions.push(repoManager);
 }
-// exports.activate = activate;
-// exports.deactivate = deactivate;
-
-// function activate(context) {
-
-// 	let disposable = vscode.commands.registerCommand('extension.helloWorld', function () {
-// 		vscode.window.showInformationMessage('Hello World!');
-// 	});
-
-// 	context.subscriptions.push(disposable);
-// }
 exports.activate = activate;
 
 function deactivate() {}
