@@ -36,7 +36,7 @@ const diffDocProvider_1 = require('./diffDocProvider');
 const RepoFileWatcher = require('./repoFileWatcher').default;
 const utils_1 = require('./utils');
 const AssetLoader = require('./assetLoader').default;
-const WebviewGenerator = require('./webviewGenerator').default;
+const WebviewHtmlGenerator = require('./webviewHtmlGenerator').default;
 
 class GitGraphView {
   constructor(panel, extensionPath, dataSource, extensionState, avatarManager, repoManager) {
@@ -292,7 +292,7 @@ class GitGraphView {
       repos: this.repoManager.getRepos(),
       showCurrentBranchByDefault: configuration.showCurrentBranchByDefault
     };
-    this.panel.webview.html = new WebviewGenerator(viewState).getHtmlForWebview();
+    this.panel.webview.html = new WebviewHtmlGenerator(viewState).getHtmlForWebview();
 
     const numRepos = this.repoManager.getRepos().length;
     this.isGraphViewLoaded = numRepos > 0;

@@ -1,4 +1,4 @@
-class WebviewGenerator {
+class WebviewHtmlGenerator {
   constructor(state) {
     this.state = state;
   }
@@ -63,7 +63,7 @@ class WebviewGenerator {
     return this.state.assetLoader.getUri('media', file).with({ scheme: 'vscode-resource' });
   }
 }
-exports.default = WebviewGenerator;
+exports.default = WebviewHtmlGenerator;
 
 function getNonce() {
   let text = '';
