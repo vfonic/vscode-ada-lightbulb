@@ -38,4 +38,4 @@ class CommitView {
   }
 }
 
-exports.default = CommitView;
+window.CommitView = CommitView;

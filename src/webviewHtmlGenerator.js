@@ -48,14 +48,6 @@ class WebviewHtmlGenerator {
       <div id="dialog"></div>
       <div id="scrollShadow-top"></div>
       <div id="scrollShadow-bottom"></div>
-      <script>
-        window.exports = class {
-          set default(klass) {
-            console.log("SETTING:", klass);
-            window[klass.constructor.name] = klass;
-          }
-        };
-      </script>
       <script nonce="${nonce}">var viewState = ${JSON.stringify(this.state)};</script>
       <script src="${this.getMediaUri('gitFileTreeView.js')}"></script>
       <script src="${this.getMediaUri('scrollShadow.js')}"></script>

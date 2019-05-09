@@ -7,4 +7,4 @@ class ScrollShadow {
   }
 }
 
-exports.default = ScrollShadow;
+window.ScrollShadow = ScrollShadow;
