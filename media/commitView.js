@@ -8,7 +8,7 @@ class CommitView {
 
   render() {
     if (this.expandedCommit === null || this.expandedCommit.hash !== this.expandedCommit.commitDetails.hash) {
-      return;
+      return null;
     }
 
     const { commitDetails, fileTree } = this.expandedCommit;
