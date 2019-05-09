@@ -63,7 +63,7 @@ This extension is available on the [Visual Studio Marketplace](https://marketpla
 
 ## TODO
 
-- [ ] Rethink config options (for now)
+- [ ] Rethink config options
 - [ ] Publish to VS Code Marketplace
 - [ ] Add config option to show all git commands being run
 - [x] Show diff panel for selected commit in the panel at the bottom
@@ -75,4 +75,7 @@ This extension is available on the [Visual Studio Marketplace](https://marketpla
 - [ ] Register as a source control provider
 - [ ] Add Undo button
 - [ ] Add keyboard shortcuts
+- [ ] Allow navigating between commits by using arrow keys
 - [ ] Give credit where credit is due (https://github.com/mhutchie/vscode-git-graph)
+- [ ] Allow resizing CommitView
+  - [ ] Set margin-bottom on #content element
