@@ -240,12 +240,12 @@ class GitGraphView {
     );
   }
   static createOrShow(extensionPath, dataSource, extensionState, avatarManager, repoManager) {
-    const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
+    const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : vscode.ViewColumn.One;
     if (GitGraphView.currentPanel) {
       GitGraphView.currentPanel.panel.reveal(column);
       return;
     }
-    const panel = vscode.window.createWebviewPanel('ada-lightbulb', 'Ada Lightbulb', column || vscode.ViewColumn.One, {
+    const panel = vscode.window.createWebviewPanel('ada-lightbulb', 'Ada Lightbulb', column, {
       enableScripts: true,
       localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media'))]
     });

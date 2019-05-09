@@ -242,7 +242,7 @@
     Branch.prototype.setEnd = function(end) {
       this.end = end;
     };
-    Branch.prototype.draw = function(svg, config, expandAt) {
+    Branch.prototype.draw = function(svg, config) {
       var colour = config.graphColours[this.colour % config.graphColours.length],
         i,
         x1,
@@ -258,57 +258,6 @@
         y1 = this.lines[i].p1.y * config.grid.y + config.grid.offsetY;
         x2 = this.lines[i].p2.x * config.grid.x + config.grid.offsetX;
         y2 = this.lines[i].p2.y * config.grid.y + config.grid.offsetY;
-        if (expandAt > -1) {
-          if (this.lines[i].p1.y > expandAt) {
-            y1 += config.grid.expandY;
-            y2 += config.grid.expandY;
-          } else if (this.lines[i].p2.y > expandAt) {
-            if (x1 === x2) {
-              y2 += config.grid.expandY;
-            } else if (this.lines[i].lockedFirst) {
-              lines.push({
-                p1: {
-                  x: x1,
-                  y: y1
-                },
-                p2: {
-                  x: x2,
-                  y: y2
-                },
-                isCommitted: i >= this.numUncommitted,
-                lockedFirst: this.lines[i].lockedFirst
-              });
-              lines.push({
-                p1: {
-                  x: x2,
-                  y: y1 + config.grid.y
-                },
-                p2: {
-                  x: x2,
-                  y: y2 + config.grid.expandY
-                },
-                isCommitted: i >= this.numUncommitted,
-                lockedFirst: this.lines[i].lockedFirst
-              });
-              continue;
-            } else {
-              lines.push({
-                p1: {
-                  x: x1,
-                  y: y1
-                },
-                p2: {
-                  x: x1,
-                  y: y2 - config.grid.y + config.grid.expandY
-                },
-                isCommitted: i >= this.numUncommitted,
-                lockedFirst: this.lines[i].lockedFirst
-              });
-              y1 += config.grid.expandY;
-              y2 += config.grid.expandY;
-            }
-          }
-        }
         lines.push({
           p1: {
             x: x1,
@@ -485,7 +434,7 @@
     Vertex.prototype.setCurrent = function() {
       this.isCurrent = true;
     };
-    Vertex.prototype.draw = function(svg, config, expandOffset) {
+    Vertex.prototype.draw = function(svg, config) {
       if (this.onBranch === null) return;
       var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       var colour = this.isCommitted
@@ -494,7 +443,7 @@
       circle.setAttribute('cx', (this.x * config.grid.x + config.grid.offsetX).toString());
       circle.setAttribute(
         'cy',
-        (this.y * config.grid.y + config.grid.offsetY + (expandOffset ? config.grid.expandY : 0)).toString()
+        (this.y * config.grid.y + config.grid.offsetY).toString()
       );
       circle.setAttribute('r', '4');
       if (this.isCurrent) {
@@ -564,21 +513,21 @@
         this.determinePath(i);
       }
     };
-    Graph.prototype.render = function(expandedCommit) {
+    Graph.prototype.render = function() {
       var group = document.createElementNS('http://www.w3.org/2000/svg', 'g'),
         i,
         width = this.getWidth();
       group.setAttribute('mask', 'url(#GraphMask)');
       for (i = 0; i < this.branches.length; i++) {
-        this.branches[i].draw(group, this.config, expandedCommit !== null ? expandedCommit.id : -1);
+        this.branches[i].draw(group, this.config);
       }
       for (i = 0; i < this.vertices.length; i++) {
-        this.vertices[i].draw(group, this.config, expandedCommit !== null && i > expandedCommit.id);
+        this.vertices[i].draw(group, this.config);
       }
       if (this.svgGroup !== null) this.svg.removeChild(this.svgGroup);
       this.svg.appendChild(group);
       this.svgGroup = group;
-      this.setDimensions(width, this.getHeight(expandedCommit));
+      this.setDimensions(width, this.getHeight());
       this.applyMaxWidth(width);
     };
     Graph.prototype.clear = function() {
@@ -598,12 +547,11 @@
       }
       return x * this.config.grid.x;
     };
-    Graph.prototype.getHeight = function(expandedCommit) {
+    Graph.prototype.getHeight = function() {
       return (
         this.vertices.length * this.config.grid.y +
         this.config.grid.offsetY -
-        this.config.grid.y / 2 +
-        (expandedCommit !== null ? this.config.grid.expandY : 0)
+        this.config.grid.y / 2
       );
     };
     Graph.prototype.getVertexColour = function(v) {
@@ -1008,7 +956,7 @@
             this.commits.length
           : this.config.grid.y;
       this.config.grid.offsetY = headerHeight + this.config.grid.y / 2;
-      this.graph.render(this.expandedCommit);
+      this.graph.render();
     };
     GitGraphView.prototype.renderTable = function() {
       var _this = this;
