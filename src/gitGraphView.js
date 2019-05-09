@@ -33,7 +33,7 @@ const vscode = require('vscode');
 const Config = require('./config').default;
 const configuration = new Config();
 const diffDocProvider_1 = require('./diffDocProvider');
-const repoFileWatcher_1 = require('./repoFileWatcher');
+const RepoFileWatcher = require('./repoFileWatcher').default;
 const utils_1 = require('./utils');
 class GitGraphView {
   constructor(panel, extensionPath, dataSource, extensionState, avatarManager, repoManager) {
@@ -72,7 +72,7 @@ class GitGraphView {
       null,
       this.disposables
     );
-    this.repoFileWatcher = new repoFileWatcher_1.RepoFileWatcher(() => {
+    this.repoFileWatcher = new RepoFileWatcher(() => {
       if (this.panel.visible) {
         this.sendMessage({ command: 'refresh' });
       }
