@@ -46,7 +46,16 @@ class WebviewHtmlGenerator {
       <div id="dialogBacking"></div>
       <div id="dialog"></div>
       <div id="scrollShadow"></div>
+      <script>
+        window.exports = class {
+          set default(klass) {
+            console.log("SETTING:", klass);
+            window[klass.constructor.name] = klass;
+          }
+        };
+      </script>
       <script nonce="${nonce}">var viewState = ${JSON.stringify(this.state)};</script>
+      <script src="${this.getMediaUri('commitView.js')}"></script>
       <script src="${this.getMediaUri('web.js')}"></script>
       </body>`;
     } else {

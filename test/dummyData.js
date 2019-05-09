@@ -382,4 +382,35 @@ window.postMessageData = {
     moreCommitsAvailable: false,
     hard: true,
   },
+  commitDetails: {
+    command: 'commitDetails',
+    commitDetails: {
+      hash: '9d89bfc42530a81cea36fbc75d629794bb8f3d8f',
+      parents: ['c94cac4b8864946f0fe27dece1e215fd72e90e5a'],
+      author: 'Viktor Fonic',
+      email: 'viktor.fonic@gmail.com',
+      date: 1557397133,
+      committer: 'Viktor Fonic',
+      body: 'Turn configuration settings fetching to getters',
+      fileChanges: [
+        { oldFilePath: 'src/config.js', newFilePath: 'src/config.js', type: 'M', additions: 14, deletions: 14 },
+        { oldFilePath: 'src/dataSource.js', newFilePath: 'src/dataSource.js', type: 'M', additions: 4, deletions: 6 },
+        {
+          oldFilePath: 'src/gitGraphView.js',
+          newFilePath: 'src/gitGraphView.js',
+          type: 'M',
+          additions: 10,
+          deletions: 10,
+        },
+        { oldFilePath: 'src/repoManager.js', newFilePath: 'src/repoManager.js', type: 'M', additions: 3, deletions: 3 },
+        {
+          oldFilePath: 'src/statusBarItem.js',
+          newFilePath: 'src/statusBarItem.js',
+          type: 'M',
+          additions: 2,
+          deletions: 2,
+        },
+      ],
+    },
+  },
 };

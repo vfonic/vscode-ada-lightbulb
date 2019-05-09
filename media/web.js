@@ -1044,8 +1044,8 @@
       if (colHeadersElem === null) {
         return;
       }
-      var headerHeight = colHeadersElem.clientHeight + 1,
-        expandedCommitElem = this.expandedCommit !== null ? document.getElementById('commitDetails') : null;
+      const headerHeight = colHeadersElem.clientHeight + 1;
+      const expandedCommitElem = this.expandedCommit !== null ? document.getElementById('commitDetails') : null;
       this.config.grid.expandY =
         expandedCommitElem !== null ? expandedCommitElem.getBoundingClientRect().height : this.config.grid.expandY;
       this.config.grid.y =
@@ -1588,9 +1588,6 @@
         });
         showContextMenu(e, menu, sourceElem);
       });
-      // addListenerToClass("gitRef", "click", function(e) {
-      //     return e.stopPropagation();
-      // });
       addListenerToClass('gitRef', 'dblclick', function(e) {
         e.stopPropagation();
         hideDialogAndContextMenu();
@@ -1833,21 +1830,15 @@
     }
 
     showCommitDetails(commitDetails, fileTree) {
+      new CommitView(commitDetails, fileTree, this.expandedCommit);
       var _this = this;
-      if (
-        this.expandedCommit === null ||
-        this.expandedCommit.srcElem === null ||
-        this.expandedCommit.hash !== commitDetails.hash
-      ) {
-        return;
-      }
       var elem = document.getElementById('commitDetails');
       if (typeof elem === 'object' && elem !== null) {
         elem.remove();
       }
       this.expandedCommit.commitDetails = commitDetails;
       this.expandedCommit.fileTree = fileTree;
-      this.expandedCommit.srcElem.classList.add('commitDetailsOpen');
+      // this.expandedCommit.srcElem.classList.add('commitDetailsOpen');
       this.saveState();
       var newElem = document.createElement('tr'),
         html = '<td></td><td colspan="4"><div id="commitDetailsSummary">';
