@@ -1,3 +1,20 @@
+/* variables */
+body {
+  --controls-line-height: 32px;
+  --controls-padding-topBottom: 4px;
+  --controls-border-width: 1px;
+  --controls-height: calc(
+    var(--controls-line-height) + var(--controls-padding-topBottom) + var(--controls-border-width)
+  );
+  --tableTh-height: 30px;
+  --z-index-commitGraph: -1;
+  --z-index-scrollShadow: 5;
+  --z-index-commitTable: 7;
+  --z-index-controls: 8;
+  --z-index-dialogBacking: 9;
+  --z-index-dialog: 10;
+}
+
 /* Body */
 body {
   margin: 0;
@@ -12,18 +29,18 @@ body.unableToLoad p {
 }
 #scrollShadow.active {
   position: fixed;
-  top: 71px; /* equal to #controls height + thead height */
+  top: calc(var(--controls-height) + var(--tableTh-height));
   left: 0;
   width: 100%;
   height: 0;
   box-shadow: 0 -6px 6px 6px var(--vscode-scrollbar-shadow);
-  z-index: 5;
+  z-index: var(--z-index-scrollShadow);
 }
 
 /* Content */
 #content {
   position: relative;
-  margin-top: 41px; /* equal to #controls height */
+  margin-top: calc(var(--controls-height) - var(--controls-border-width));
 }
 
 /* Commit Graph */
@@ -32,7 +49,7 @@ body.unableToLoad p {
   position: absolute;
   left: 8px;
   top: 0;
-  z-index: -1;
+  z-index: var(--z-index-commitGraph);
 }
 #commitGraph circle.current {
   fill: var(--vscode-editor-background);
@@ -90,8 +107,8 @@ body.unableToLoad p {
 }
 #commitTable th {
   position: sticky;
-  top: 41px; /* equal to #controls height */
-  z-index: 7;
+  top: calc(var(--controls-height) - var(--controls-border-width));
+  z-index: var(--z-index-commitTable);
   border-bottom: 1px solid rgba(128, 128, 128, 0.5);
   background-color: var(--vscode-editor-background);
   line-height: 18px;
@@ -381,11 +398,11 @@ svg.fileIcon {
   left: 0;
   right: 0;
   top: 0;
-  padding: 4px 96px 4px 0;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.5);
+  padding: var(--controls-padding-topBottom) 96px var(--controls-padding-topBottom) 0;
+  border-bottom: var(--controls-border-width) solid rgba(128, 128, 128, 0.5);
   background-color: var(--vscode-editor-background);
-  z-index: 9;
-  line-height: 32px;
+  z-index: var(--z-index-controls);
+  line-height: var(--controls-line-height);
   text-align: center;
   font-weight: 700;
   font-size: 13px;
@@ -478,7 +495,7 @@ svg.fileIcon {
   text-align: center;
   max-width: 360px;
   max-height: 80%;
-  z-index: 10;
+  z-index: var(--z-index-dialog);
   box-shadow: 0 0 30px 5px var(--vscode-widget-shadow);
   overflow-y: auto;
 }
@@ -543,7 +560,7 @@ svg.fileIcon {
   right: 0;
   top: 0;
   bottom: 0;
-  z-index: 9;
+  z-index: var(--z-index-dialogBacking);
 }
 #dialog.noInput #dialogAction,
 #dialog.inputInvalid #dialogAction {
