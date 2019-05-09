@@ -3,13 +3,13 @@ module.exports = {
     browser: false,
     commonjs: true,
     es6: true,
-    node: true
+    node: true,
   },
   parserOptions: {
     ecmaFeatures: {
-      modules: true
+      modules: true,
     },
-    sourceType: 'module'
+    sourceType: 'module',
   },
   extends: ['airbnb-base', 'eslint:recommended', 'plugin:prettier/recommended'],
   plugins: ['prettier'],
@@ -30,8 +30,9 @@ module.exports = {
     'no-unreachable': 'error',
     'no-unused-expressions': 'error',
     'no-unused-vars': ['error', { vars: 'all', args: 'after-used', ignoreRestSiblings: true }],
-    'prettier/prettier': ['error', { singleQuote: true }],
+    'prettier/prettier': ['error', { printWidth: 120, singleQuote: true, trailingComma: 'es5' }],
+    quotes: [2, 'single', 'avoid-escape'],
     'sort-imports': 'error',
-    'valid-typeof': 'error'
-  }
+    'valid-typeof': 'error',
+  },
 };
