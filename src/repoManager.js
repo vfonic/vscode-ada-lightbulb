@@ -34,6 +34,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 const fs = require('fs');
 const vscode = require('vscode');
 const Config = require('./config').default;
+
 const configuration = new Config();
 const utils_1 = require('./utils');
 

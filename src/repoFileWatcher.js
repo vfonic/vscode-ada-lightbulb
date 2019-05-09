@@ -2,6 +2,7 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 const vscode = require('vscode');
 const utils_1 = require('./utils');
+
 const fileChangeRegex = /(^\.git\/(config|index|HEAD|refs\/stash|refs\/heads\/.*|refs\/remotes\/.*|refs\/tags\/.*)$)|(^(?!\.git).*$)|(^\.git[^\/]+$)/;
 
 class RepoFileWatcher {

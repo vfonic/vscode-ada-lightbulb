@@ -2,6 +2,7 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 const vscode = require('vscode');
 const Config = require('./config').default;
+
 const configuration = new Config();
 
 class StatusBarItem {

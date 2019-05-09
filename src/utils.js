@@ -1,6 +1,7 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
 const vscode = require('vscode');
+
 const FS_REGEX = /\\/g;
 
 function abbrevCommit(commitHash) {
