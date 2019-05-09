@@ -34,12 +34,13 @@ Object.defineProperty(exports, '__esModule', { value: true });
 const path = require('path');
 const vscode = require('vscode');
 const Config = require('./config').default;
-const configuration = new Config();
 const diffDocProvider_1 = require('./diffDocProvider');
 const RepoFileWatcher = require('./repoFileWatcher').default;
 const utils_1 = require('./utils');
 const AssetLoader = require('./assetLoader').default;
 const WebviewHtmlGenerator = require('./webviewHtmlGenerator').default;
+
+const configuration = new Config();
 
 class GitGraphView {
   constructor(panel, extensionPath, dataSource, extensionState, avatarManager, repoManager) {
@@ -167,11 +168,8 @@ class GitGraphView {
               });
               break;
             case 'loadBranches':
-              let branchData = yield this.dataSource.getBranches(msg.repo, msg.showRemoteBranches),
-                isRepo = true;
-              if (branchData.error) {
-                isRepo = yield this.dataSource.isGitRepository(msg.repo);
-              }
+              const branchData = yield this.dataSource.getBranches(msg.repo, msg.showRemoteBranches);
+              const isRepo = branchData.error ? yield this.dataSource.isGitRepository(msg.repo) : true;
               this.sendMessage({
                 command: 'loadBranches',
                 branches: branchData.branches,
@@ -319,9 +317,9 @@ class GitGraphView {
   }
 
   viewDiff(repo, commitHash, oldFilePath, newFilePath, type) {
-    let abbrevHash = utils_1.abbrevCommit(commitHash);
-    let pathComponents = newFilePath.split('/');
-    let title =
+    const abbrevHash = utils_1.abbrevCommit(commitHash);
+    const pathComponents = newFilePath.split('/');
+    const title =
       pathComponents[pathComponents.length - 1] +
       ' (' +
       (type === 'A'
