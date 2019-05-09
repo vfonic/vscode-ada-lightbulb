@@ -53,7 +53,4 @@ class Config {
     return path !== null ? path : 'git';
   }
 }
-function getConfig() {
-  return new Config();
-}
-exports.getConfig = getConfig;
+exports.default = Config;

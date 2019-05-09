@@ -1,7 +1,8 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
 const vscode = require('vscode');
-const config_1 = require('./config');
+const Config = require('./config').default;
+const Configuration = new Config();
 class StatusBarItem {
   constructor(context) {
     this.numRepos = 0;
@@ -16,7 +17,7 @@ class StatusBarItem {
     this.refresh();
   }
   refresh() {
-    if (config_1.getConfig().showStatusBarItem() && this.numRepos > 0) {
+    if (Configuration.showStatusBarItem() && this.numRepos > 0) {
       this.statusBarItem.show();
     } else {
       this.statusBarItem.hide();
