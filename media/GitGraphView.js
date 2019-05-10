@@ -1151,77 +1151,51 @@ class GitGraphView {
     this.saveState();
 
     elem.innerHTML = commitView.render();
-    console.log(commitView.render());
-
-    // let html = '<div><div id="commitDetailsSummary">';
-    // html +=
-    //   '<span class="commitDetailsSummaryTop' +
-    //   (typeof this.avatars[commitDetails.email] === 'string' ? ' withAvatar' : '') +
-    //   '">';
-    // html += '<span class="commitDetailsSummaryTopRow"><span class="commitDetailsSummaryKeyValues">';
-    // html += '<b>Commit: </b>' + escapeHtml(commitDetails.hash) + '<br>';
-    // html += '<b>Parents: </b>' + commitDetails.parents.join(', ') + '<br>';
-    // html +=
-    //   '<b>Author: </b>' + escapeHtml(commitDetails.author) + ' &lt;' + escapeHtml(commitDetails.email) + '&gt;<br>';
-    // html += '<b>Date: </b>' + new Date(commitDetails.date * 1e3).toString() + '<br>';
-    // html += '<b>Committer: </b>' + escapeHtml(commitDetails.committer) + '</span>';
-    // if (typeof this.avatars[commitDetails.email] === 'string') {
-    //   html += '<span class="commitDetailsSummaryAvatar"><img src="' + this.avatars[commitDetails.email] + '"></span>';
-    // }
-    // html += '</span></span><br><br>';
-    // html += escapeHtml(commitDetails.body).replace(/\n/g, '<br>') + '</div>';
-    // html += '<div id="commitDetailsFiles">' + new GitFileTreeView(fileTree, commitDetails.fileChanges).render() + '</div>';
-    // html += '<div id="commitDetailsClose">' + svgIcons.close + '</div>';
-    // html += '</div>';
-    // elem.innerHTML = html;
-    // console.log(html);
-
     this.renderGraph();
 
-    // function alterGitFileTree(folder, folderPath, open) {
-    //   var path = folderPath.split('/'),
-    //     i,
-    //     cur = folder;
-    //   for (i = 0; i < path.length; i++) {
-    //     if (typeof cur.contents[path[i]] !== 'undefined') {
-    //       cur = cur.contents[path[i]];
-    //       if (i === path.length - 1) {
-    //         cur.open = open;
-    //         return;
-    //       }
-    //     } else {
-    //       return;
-    //     }
-    //   }
-    // }
-
-    // var _this = this;
-    // document.getElementById('commitDetailsClose').addEventListener('click', function() {
-    //   _this.hideCommitDetails();
-    // });
-    // addListenerToClass('gitFolder', 'click', function(e) {
-    //   var sourceElem = e.target.closest('.gitFolder');
-    //   var parent = sourceElem.parentElement;
-    //   parent.classList.toggle('closed');
-    //   var isOpen = !parent.classList.contains('closed');
-    //   parent.children[0].children[0].innerHTML = isOpen ? svgIcons.openFolder : svgIcons.closedFolder;
-    //   parent.children[1].classList.toggle('hidden');
-    //   alterGitFileTree(_this.expandedCommit.fileTree, decodeURIComponent(sourceElem.dataset.folderpath), isOpen);
-    //   _this.saveState();
-    // });
-    // addListenerToClass('gitFile', 'click', function(e) {
-    //   var sourceElem = e.target.closest('.gitFile');
-    //   if (_this.expandedCommit === null || !sourceElem.classList.contains('gitDiffPossible')) {
-    //     return;
-    //   }
-    //   sendMessage({
-    //     command: 'viewDiff',
-    //     repo: _this.currentRepo,
-    //     commitHash: _this.expandedCommit.hash,
-    //     oldFilePath: decodeURIComponent(sourceElem.dataset.oldfilepath),
-    //     newFilePath: decodeURIComponent(sourceElem.dataset.newfilepath),
-    //     type: sourceElem.dataset.type,
-    //   });
-    // });
+    var _this = this;
+    document.getElementById('commitDetailsClose').addEventListener('click', function() {
+      _this.hideCommitDetails();
+    });
+    addListenerToClass('gitFolder', 'click', function(e) {
+      function alterGitFileTree(folder, folderPath, open) {
+        var path = folderPath.split('/'),
+          i,
+          cur = folder;
+        for (i = 0; i < path.length; i++) {
+          if (typeof cur.contents[path[i]] !== 'undefined') {
+            cur = cur.contents[path[i]];
+            if (i === path.length - 1) {
+              cur.open = open;
+              return;
+            }
+          } else {
+            return;
+          }
+        }
+      }
+      var sourceElem = e.target.closest('.gitFolder');
+      var parent = sourceElem.parentElement;
+      parent.classList.toggle('closed');
+      var isOpen = !parent.classList.contains('closed');
+      parent.children[0].children[0].innerHTML = isOpen ? svgIcons.openFolder : svgIcons.closedFolder;
+      parent.children[1].classList.toggle('hidden');
+      alterGitFileTree(_this.expandedCommit.fileTree, decodeURIComponent(sourceElem.dataset.folderpath), isOpen);
+      _this.saveState();
+    });
+    addListenerToClass('gitFile', 'click', function(e) {
+      var sourceElem = e.target.closest('.gitFile');
+      if (_this.expandedCommit === null || !sourceElem.classList.contains('gitDiffPossible')) {
+        return;
+      }
+      sendMessage({
+        command: 'viewDiff',
+        repo: _this.currentRepo,
+        commitHash: _this.expandedCommit.hash,
+        oldFilePath: decodeURIComponent(sourceElem.dataset.oldfilepath),
+        newFilePath: decodeURIComponent(sourceElem.dataset.newfilepath),
+        type: sourceElem.dataset.type,
+      });
+    });
   }
 }
