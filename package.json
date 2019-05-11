@@ -2,7 +2,7 @@
   "name": "ada-lightbulb",
   "displayName": "Ada Lightbulb",
   "description": "The only git GUI you'll ever need",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "vfonic",
   "icon": "resources/icon.png",
   "repository": {
