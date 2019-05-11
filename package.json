@@ -4,6 +4,7 @@
   "description": "The only git GUI you'll ever need",
   "version": "0.1.0",
   "publisher": "vfonic",
+  "icon": "resources/icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/vfonic/ada-lightbulb.git"
