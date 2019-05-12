@@ -6,7 +6,7 @@
       "open": true,
       "draft": false,
       "prerelease": false,
-      "files": ["ada-lightbulb-[version].vsix"]
+      "files": ["ada-lightbulb-*.vsix"]
     }
   },
   "scripts": {
@@ -19,6 +19,6 @@
     "pretag": "",
     "posttag": "",
     "prerelease": "vsce package",
-    "postrelease": "vsce publish"
+    "postrelease": "vsce publish && rm ada-lightbulb-*.vsix"
   }
 }
