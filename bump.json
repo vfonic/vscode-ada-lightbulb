@@ -19,6 +19,6 @@
     "pretag": "",
     "posttag": "",
     "prerelease": "vsce package",
-    "postrelease": ""
+    "postrelease": "vsce publish"
   }
 }
