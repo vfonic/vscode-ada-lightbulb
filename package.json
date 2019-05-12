@@ -1,13 +1,21 @@
 {
   "name": "ada-lightbulb",
   "displayName": "Ada Lightbulb",
-  "description": "The only git GUI you'll ever need",
+  "description": "The only git GUI you'll ever need.",
   "version": "0.1.1",
-  "publisher": "vfonic",
   "icon": "resources/icon.png",
+  "license": "MIT",
+  "publisher": "vfonic",
+  "author": {
+    "name": "Viktor Fonic",
+    "email": "viktor.fonic@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/vfonic/vscode-ada-lightbulb/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/vfonic/ada-lightbulb.git"
+    "url": "https://github.com/vfonic/vscode-ada-lightbulb.git"
   },
   "engines": {
     "vscode": "^1.33.0"
@@ -20,21 +28,9 @@
   ],
   "main": "./src/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "category": "Ada Lightbulb",
-        "command": "ada-lightbulb.view",
-        "title": "Open graph"
-      },
-      {
-        "category": "Ada Lightbulb",
-        "command": "ada-lightbulb.clearAvatarCache",
-        "title": "Clear Avatar Cache"
-      }
-    ],
     "configuration": {
       "type": "object",
-      "title": "Ada Lightbulb",
+      "title": "Ada Lightbulb - Configuration",
       "properties": {
         "ada-lightbulb.autoCenterCommitDetailsView": {
           "type": "boolean",
@@ -154,7 +150,13 @@
           "description": "Specifies the colour theme of the icon displayed on the Ada Lightbulb tab."
         }
       }
-    }
+    },
+    "commands": [
+      {
+        "title": "Ada Lightbulb: Open graph",
+        "command": "ada-lightbulb.view"
+      }
+    ]
   },
   "scripts": {
     "package-and-install": "vsce package && node ./.vscode/install-package.js",

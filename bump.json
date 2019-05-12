@@ -1,0 +1,24 @@
+{
+  "release": {
+    "enabled": true,
+    "github": {
+      "enabled": true,
+      "open": true,
+      "draft": false,
+      "prerelease": false,
+      "files": ["ada-lightbulb-[version].vsix"]
+    }
+  },
+  "scripts": {
+    "prebump": "",
+    "postbump": "",
+    "prechangelog": "",
+    "postchangelog": "",
+    "precommit": "",
+    "postcommit": "",
+    "pretag": "",
+    "posttag": "",
+    "prerelease": "vsce package",
+    "postrelease": ""
+  }
+}

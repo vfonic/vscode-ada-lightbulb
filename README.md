@@ -1,8 +1,16 @@
 # Ada Lightbulb extension for Visual Studio Code
 
-View a git graph of your repository, and easily perform Git actions from the graph. Configurable to look the way you want!
+View a git graph of your repository, and easily perform Git actions from the graph.
 
-![Despicable Me Lightbulb](https://github.com/vfonic/vscode-ada-lightbulb/raw/master/resources/Lightbolb.gif)
+<p><img src="https://github.com/vfonic/vscode-ada-lightbulb/raw/master/resources/Lightbolb.gif" height="300px"></p>
+
+## Demo
+
+![Demo](resources/demo.gif)
+
+## Install
+
+You can install this extension from [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=vfonic.ada-lightbulb) for Visual Studio Code.
 
 ## Features
 
@@ -30,8 +38,12 @@ This extension contributes the following command:
 
 ## Release Notes
 
-Detailed Release Notes are available [here](CHANGELOG.md).
+Detailed Release Notes are available in the [CHANGELOG](CHANGELOG.md).
 
-## Visual Studio Marketplace
+## Contributing
 
-This extension is available on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=vfonic.ada-lightbulb) for Visual Studio Code.
+If you found a problem, or have a feature request, please open an [issue](https://github.com/vfonic/vscode-ada-lightbulb/issues) about it.
+
+## License
+
+MIT
