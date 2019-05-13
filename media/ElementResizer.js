@@ -16,7 +16,6 @@ class ElementResizer {
 
     if (this.columnWidths == null) {
       gitGraphView.tableElem.className = 'autoLayout';
-      gitGraphView.graph.limitMaxWidth(-1);
       this.cols[0].style.padding =
         '0 ' +
         Math.round(
@@ -58,7 +57,6 @@ class ElementResizer {
     this.colHeadersElem.removeEventListener('mouseup', this.stopResizing);
     this.colHeadersElem.removeEventListener('mouseleave', this.stopResizing);
     this.col = -1;
-    this.mouseX = -1;
     this.colHeadersElem.classList.remove('resizing');
     this.gitGraphView.gitRepos[this.gitGraphView.currentRepo].columnWidths = this.columnWidths;
     sendMessage({
@@ -75,7 +73,6 @@ class ElementResizer {
     this.cols[3].style.width = this.columnWidths[2] + 'px';
     this.cols[4].style.width = this.columnWidths[3] + 'px';
     this.gitGraphView.tableElem.className = 'fixedLayout';
-    this.gitGraphView.graph.limitMaxWidth(this.columnWidths[0] + 16);
   }
 
   resize(mouseEvent) {
@@ -83,7 +80,7 @@ class ElementResizer {
       return;
     }
 
-    var mouseDeltaX = mouseEvent.clientX - this.mouseX;
+    let mouseDeltaX = mouseEvent.clientX - this.mouseX;
     switch (this.col) {
       case 0:
         if (this.columnWidths[0] + mouseDeltaX < 40) {
@@ -94,7 +91,6 @@ class ElementResizer {
         }
         this.columnWidths[0] += mouseDeltaX;
         this.cols[0].style.width = this.columnWidths[0] + 'px';
-        this.gitGraphView.graph.limitMaxWidth(this.columnWidths[0] + 16);
         break;
       case 1:
         if (this.cols[1].clientWidth + mouseDeltaX < ElementResizer.MIN_WIDTH) {

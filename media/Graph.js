@@ -6,25 +6,9 @@ class Graph {
     this.branches = [];
     this.availableColours = [];
     this.config = config;
-    var svgNamespace = 'http://www.w3.org/2000/svg';
-    var defs = document.createElementNS(svgNamespace, 'defs'),
-      linearGradient = document.createElementNS(svgNamespace, 'linearGradient'),
-      mask = document.createElementNS(svgNamespace, 'mask');
+
+    const svgNamespace = 'http://www.w3.org/2000/svg';
     this.svg = document.createElementNS(svgNamespace, 'svg');
-    this.svgMaskRect = document.createElementNS(svgNamespace, 'rect');
-    this.svgGradientStop1 = document.createElementNS(svgNamespace, 'stop');
-    this.svgGradientStop2 = document.createElementNS(svgNamespace, 'stop');
-    linearGradient.setAttribute('id', 'GraphGradient');
-    this.svgGradientStop1.setAttribute('stop-color', 'white');
-    linearGradient.appendChild(this.svgGradientStop1);
-    this.svgGradientStop2.setAttribute('stop-color', 'black');
-    linearGradient.appendChild(this.svgGradientStop2);
-    defs.appendChild(linearGradient);
-    mask.setAttribute('id', 'GraphMask');
-    this.svgMaskRect.setAttribute('fill', 'url(#GraphGradient)');
-    mask.appendChild(this.svgMaskRect);
-    defs.appendChild(mask);
-    this.svg.appendChild(defs);
     this.setDimensions(0, 0);
     document.getElementById(id).appendChild(this.svg);
   }
@@ -58,31 +42,20 @@ class Graph {
   }
 
   render() {
-    var group = document.createElementNS('http://www.w3.org/2000/svg', 'g'),
-      i,
-      width = this.getWidth();
-    group.setAttribute('mask', 'url(#GraphMask)');
-    for (i = 0; i < this.branches.length; i++) {
-      this.branches[i].draw(group, this.config);
-    }
-    for (i = 0; i < this.vertices.length; i++) {
-      this.vertices[i].draw(group, this.config);
-    }
-    if (this.svgGroup !== null) {
-      this.svg.removeChild(this.svgGroup);
-    }
-    this.svg.appendChild(group);
+    this.clear();
+
+    var group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    this.branches.forEach(branch => branch.draw(group, this.config));
+    this.vertices.forEach(vertex => vertex.draw(group, this.config));
     this.svgGroup = group;
-    this.setDimensions(width, this.getHeight());
-    this.applyMaxWidth(width);
+    this.svg.appendChild(group);
+
+    this.setDimensions(this.getWidth(), this.getHeight());
   }
 
   clear() {
-    if (this.svgGroup !== null) {
-      this.svg.removeChild(this.svgGroup);
-      this.svgGroup = null;
-      this.setDimensions(0, 0);
-    }
+    emptyElement(this.svg);
+    this.setDimensions(0, 0);
   }
 
   getWidth() {
@@ -106,23 +79,9 @@ class Graph {
     return this.vertices[v].getColour() % this.config.graphColours.length;
   }
 
-  limitMaxWidth(maxWidth) {
-    this.maxWidth = maxWidth;
-    this.applyMaxWidth(this.getWidth());
-  }
-
   setDimensions(width, height) {
     this.svg.setAttribute('width', width.toString());
     this.svg.setAttribute('height', height.toString());
-    this.svgMaskRect.setAttribute('width', width.toString());
-    this.svgMaskRect.setAttribute('height', height.toString());
-  }
-
-  applyMaxWidth(width) {
-    var offset1 = this.maxWidth > -1 ? (this.maxWidth - 12) / width : 1;
-    var offset2 = this.maxWidth > -1 ? this.maxWidth / width : 1;
-    this.svgGradientStop1.setAttribute('offset', offset1.toString());
-    this.svgGradientStop2.setAttribute('offset', offset2.toString());
   }
 
   determinePath(startAt) {

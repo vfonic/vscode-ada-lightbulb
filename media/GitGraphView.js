@@ -924,10 +924,10 @@ class GitGraphView {
   }
 
   initElementResizer() {
-    const colHeadersElem = document.getElementById('tableColHeaders');
-    const cols = document.getElementsByClassName('tableColHeader');
+    const trElement = document.getElementById('tableColHeaders');
+    const thElements = document.getElementsByClassName('tableColHeader');
     const resizeClassName = 'resizeCol';
-    new ElementResizer(this, colHeadersElem, cols, resizeClassName);
+    new ElementResizer(this, trElement, thElements, resizeClassName);
   }
 
   renderUncommitedChanges() {

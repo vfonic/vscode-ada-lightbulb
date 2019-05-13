@@ -10,7 +10,7 @@ body {
   --ada-lightbulb-border: 1px solid rgba(128, 128, 128, 0.5);
   --ada-lightbulb-tableTh-height: 30px;
   --ada-lightbulb-commitDetails-height: 250px;
-  --ada-lightbulb-z-index-commitGraph: -1;
+  --ada-lightbulb-z-index-commitGraph: 2;
   --ada-lightbulb-z-index-scrollShadow: 5;
   --ada-lightbulb-z-index-commitTable: 7;
   --ada-lightbulb-z-index-controls: 8;
@@ -139,9 +139,6 @@ body.unableToLoad p {
 }
 #tableColHeaders.resizing th {
   cursor: col-resize;
-}
-.tableColHeader {
-  position: relative;
 }
 .resizeCol {
   position: absolute;
@@ -475,6 +472,9 @@ svg.fileIcon {
 }
 #controls label {
   cursor: pointer;
+}
+#commitTable td {
+  background-color: var(--vscode-editor-background);
 }
 
 /* Context Menu */
