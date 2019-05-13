@@ -3,7 +3,7 @@ class ElementResizer {
     return 64;
   }
 
-  constructor(gitGraphView, colHeadersElem, cols) {
+  constructor(gitGraphView, colHeadersElem, cols, resizeClassName) {
     this.stopResizing = this.stopResizing.bind(this);
     this.makeTableFixedLayout = this.makeTableFixedLayout.bind(this);
     this.resize = this.resize.bind(this);
@@ -30,19 +30,20 @@ class ElementResizer {
         this.cols[4].clientWidth - 24,
       ];
     }
+
     this.mouseX = -1;
     this.col = -1;
     Array.from(this.cols).forEach((col, index) => {
       if (index > 0) {
-        col.innerHTML += `<span class="resizeCol left" data-col="${index - 1}"></span>`;
+        col.innerHTML += `<span class="${resizeClassName} before" data-col="${index - 1}"></span>`;
       }
       if (index < this.cols.length - 1) {
-        col.innerHTML += `<span class="resizeCol right" data-col="${index}"></span>`;
+        col.innerHTML += `<span class="${resizeClassName} after" data-col="${index}"></span>`;
       }
     });
     this.makeTableFixedLayout();
 
-    addListenerToClass('resizeCol', 'mousedown', e => {
+    addListenerToClass(resizeClassName, 'mousedown', e => {
       this.col = parseInt(e.target.dataset.col);
       this.mouseX = e.clientX;
       this.colHeadersElem.classList.add('resizing');

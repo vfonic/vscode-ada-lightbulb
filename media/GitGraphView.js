@@ -926,7 +926,8 @@ class GitGraphView {
   initElementResizer() {
     const colHeadersElem = document.getElementById('tableColHeaders');
     const cols = document.getElementsByClassName('tableColHeader');
-    new ElementResizer(this, colHeadersElem, cols);
+    const resizeClassName = 'resizeCol';
+    new ElementResizer(this, colHeadersElem, cols, resizeClassName);
   }
 
   renderUncommitedChanges() {

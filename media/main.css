@@ -151,12 +151,27 @@ body.unableToLoad p {
   width: 6px;
   cursor: col-resize;
 }
-.resizeCol.left {
+.resizeCol.before {
   left: 0;
   border-left: 1px solid rgba(128, 128, 128, 0.25);
 }
-.resizeCol.right {
+.resizeCol.after {
   right: 0;
+}
+.resizeRow {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  display: block;
+  height: 6px;
+  cursor: row-resize;
+}
+.resizeRow.before {
+  top: 0;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.25);
+}
+.resizeRow.after {
+  bottom: 0;
 }
 
 /* Commit Details View */
