@@ -1,108 +1,120 @@
 class ElementResizer {
   constructor(gitGraphView) {
-    const colHeadersElem = document.getElementById('tableColHeaders');
-    const cols = document.getElementsByClassName('tableColHeader');
-    var columnWidths = gitGraphView.gitRepos[gitGraphView.currentRepo].columnWidths;
-    let mouseX = -1;
-    let col = -1;
-    Array.from(cols).forEach((col, index) => {
+    this.stopResizing = this.stopResizing.bind(this);
+    this.makeTableFixedLayout = this.makeTableFixedLayout.bind(this);
+    this.resize = this.resize.bind(this);
+
+    this.gitGraphView = gitGraphView;
+    this.colHeadersElem = document.getElementById('tableColHeaders');
+    this.cols = document.getElementsByClassName('tableColHeader');
+
+    this.columnWidths = gitGraphView.gitRepos[gitGraphView.currentRepo].columnWidths;
+
+    if (this.columnWidths == null) {
+      gitGraphView.tableElem.className = 'autoLayout';
+      gitGraphView.graph.limitMaxWidth(-1);
+      this.cols[0].style.padding =
+        '0 ' +
+        Math.round((Math.max(gitGraphView.graph.getWidth() + 16, 64) - (this.cols[0].offsetWidth - 24)) / 2) +
+        'px';
+      this.columnWidths = [
+        this.cols[0].clientWidth - 24,
+        this.cols[2].clientWidth - 24,
+        this.cols[3].clientWidth - 24,
+        this.cols[4].clientWidth - 24,
+      ];
+    }
+    this.mouseX = -1;
+    this.col = -1;
+    Array.from(this.cols).forEach((col, index) => {
       if (index > 0) {
         col.innerHTML += `<span class="resizeCol left" data-col="${index - 1}"></span>`;
       }
-      if (index < cols.length - 1) {
+      if (index < this.cols.length - 1) {
         col.innerHTML += `<span class="resizeCol right" data-col="${index}"></span>`;
       }
     });
-    if (columnWidths !== null) {
-      makeTableFixedLayout();
-    } else {
-      gitGraphView.tableElem.className = 'autoLayout';
-      gitGraphView.graph.limitMaxWidth(-1);
-      cols[0].style.padding =
-        '0 ' + Math.round((Math.max(gitGraphView.graph.getWidth() + 16, 64) - (cols[0].offsetWidth - 24)) / 2) + 'px';
-    }
-    addListenerToClass('resizeCol', 'mousedown', function(e) {
-      col = parseInt(e.target.dataset.col);
-      mouseX = e.clientX;
-      if (columnWidths === null) {
-        columnWidths = [
-          cols[0].clientWidth - 24,
-          cols[2].clientWidth - 24,
-          cols[3].clientWidth - 24,
-          cols[4].clientWidth - 24,
-        ];
-        makeTableFixedLayout();
-      }
-      colHeadersElem.classList.add('resizing');
+    this.makeTableFixedLayout();
+
+    addListenerToClass('resizeCol', 'mousedown', e => {
+      this.col = parseInt(e.target.dataset.col);
+      this.mouseX = e.clientX;
+      this.colHeadersElem.classList.add('resizing');
+      this.colHeadersElem.addEventListener('mousemove', this.resize);
+      this.colHeadersElem.addEventListener('mouseup', this.stopResizing);
+      this.colHeadersElem.addEventListener('mouseleave', this.stopResizing);
     });
-    colHeadersElem.addEventListener('mousemove', function(e) {
-      if (col > -1 && columnWidths !== null) {
-        var mouseEvent = e;
-        var mouseDeltaX = mouseEvent.clientX - mouseX;
-        switch (col) {
-          case 0:
-            if (columnWidths[0] + mouseDeltaX < 40) {
-              mouseDeltaX = -columnWidths[0] + 40;
-            }
-            if (cols[1].clientWidth - mouseDeltaX < 64) {
-              mouseDeltaX = cols[1].clientWidth - 64;
-            }
-            columnWidths[0] += mouseDeltaX;
-            cols[0].style.width = columnWidths[0] + 'px';
-            gitGraphView.graph.limitMaxWidth(columnWidths[0] + 16);
-            break;
-          case 1:
-            if (cols[1].clientWidth + mouseDeltaX < 64) {
-              mouseDeltaX = -cols[1].clientWidth + 64;
-            }
-            if (columnWidths[1] - mouseDeltaX < 40) {
-              mouseDeltaX = columnWidths[1] - 40;
-            }
-            columnWidths[1] -= mouseDeltaX;
-            cols[2].style.width = columnWidths[1] + 'px';
-            break;
-          default:
-            if (columnWidths[col - 1] + mouseDeltaX < 40) {
-              mouseDeltaX = -columnWidths[col - 1] + 40;
-            }
-            if (columnWidths[col] - mouseDeltaX < 40) {
-              mouseDeltaX = columnWidths[col] - 40;
-            }
-            columnWidths[col - 1] += mouseDeltaX;
-            columnWidths[col] -= mouseDeltaX;
-            cols[col].style.width = columnWidths[col - 1] + 'px';
-            cols[col + 1].style.width = columnWidths[col] + 'px';
+  }
+
+  stopResizing() {
+    this.colHeadersElem.removeEventListener('mousemove', this.resize);
+    this.colHeadersElem.removeEventListener('mouseup', this.stopResizing);
+    this.colHeadersElem.removeEventListener('mouseleave', this.stopResizing);
+    this.col = -1;
+    this.mouseX = -1;
+    this.colHeadersElem.classList.remove('resizing');
+    this.gitGraphView.gitRepos[this.gitGraphView.currentRepo].columnWidths = this.columnWidths;
+    sendMessage({
+      command: 'saveRepoState',
+      repo: this.gitGraphView.currentRepo,
+      state: this.gitGraphView.gitRepos[this.gitGraphView.currentRepo],
+    });
+  }
+
+  makeTableFixedLayout() {
+    if (this.columnWidths != null) {
+      this.cols[0].style.width = this.columnWidths[0] + 'px';
+      this.cols[0].style.padding = '';
+      this.cols[2].style.width = this.columnWidths[1] + 'px';
+      this.cols[3].style.width = this.columnWidths[2] + 'px';
+      this.cols[4].style.width = this.columnWidths[3] + 'px';
+      this.gitGraphView.tableElem.className = 'fixedLayout';
+      this.gitGraphView.graph.limitMaxWidth(this.columnWidths[0] + 16);
+    }
+  }
+
+  resize(e) {
+    console.log('resize', this.col);
+    if (this.col === -1) {
+      return;
+    }
+
+    var mouseEvent = e;
+    var mouseDeltaX = mouseEvent.clientX - this.mouseX;
+    switch (this.col) {
+      case 0:
+        if (this.columnWidths[0] + mouseDeltaX < 40) {
+          mouseDeltaX = -this.columnWidths[0] + 40;
         }
-        mouseX = mouseEvent.clientX;
-      }
-    });
-    colHeadersElem.addEventListener('mouseup', stopResizing);
-    colHeadersElem.addEventListener('mouseleave', stopResizing);
-
-    function stopResizing() {
-      if (col > -1 && columnWidths !== null) {
-        col = -1;
-        mouseX = -1;
-        colHeadersElem.classList.remove('resizing');
-        gitGraphView.gitRepos[gitGraphView.currentRepo].columnWidths = columnWidths;
-        sendMessage({
-          command: 'saveRepoState',
-          repo: gitGraphView.currentRepo,
-          state: gitGraphView.gitRepos[gitGraphView.currentRepo],
-        });
-      }
+        if (this.cols[1].clientWidth - mouseDeltaX < 64) {
+          mouseDeltaX = this.cols[1].clientWidth - 64;
+        }
+        this.columnWidths[0] += mouseDeltaX;
+        this.cols[0].style.width = this.columnWidths[0] + 'px';
+        this.gitGraphView.graph.limitMaxWidth(this.columnWidths[0] + 16);
+        break;
+      case 1:
+        if (this.cols[1].clientWidth + mouseDeltaX < 64) {
+          mouseDeltaX = -this.cols[1].clientWidth + 64;
+        }
+        if (this.columnWidths[1] - mouseDeltaX < 40) {
+          mouseDeltaX = this.columnWidths[1] - 40;
+        }
+        this.columnWidths[1] -= mouseDeltaX;
+        this.cols[2].style.width = this.columnWidths[1] + 'px';
+        break;
+      default:
+        if (this.columnWidths[this.col - 1] + mouseDeltaX < 40) {
+          mouseDeltaX = -this.columnWidths[this.col - 1] + 40;
+        }
+        if (this.columnWidths[this.col] - mouseDeltaX < 40) {
+          mouseDeltaX = this.columnWidths[this.col] - 40;
+        }
+        this.columnWidths[this.col - 1] += mouseDeltaX;
+        this.columnWidths[this.col] -= mouseDeltaX;
+        this.cols[this.col].style.width = this.columnWidths[this.col - 1] + 'px';
+        this.cols[this.col + 1].style.width = this.columnWidths[this.col] + 'px';
     }
-
-    function makeTableFixedLayout() {
-      if (columnWidths !== null) {
-        cols[0].style.width = columnWidths[0] + 'px';
-        cols[0].style.padding = '';
-        cols[2].style.width = columnWidths[1] + 'px';
-        cols[3].style.width = columnWidths[2] + 'px';
-        cols[4].style.width = columnWidths[3] + 'px';
-        gitGraphView.tableElem.className = 'fixedLayout';
-        gitGraphView.graph.limitMaxWidth(columnWidths[0] + 16);
-      }
-    }
+    this.mouseX = mouseEvent.clientX;
   }
 }
