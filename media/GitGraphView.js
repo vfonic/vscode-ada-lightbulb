@@ -917,7 +917,96 @@ class GitGraphView {
     const trElement = document.getElementById('tableColHeaders');
     const thElements = document.getElementsByClassName('tableColHeader');
     const resizeClassName = 'resizeCol';
-    new ElementResizer(this, trElement, thElements, resizeClassName);
+
+    let columnWidths = this.gitRepos[this.currentRepo].columnWidths;
+
+    if (columnWidths == null) {
+      this.tableElem.className = 'autoLayout';
+      thElements[0].style.padding =
+        '0 ' +
+        Math.round(
+          (Math.max(this.graph.getWidth() + 16, ElementResizer.MIN_WIDTH) - (thElements[0].offsetWidth - 24)) / 2
+        ) +
+        'px';
+      columnWidths = [
+        thElements[0].clientWidth - 24,
+        thElements[2].clientWidth - 24,
+        thElements[3].clientWidth - 24,
+        thElements[4].clientWidth - 24,
+      ];
+    }
+
+    Array.from(thElements).forEach((col, index) => {
+      if (index > 0) {
+        col.innerHTML += `<span class="${resizeClassName} before" data-col="${index - 1}"></span>`;
+        col.innerHTML += `<span class="${resizeClassName} after" data-col="${index - 1}"></span>`;
+      }
+    });
+
+    // make table fixed layout
+    thElements[0].style.width = columnWidths[0] + 'px';
+    thElements[0].style.padding = '';
+    thElements[2].style.width = columnWidths[1] + 'px';
+    thElements[3].style.width = columnWidths[2] + 'px';
+    thElements[4].style.width = columnWidths[3] + 'px';
+    this.tableElem.className = 'fixedLayout';
+
+    let columnBeingEdited;
+    let mouseX;
+    const onResizeStart = mouseEvent => {
+      mouseX = mouseEvent.clientX;
+      columnBeingEdited = parseInt(mouseEvent.target.dataset.col);
+    };
+
+    const onResize = mouseEvent => {
+      let mouseDeltaX = mouseEvent.clientX - mouseX;
+      switch (columnBeingEdited) {
+        case 0:
+          if (columnWidths[0] + mouseDeltaX < 40) {
+            mouseDeltaX = -columnWidths[0] + 40;
+          }
+          if (thElements[1].clientWidth - mouseDeltaX < ElementResizer.MIN_WIDTH) {
+            mouseDeltaX = thElements[1].clientWidth - ElementResizer.MIN_WIDTH;
+          }
+          columnWidths[0] += mouseDeltaX;
+          thElements[0].style.width = columnWidths[0] + 'px';
+          break;
+        case 1:
+          if (thElements[1].clientWidth + mouseDeltaX < ElementResizer.MIN_WIDTH) {
+            mouseDeltaX = -thElements[1].clientWidth + ElementResizer.MIN_WIDTH;
+          }
+          if (columnWidths[1] - mouseDeltaX < 40) {
+            mouseDeltaX = columnWidths[1] - 40;
+          }
+          columnWidths[1] -= mouseDeltaX;
+          thElements[2].style.width = columnWidths[1] + 'px';
+          break;
+        default:
+          if (columnWidths[columnBeingEdited - 1] + mouseDeltaX < 40) {
+            mouseDeltaX = -columnWidths[columnBeingEdited - 1] + 40;
+          }
+          if (columnWidths[columnBeingEdited] - mouseDeltaX < 40) {
+            mouseDeltaX = columnWidths[columnBeingEdited] - 40;
+          }
+          columnWidths[columnBeingEdited - 1] += mouseDeltaX;
+          columnWidths[columnBeingEdited] -= mouseDeltaX;
+          thElements[columnBeingEdited].style.width = columnWidths[columnBeingEdited - 1] + 'px';
+          thElements[columnBeingEdited + 1].style.width = columnWidths[columnBeingEdited] + 'px';
+      }
+      mouseX = mouseEvent.clientX;
+    };
+
+    const onResizeEnd = () => {
+      columnBeingEdited = -1;
+      this.gitRepos[this.currentRepo].columnWidths = columnWidths;
+      sendMessage({
+        command: 'saveRepoState',
+        repo: this.currentRepo,
+        state: this.gitRepos[this.currentRepo],
+      });
+    };
+
+    new ElementResizer(trElement, resizeClassName, onResizeStart, onResize, onResizeEnd);
   }
 
   renderUncommitedChanges() {
