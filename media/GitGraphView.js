@@ -225,7 +225,7 @@ class GitGraphView {
       avatarsNeeded = {};
     for (i = 0; i < this.commits.length; i++) {
       this.commitLookup[this.commits[i].hash] = i;
-      if (this.expandedCommit !== null && this.expandedCommit.hash === this.commits[i].hash) {
+      if (this.expandedCommit != null && this.expandedCommit.hash === this.commits[i].hash) {
         expandedCommitVisible = true;
       }
       if (
@@ -241,7 +241,7 @@ class GitGraphView {
       }
     }
     this.graph.loadCommits(this.commits, this.commitHead, this.commitLookup);
-    if (this.expandedCommit !== null && !expandedCommitVisible) {
+    if (this.expandedCommit != null && !expandedCommitVisible) {
       this.expandedCommit = null;
       this.saveState();
     }
@@ -459,7 +459,7 @@ class GitGraphView {
         _this.requestLoadCommits(true, function() {});
       });
     }
-    if (this.expandedCommit !== null) {
+    if (this.expandedCommit != null) {
       var elem = null,
         elems = document.getElementsByClassName('commit');
       for (i = 0; i < elems.length; i++) {
@@ -475,7 +475,7 @@ class GitGraphView {
         this.expandedCommit.id = parseInt(elem.dataset.id);
         this.expandedCommit.srcElem = elem;
         this.saveState();
-        if (this.expandedCommit.commitDetails !== null && this.expandedCommit.fileTree !== null) {
+        if (this.expandedCommit.commitDetails != null && this.expandedCommit.fileTree !== null) {
           this.showCommitDetails(this.expandedCommit.commitDetails, this.expandedCommit.fileTree);
         } else {
           this.loadCommitDetails(elem);
@@ -748,14 +748,10 @@ class GitGraphView {
 
     addListenerToClass('commit', 'click', function(e) {
       var sourceElem = e.target.closest('.commit');
-      if (_this.expandedCommit !== null && _this.expandedCommit.hash === sourceElem.dataset.hash) {
-        // _this.hideCommitDetails();
+      if (sourceElem.dataset.hash === '*') {
+        _this.loadUncommittedChanges();
       } else {
-        if (sourceElem.dataset.hash === '*') {
-          _this.loadUncommittedChanges();
-        } else {
-          _this.loadCommitDetails(sourceElem);
-        }
+        _this.loadCommitDetails(sourceElem);
       }
     });
 
@@ -1105,7 +1101,6 @@ class GitGraphView {
   }
 
   loadCommitDetails(sourceElem) {
-    this.hideCommitDetails();
     this.expandedCommit = {
       id: parseInt(sourceElem.dataset.id),
       hash: sourceElem.dataset.hash,

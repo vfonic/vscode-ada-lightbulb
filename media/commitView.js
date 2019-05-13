@@ -7,7 +7,7 @@ class CommitView {
   }
 
   render() {
-    if (this.expandedCommit === null || this.expandedCommit.hash !== this.expandedCommit.commitDetails.hash) {
+    if (this.expandedCommit == null) {
       return null;
     }
 
