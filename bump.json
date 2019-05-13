@@ -10,14 +10,6 @@
     }
   },
   "scripts": {
-    "prebump": "",
-    "postbump": "",
-    "prechangelog": "",
-    "postchangelog": "",
-    "precommit": "",
-    "postcommit": "",
-    "pretag": "",
-    "posttag": "",
     "prerelease": "vsce package",
     "postrelease": "vsce publish && rm ada-lightbulb-*.vsix"
   }

@@ -6,7 +6,7 @@ View a git graph of your repository, and easily perform Git actions from the gra
 
 ## Demo
 
-![Demo](resources/demo.gif)
+![Demo](resources/demo-lightbulb.gif)
 
 ## Install
 
