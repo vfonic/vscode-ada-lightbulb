@@ -62,19 +62,16 @@ class ElementResizer {
   }
 
   makeTableFixedLayout() {
-    if (this.columnWidths != null) {
-      this.cols[0].style.width = this.columnWidths[0] + 'px';
-      this.cols[0].style.padding = '';
-      this.cols[2].style.width = this.columnWidths[1] + 'px';
-      this.cols[3].style.width = this.columnWidths[2] + 'px';
-      this.cols[4].style.width = this.columnWidths[3] + 'px';
-      this.gitGraphView.tableElem.className = 'fixedLayout';
-      this.gitGraphView.graph.limitMaxWidth(this.columnWidths[0] + 16);
-    }
+    this.cols[0].style.width = this.columnWidths[0] + 'px';
+    this.cols[0].style.padding = '';
+    this.cols[2].style.width = this.columnWidths[1] + 'px';
+    this.cols[3].style.width = this.columnWidths[2] + 'px';
+    this.cols[4].style.width = this.columnWidths[3] + 'px';
+    this.gitGraphView.tableElem.className = 'fixedLayout';
+    this.gitGraphView.graph.limitMaxWidth(this.columnWidths[0] + 16);
   }
 
   resize(e) {
-    console.log('resize', this.col);
     if (this.col === -1) {
       return;
     }

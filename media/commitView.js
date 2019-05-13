@@ -32,7 +32,7 @@ class CommitView {
     html += escapeHtml(commitDetails.body).replace(/\n/g, '<br>') + '</div>';
     html +=
       '<div id="commitDetailsFiles">' + new GitFileTreeView(fileTree, commitDetails.fileChanges).render() + '</div>';
-    html += '<div id="commitDetailsClose">' + svgIcons.close + '</div>';
+    // html += '<div id="commitDetailsClose">' + svgIcons.close + '</div>';
     html += '</div>';
     return html;
   }

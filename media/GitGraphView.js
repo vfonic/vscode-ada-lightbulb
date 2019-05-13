@@ -1048,9 +1048,9 @@ class GitGraphView {
     this.renderGraph();
 
     var _this = this;
-    document.getElementById('commitDetailsClose').addEventListener('click', function() {
-      _this.hideCommitDetails();
-    });
+    // document.getElementById('commitDetailsClose').addEventListener('click', function() {
+    //   _this.hideCommitDetails();
+    // });
     addListenerToClass('gitFolder', 'click', function(e) {
       function alterGitFileTree(folder, folderPath, open) {
         var path = folderPath.split('/'),
