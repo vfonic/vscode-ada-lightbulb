@@ -1,4 +1,4 @@
-class Branch {
+class Edge {
   constructor(colour) {
     this.lines = [];
     this.end = 0;

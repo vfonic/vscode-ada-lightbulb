@@ -3,7 +3,7 @@ class Vertex {
     this.x = 0;
     this.parents = [];
     this.nextParent = 0;
-    this.onBranch = null;
+    this.onEdge = null;
     this.isCommitted = true;
     this.isCurrent = false;
     this.nextX = 0;
@@ -41,23 +41,23 @@ class Vertex {
     return this.parents.length > 1;
   }
 
-  addToBranch(branch, x) {
-    if (this.onBranch === null) {
-      this.onBranch = branch;
+  addToEdge(edge, x) {
+    if (this.onEdge === null) {
+      this.onEdge = edge;
       this.x = x;
     }
   }
 
-  isNotOnBranch() {
-    return this.onBranch === null;
+  isNotOnEdge() {
+    return this.onEdge === null;
   }
 
-  isOnThisBranch(branch) {
-    return this.onBranch === branch;
+  isOnThisEdge(edge) {
+    return this.onEdge === edge;
   }
 
-  getBranch() {
-    return this.onBranch;
+  getEdge() {
+    return this.onEdge;
   }
 
   getPoint() {
@@ -78,9 +78,9 @@ class Vertex {
     return this.isCommitted;
   }
 
-  getPointConnectingTo(vertex, onBranch) {
+  getPointConnectingTo(vertex, onEdge) {
     for (var i = 0; i < this.connections.length; i++) {
-      if (this.connections[i].connectsTo === vertex && this.connections[i].onBranch === onBranch) {
+      if (this.connections[i].connectsTo === vertex && this.connections[i].onEdge === onEdge) {
         return {
           x: i,
           y: this.y,
@@ -90,18 +90,18 @@ class Vertex {
     return null;
   }
 
-  registerUnavailablePoint(x, connectsToVertex, onBranch) {
+  registerUnavailablePoint(x, connectsToVertex, onEdge) {
     if (x === this.nextX) {
       this.nextX = x + 1;
       this.connections[x] = {
         connectsTo: connectsToVertex,
-        onBranch: onBranch,
+        onEdge: onEdge,
       };
     }
   }
 
   getColour() {
-    return this.onBranch !== null ? this.onBranch.getColour() : 0;
+    return this.onEdge !== null ? this.onEdge.getColour() : 0;
   }
 
   setNotCommited() {
@@ -113,12 +113,12 @@ class Vertex {
   }
 
   draw(svg, config) {
-    if (this.onBranch === null) {
+    if (this.onEdge === null) {
       return;
     }
     var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     var colour = this.isCommitted
-      ? config.graphColours[this.onBranch.getColour() % config.graphColours.length]
+      ? config.graphColours[this.onEdge.getColour() % config.graphColours.length]
       : '#808080';
     circle.setAttribute('cx', (this.x * config.grid.x + config.grid.offsetX).toString());
     circle.setAttribute('cy', (this.y * config.grid.y + config.grid.offsetY).toString());

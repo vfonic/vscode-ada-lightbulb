@@ -3,7 +3,7 @@ class Graph {
     this.svgGroup = null;
     this.maxWidth = -1;
     this.vertices = [];
-    this.branches = [];
+    this.edges = [];
     this.availableColours = [];
     this.config = config;
 
@@ -15,7 +15,7 @@ class Graph {
 
   loadCommits(commits, commitHead, commitLookup) {
     this.vertices = [];
-    this.branches = [];
+    this.edges = [];
     this.availableColours = [];
     var i, j;
     for (i = 0; i < commits.length; i++) {
@@ -45,7 +45,7 @@ class Graph {
     this.clear();
 
     var group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    this.branches.forEach(branch => branch.draw(group, this.config));
+    this.edges.forEach(edge => edge.draw(group, this.config));
     this.vertices.forEach(vertex => vertex.draw(group, this.config));
     this.svgGroup = group;
     this.svg.appendChild(group);
@@ -88,25 +88,25 @@ class Graph {
     var i = startAt;
     var vertex = this.vertices[i],
       parentVertex = this.vertices[i].getNextParent();
-    var lastPoint = vertex.isNotOnBranch() ? vertex.getNextPoint() : vertex.getPoint(),
+    var lastPoint = vertex.isNotOnEdge() ? vertex.getNextPoint() : vertex.getPoint(),
       curPoint;
-    if (parentVertex !== null && vertex.isMerge() && !vertex.isNotOnBranch() && !parentVertex.isNotOnBranch()) {
+    if (parentVertex !== null && vertex.isMerge() && !vertex.isNotOnEdge() && !parentVertex.isNotOnEdge()) {
       var foundPointToParent = false,
-        parentBranch = parentVertex.getBranch();
+        parentEdge = parentVertex.getEdge();
       for (i = startAt + 1; i < this.vertices.length; i++) {
-        curPoint = this.vertices[i].getPointConnectingTo(parentVertex, parentBranch);
+        curPoint = this.vertices[i].getPointConnectingTo(parentVertex, parentEdge);
         if (curPoint !== null) {
           foundPointToParent = true;
         } else {
           curPoint = this.vertices[i].getNextPoint();
         }
-        parentBranch.addLine(
+        parentEdge.addLine(
           lastPoint,
           curPoint,
           vertex.getIsCommitted(),
           !foundPointToParent && this.vertices[i] !== parentVertex ? lastPoint.x < curPoint.x : true
         );
-        this.vertices[i].registerUnavailablePoint(curPoint.x, parentVertex, parentBranch);
+        this.vertices[i].registerUnavailablePoint(curPoint.x, parentVertex, parentEdge);
         lastPoint = curPoint;
         if (foundPointToParent) {
           vertex.registerParentProcessed();
@@ -114,37 +114,37 @@ class Graph {
         }
       }
     } else {
-      var branch = new Branch(this.getAvailableColour(startAt));
-      vertex.addToBranch(branch, lastPoint.x);
-      vertex.registerUnavailablePoint(lastPoint.x, vertex, branch);
+      var edge = new Edge(this.getAvailableColour(startAt));
+      vertex.addToEdge(edge, lastPoint.x);
+      vertex.registerUnavailablePoint(lastPoint.x, vertex, edge);
       for (i = startAt + 1; i < this.vertices.length; i++) {
         curPoint =
-          parentVertex === this.vertices[i] && !parentVertex.isNotOnBranch()
+          parentVertex === this.vertices[i] && !parentVertex.isNotOnEdge()
             ? this.vertices[i].getPoint()
             : this.vertices[i].getNextPoint();
-        branch.addLine(lastPoint, curPoint, vertex.getIsCommitted(), lastPoint.x < curPoint.x);
-        this.vertices[i].registerUnavailablePoint(curPoint.x, parentVertex, branch);
+        edge.addLine(lastPoint, curPoint, vertex.getIsCommitted(), lastPoint.x < curPoint.x);
+        this.vertices[i].registerUnavailablePoint(curPoint.x, parentVertex, edge);
         lastPoint = curPoint;
         if (parentVertex === this.vertices[i]) {
           vertex.registerParentProcessed();
-          var parentVertexOnBranch = !parentVertex.isNotOnBranch();
-          parentVertex.addToBranch(branch, curPoint.x);
+          var parentVertexOnEdge = !parentVertex.isNotOnEdge();
+          parentVertex.addToEdge(edge, curPoint.x);
           vertex = parentVertex;
           parentVertex = vertex.getNextParent();
-          if (parentVertexOnBranch) {
+          if (parentVertexOnEdge) {
             break;
           }
         }
       }
-      branch.setEnd(i);
-      this.branches.push(branch);
-      this.availableColours[branch.getColour()] = i;
+      edge.setEnd(i);
+      this.edges.push(edge);
+      this.availableColours[edge.getColour()] = i;
     }
   }
 
   findStart() {
     for (var i = 0; i < this.vertices.length; i++) {
-      if (this.vertices[i].getNextParent() !== null || this.vertices[i].isNotOnBranch()) {
+      if (this.vertices[i].getNextParent() !== null || this.vertices[i].isNotOnEdge()) {
         return i;
       }
     }
