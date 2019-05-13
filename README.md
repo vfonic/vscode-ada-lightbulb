@@ -44,6 +44,10 @@ Detailed Release Notes are available in the [CHANGELOG](CHANGELOG.md).
 
 If you found a problem, or have a feature request, please open an [issue](https://github.com/vfonic/vscode-ada-lightbulb/issues) about it.
 
+## Related Extensions
+
+- This extension simply wouldn't be possible without [Git Graph](https://github.com/mhutchie/vscode-git-graph) extension by [@mhutchie](https://github.com/mhutchie). Most of the graph functionality was taken from that extension.
+
 ## License
 
 MIT
