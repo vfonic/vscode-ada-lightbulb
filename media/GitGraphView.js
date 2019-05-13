@@ -1047,7 +1047,6 @@ class GitGraphView {
       emptyElement(elem);
       this.expandedCommit = null;
       this.saveState();
-      this.renderGraph();
     }
   }
 
@@ -1058,7 +1057,6 @@ class GitGraphView {
     this.saveState();
 
     elem.innerHTML = commitView.render();
-    this.renderGraph();
 
     var _this = this;
     // document.getElementById('commitDetailsClose').addEventListener('click', function() {
