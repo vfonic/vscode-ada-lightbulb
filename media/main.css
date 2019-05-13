@@ -22,6 +22,8 @@ body {
 body {
   margin: 0;
   padding: 0;
+  padding-top: calc(var(--ada-lightbulb-controls-height) - var(--ada-lightbulb-controls-border-width));
+  padding-bottom: calc(var(--ada-lightbulb-commitDetails-height) + 6px);
 }
 body.unableToLoad {
   margin: 0 20px;
@@ -50,8 +52,6 @@ body.unableToLoad p {
 /* Content */
 #content {
   position: relative;
-  margin-top: calc(var(--ada-lightbulb-controls-height) - var(--ada-lightbulb-controls-border-width));
-  margin-bottom: calc(var(--ada-lightbulb-commitDetails-height) + 6px);
 }
 
 /* Commit Graph */

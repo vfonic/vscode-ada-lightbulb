@@ -456,7 +456,9 @@ class GitGraphView {
     this.footerElem.innerHTML = this.moreCommitsAvailable
       ? '<div id="loadMoreCommitsBtn" class="roundedBtn">Load More Commits</div>'
       : '';
-    new ElementResizer(this);
+
+    this.initElementResizer();
+
     if (this.moreCommitsAvailable) {
       document.getElementById('loadMoreCommitsBtn').addEventListener('click', function() {
         document.getElementById('loadMoreCommitsBtn').parentNode.innerHTML =
@@ -490,6 +492,7 @@ class GitGraphView {
         }
       }
     }
+
     addListenerToClass('commit', 'contextmenu', function(e) {
       e.stopPropagation();
       var sourceElem = e.target.closest('.commit');
@@ -752,6 +755,7 @@ class GitGraphView {
         sourceElem
       );
     });
+
     addListenerToClass('commit', 'click', function(e) {
       var sourceElem = e.target.closest('.commit');
       if (_this.expandedCommit !== null && _this.expandedCommit.hash === sourceElem.dataset.hash) {
@@ -764,6 +768,7 @@ class GitGraphView {
         }
       }
     });
+
     addListenerToClass('gitRef', 'contextmenu', function(e) {
       e.stopPropagation();
       var sourceElem = e.target.closest('.gitRef');
@@ -909,12 +914,19 @@ class GitGraphView {
       });
       ContextMenu.showContextMenu(e, menu, sourceElem);
     });
+
     addListenerToClass('gitRef', 'dblclick', function(e) {
       e.stopPropagation();
       hideDialogAndContextMenu();
       var sourceElem = e.target.closest('.gitRef');
       _this.checkoutBranchAction(sourceElem, unescapeHtml(sourceElem.dataset.name));
     });
+  }
+
+  initElementResizer() {
+    const colHeadersElem = document.getElementById('tableColHeaders');
+    const cols = document.getElementsByClassName('tableColHeader');
+    new ElementResizer(this, colHeadersElem, cols);
   }
 
   renderUncommitedChanges() {

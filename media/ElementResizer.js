@@ -1,12 +1,16 @@
 class ElementResizer {
-  constructor(gitGraphView) {
+  static get MIN_WIDTH() {
+    return 64;
+  }
+
+  constructor(gitGraphView, colHeadersElem, cols) {
     this.stopResizing = this.stopResizing.bind(this);
     this.makeTableFixedLayout = this.makeTableFixedLayout.bind(this);
     this.resize = this.resize.bind(this);
 
     this.gitGraphView = gitGraphView;
-    this.colHeadersElem = document.getElementById('tableColHeaders');
-    this.cols = document.getElementsByClassName('tableColHeader');
+    this.colHeadersElem = colHeadersElem;
+    this.cols = cols;
 
     this.columnWidths = gitGraphView.gitRepos[gitGraphView.currentRepo].columnWidths;
 
@@ -15,7 +19,9 @@ class ElementResizer {
       gitGraphView.graph.limitMaxWidth(-1);
       this.cols[0].style.padding =
         '0 ' +
-        Math.round((Math.max(gitGraphView.graph.getWidth() + 16, 64) - (this.cols[0].offsetWidth - 24)) / 2) +
+        Math.round(
+          (Math.max(gitGraphView.graph.getWidth() + 16, ElementResizer.MIN_WIDTH) - (this.cols[0].offsetWidth - 24)) / 2
+        ) +
         'px';
       this.columnWidths = [
         this.cols[0].clientWidth - 24,
@@ -71,28 +77,27 @@ class ElementResizer {
     this.gitGraphView.graph.limitMaxWidth(this.columnWidths[0] + 16);
   }
 
-  resize(e) {
+  resize(mouseEvent) {
     if (this.col === -1) {
       return;
     }
 
-    var mouseEvent = e;
     var mouseDeltaX = mouseEvent.clientX - this.mouseX;
     switch (this.col) {
       case 0:
         if (this.columnWidths[0] + mouseDeltaX < 40) {
           mouseDeltaX = -this.columnWidths[0] + 40;
         }
-        if (this.cols[1].clientWidth - mouseDeltaX < 64) {
-          mouseDeltaX = this.cols[1].clientWidth - 64;
+        if (this.cols[1].clientWidth - mouseDeltaX < ElementResizer.MIN_WIDTH) {
+          mouseDeltaX = this.cols[1].clientWidth - ElementResizer.MIN_WIDTH;
         }
         this.columnWidths[0] += mouseDeltaX;
         this.cols[0].style.width = this.columnWidths[0] + 'px';
         this.gitGraphView.graph.limitMaxWidth(this.columnWidths[0] + 16);
         break;
       case 1:
-        if (this.cols[1].clientWidth + mouseDeltaX < 64) {
-          mouseDeltaX = -this.cols[1].clientWidth + 64;
+        if (this.cols[1].clientWidth + mouseDeltaX < ElementResizer.MIN_WIDTH) {
+          mouseDeltaX = -this.cols[1].clientWidth + ElementResizer.MIN_WIDTH;
         }
         if (this.columnWidths[1] - mouseDeltaX < 40) {
           mouseDeltaX = this.columnWidths[1] - 40;
