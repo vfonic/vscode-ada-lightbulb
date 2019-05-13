@@ -1,3 +1,6 @@
+## 0.2.1 (2019-05-14)
+- Update bump config
+
 ## 0.2.0 (2019-05-14)
 - Give credit where credit is due
 - Update demo video
