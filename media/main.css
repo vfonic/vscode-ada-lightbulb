@@ -118,6 +118,9 @@ body.unableToLoad p {
 }
 #commitTable th {
   position: sticky;
+
+  /* needed for .resizeCol */
+  overflow: visible;
   top: calc(var(--ada-lightbulb-controls-height) - var(--ada-lightbulb-controls-border-width));
   z-index: var(--ada-lightbulb-z-index-commitTable);
   border-bottom: var(--ada-lightbulb-border);
@@ -140,35 +143,42 @@ body.unableToLoad p {
 #tableColHeaders.resizing th {
   cursor: col-resize;
 }
-.resizeCol {
+.resizeCol,
+.resizeRow {
   position: absolute;
-  top: 0;
-  height: 100%;
   display: block;
-  width: 6px;
+
+  --ada-lightbulb-resizerSize: 8px;
+}
+.resizeCol {
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: var(--ada-lightbulb-resizerSize);
   cursor: col-resize;
 }
 .resizeCol.before {
-  left: 0;
-  border-left: 1px solid rgba(128, 128, 128, 0.25);
+  left: calc(var(--ada-lightbulb-resizerSize) * -1);
+  border-right: 1px solid rgba(128, 128, 128, 0.25);
 }
 .resizeCol.after {
-  right: 0;
+  left: 0;
 }
 .resizeRow {
   position: absolute;
   left: 0;
+  right: 0;
   width: 100%;
   display: block;
-  height: 6px;
+  height: var(--ada-lightbulb-resizerSize);
   cursor: row-resize;
 }
 .resizeRow.before {
-  top: 0;
+  top: calc(var(--ada-lightbulb-resizerSize) * -1);
   border-bottom: 1px solid rgba(128, 128, 128, 0.25);
 }
 .resizeRow.after {
-  bottom: 0;
+  top: 0;
 }
 
 /* Commit Details View */

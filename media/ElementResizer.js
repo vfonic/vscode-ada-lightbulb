@@ -35,9 +35,7 @@ class ElementResizer {
     Array.from(this.cols).forEach((col, index) => {
       if (index > 0) {
         col.innerHTML += `<span class="${resizeClassName} before" data-col="${index - 1}"></span>`;
-      }
-      if (index < this.cols.length - 1) {
-        col.innerHTML += `<span class="${resizeClassName} after" data-col="${index}"></span>`;
+        col.innerHTML += `<span class="${resizeClassName} after" data-col="${index - 1}"></span>`;
       }
     });
     this.makeTableFixedLayout();

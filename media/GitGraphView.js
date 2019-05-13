@@ -366,16 +366,6 @@ class GitGraphView {
       return;
     }
     const headerHeight = colHeadersElem.clientHeight + 1;
-    const expandedCommitElem = this.expandedCommit !== null ? document.getElementById('commitDetails') : null;
-    this.config.grid.expandY =
-      expandedCommitElem !== null ? expandedCommitElem.getBoundingClientRect().height : this.config.grid.expandY;
-    this.config.grid.y =
-      this.commits.length > 0
-        ? (this.tableElem.children[0].clientHeight -
-            headerHeight -
-            (this.expandedCommit !== null ? this.config.grid.expandY : 0)) /
-          this.commits.length
-        : this.config.grid.y;
     this.config.grid.offsetY = headerHeight + this.config.grid.y / 2;
     this.graph.render();
   }
