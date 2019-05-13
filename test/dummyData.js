@@ -15,7 +15,7 @@ window.acquireVsCodeApi = () => {
 };
 window.viewState = {
   assetLoader: {
-    extensionPath: '/Users/viktor/Developer/JavaScript/ada-lightbulb',
+    extensionPath: '/Users/viktor/Developer/JavaScript/vscode-ada-lightbulb',
     getUri: (...pathComps) => ({ with: () => [viewState.assetLoader.extensionPath, ...pathComps].join('/') }),
   },
   autoCenterCommitDetailsView: true,

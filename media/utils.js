@@ -15,10 +15,10 @@ const pad2 = i => {
 };
 
 const addListenerToClass = (className, event, eventListener) => {
-  var elems = document.getElementsByClassName(className),
+  var elements = document.getElementsByClassName(className),
     i;
-  for (i = 0; i < elems.length; i++) {
-    elems[i].addEventListener(event, eventListener);
+  for (i = 0; i < elements.length; i++) {
+    elements[i].addEventListener(event, eventListener);
   }
 };
 
