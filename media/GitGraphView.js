@@ -921,7 +921,7 @@ class GitGraphView {
       thElements[0].style.padding =
         '0 ' +
         Math.round(
-          (Math.max(this.graph.getWidth() + 16, ElementResizer.MIN_WIDTH) - (thElements[0].offsetWidth - 24)) / 2
+          (Math.max(this.graph.getWidth() + 16, ElementResizer.MIN_WIDTH_HEIGHT) - (thElements[0].offsetWidth - 24)) / 2
         ) +
         'px';
       columnWidths = [
@@ -961,15 +961,15 @@ class GitGraphView {
           if (columnWidths[0] + mouseDeltaX < 40) {
             mouseDeltaX = -columnWidths[0] + 40;
           }
-          if (thElements[1].clientWidth - mouseDeltaX < ElementResizer.MIN_WIDTH) {
-            mouseDeltaX = thElements[1].clientWidth - ElementResizer.MIN_WIDTH;
+          if (thElements[1].clientWidth - mouseDeltaX < ElementResizer.MIN_WIDTH_HEIGHT) {
+            mouseDeltaX = thElements[1].clientWidth - ElementResizer.MIN_WIDTH_HEIGHT;
           }
           columnWidths[0] += mouseDeltaX;
           thElements[0].style.width = columnWidths[0] + 'px';
           break;
         case 1:
-          if (thElements[1].clientWidth + mouseDeltaX < ElementResizer.MIN_WIDTH) {
-            mouseDeltaX = -thElements[1].clientWidth + ElementResizer.MIN_WIDTH;
+          if (thElements[1].clientWidth + mouseDeltaX < ElementResizer.MIN_WIDTH_HEIGHT) {
+            mouseDeltaX = -thElements[1].clientWidth + ElementResizer.MIN_WIDTH_HEIGHT;
           }
           if (columnWidths[1] - mouseDeltaX < 40) {
             mouseDeltaX = columnWidths[1] - 40;
@@ -1125,17 +1125,24 @@ class GitGraphView {
   }
 
   showCommitDetails(commitDetails, fileTree) {
-    const commitView = new CommitView(commitDetails, fileTree, this.expandedCommit, this.avatars);
-    var elem = document.getElementById('commitDetails');
-    emptyElement(elem);
+    var commitDetailsEl = document.getElementById('commitDetails');
+    new CommitView(
+      commitDetailsEl,
+      commitDetails,
+      fileTree,
+      this.expandedCommit,
+      this.avatars,
+      this.gitRepos,
+      this.currentRepo
+    ).render();
     this.saveState();
 
-    elem.innerHTML = commitView.render();
-
     var _this = this;
+    // TODO: remove
     // document.getElementById('commitDetailsClose').addEventListener('click', function() {
     //   _this.hideCommitDetails();
     // });
+    // TODO: remove
     addListenerToClass('gitFolder', 'click', function(e) {
       function alterGitFileTree(folder, folderPath, open) {
         var path = folderPath.split('/'),
@@ -1162,6 +1169,7 @@ class GitGraphView {
       alterGitFileTree(_this.expandedCommit.fileTree, decodeURIComponent(sourceElem.dataset.folderpath), isOpen);
       _this.saveState();
     });
+
     addListenerToClass('gitFile', 'click', function(e) {
       var sourceElem = e.target.closest('.gitFile');
       if (_this.expandedCommit === null || !sourceElem.classList.contains('gitDiffPossible')) {

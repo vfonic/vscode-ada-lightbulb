@@ -1,5 +1,5 @@
 class ElementResizer {
-  static get MIN_WIDTH() {
+  static get MIN_WIDTH_HEIGHT() {
     return 64;
   }
 

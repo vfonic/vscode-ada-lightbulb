@@ -121,7 +121,7 @@ class Vertex {
       ? config.graphColours[this.onEdge.getColour() % config.graphColours.length]
       : '#808080';
     circle.setAttribute('cx', (this.x * config.grid.x + config.grid.offsetX).toString());
-    circle.setAttribute('cy', (this.y * config.grid.y + config.grid.offsetY).toString());
+    circle.setAttribute('cy', (this.y * config.grid.y + config.grid.offsetY + 1).toString());
     circle.setAttribute('r', '4');
     if (this.isCurrent) {
       circle.setAttribute('class', 'current');
