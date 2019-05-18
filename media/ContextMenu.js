@@ -36,7 +36,7 @@ class ContextMenu {
     const ELLIPSIS = '&#8230;';
     for (i = 0; i < items.length; i++) {
       html +=
-        items[i] !== null
+        items[i] != null
           ? '<li class="contextMenuItem" data-index="' + i + '">' + items[i].title + ELLIPSIS + '</li>'
           : '<li class="contextMenuDivider"></li>';
     }

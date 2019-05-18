@@ -87,7 +87,7 @@ class RepoManager {
   }
 
   dispose() {
-    if (this.folderChangeHandler !== null) {
+    if (this.folderChangeHandler != null) {
       this.folderChangeHandler.dispose();
       this.folderChangeHandler = null;
     }
@@ -192,7 +192,7 @@ class RepoManager {
     let repos = this.getRepos();
     let numRepos = Object.keys(repos).length;
     this.statusBarItem.setNumRepos(numRepos);
-    if (this.viewCallback !== null) {
+    if (this.viewCallback != null) {
       this.viewCallback(repos, numRepos);
     }
   }
@@ -317,7 +317,7 @@ class RepoManager {
         return;
       }
       this.createEventPaths.push(path);
-      if (this.processCreateEventsTimeout !== null) {
+      if (this.processCreateEventsTimeout != null) {
         clearTimeout(this.processCreateEventsTimeout);
       }
       this.processCreateEventsTimeout = setTimeout(() => this.processCreateEvents(), 1000);
@@ -336,7 +336,7 @@ class RepoManager {
       return;
     }
     this.changeEventPaths.push(path);
-    if (this.processChangeEventsTimeout !== null) {
+    if (this.processChangeEventsTimeout != null) {
       clearTimeout(this.processChangeEventsTimeout);
     }
     this.processChangeEventsTimeout = setTimeout(() => this.processChangeEvents(), 1000);

@@ -42,14 +42,14 @@ class Vertex {
   }
 
   addToEdge(edge, x) {
-    if (this.onEdge === null) {
+    if (this.onEdge == null) {
       this.onEdge = edge;
       this.x = x;
     }
   }
 
   isNotOnEdge() {
-    return this.onEdge === null;
+    return this.onEdge == null;
   }
 
   isOnThisEdge(edge) {
@@ -100,8 +100,8 @@ class Vertex {
     }
   }
 
-  getColour() {
-    return this.onEdge !== null ? this.onEdge.getColour() : 0;
+  getColor() {
+    return this.onEdge != null ? this.onEdge.getColor() : 0;
   }
 
   setNotCommited() {
@@ -113,21 +113,19 @@ class Vertex {
   }
 
   draw(svg, config) {
-    if (this.onEdge === null) {
+    if (this.onEdge == null) {
       return;
     }
     var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    var colour = this.isCommitted
-      ? config.graphColours[this.onEdge.getColour() % config.graphColours.length]
-      : '#808080';
+    var color = this.isCommitted ? config.graphColors[this.onEdge.getColor() % config.graphColors.length] : '#808080';
     circle.setAttribute('cx', (this.x * config.grid.x + config.grid.offsetX).toString());
     circle.setAttribute('cy', (this.y * config.grid.y + config.grid.offsetY + 1).toString());
     circle.setAttribute('r', '4');
     if (this.isCurrent) {
       circle.setAttribute('class', 'current');
-      circle.setAttribute('stroke', colour);
+      circle.setAttribute('stroke', color);
     } else {
-      circle.setAttribute('fill', colour);
+      circle.setAttribute('fill', color);
     }
     svg.appendChild(circle);
   }

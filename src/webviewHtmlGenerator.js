@@ -5,7 +5,7 @@ class WebviewHtmlGenerator {
 
   getHtmlForWebview() {
     const nonce = getNonce();
-    const colorParams = this.state.graphColours
+    const colorParams = this.state.graphColors
       .map((_, index) => `[data-color="${index}"]{--ada-lightbulb-color:var(--ada-lightbulb-color${index});}`)
       .join(' ');
     return `<!DOCTYPE html>
@@ -26,7 +26,7 @@ class WebviewHtmlGenerator {
   getHtmlBodyForWebview(nonce) {
     let body,
       numRepos = Object.keys(this.state.repos).length;
-    const colorVars = this.state.graphColours
+    const colorVars = this.state.graphColors
       .map((graphColor, index) => '--ada-lightbulb-color' + index + ':' + graphColor + ';')
       .join(' ');
     if (numRepos > 0) {

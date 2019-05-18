@@ -1,9 +1,9 @@
 class Edge {
-  constructor(colour) {
+  constructor(color) {
     this.lines = [];
     this.end = 0;
     this.numUncommitted = 0;
-    this.colour = colour;
+    this.color = color;
   }
 
   addLine(p1, p2, isCommitted, lockedFirst) {
@@ -21,8 +21,8 @@ class Edge {
     }
   }
 
-  getColour() {
-    return this.colour;
+  getColor() {
+    return this.color;
   }
 
   getEnd() {
@@ -34,7 +34,7 @@ class Edge {
   }
 
   draw(svg, config) {
-    var colour = config.graphColours[this.colour % config.graphColours.length],
+    var color = config.graphColors[this.color % config.graphColors.length],
       i,
       x1,
       y1,
@@ -42,7 +42,7 @@ class Edge {
       y2,
       lines = [],
       curPath = '',
-      curColour = '',
+      curColor = '',
       d = config.grid.y * (config.graphStyle === 'angular' ? 0.38 : 0.8);
     for (i = 0; i < this.lines.length; i++) {
       x1 = this.lines[i].p1.x * config.grid.x + config.grid.offsetX;
@@ -83,15 +83,15 @@ class Edge {
       x2 = lines[i].p2.x;
       y2 = lines[i].p2.y;
       if (curPath !== '' && i > 0 && lines[i].isCommitted !== lines[i - 1].isCommitted) {
-        this.drawPath(svg, curPath, curColour);
+        this.drawPath(svg, curPath, curColor);
         curPath = '';
-        curColour = '';
+        curColor = '';
       }
       if (curPath === '' || (i > 0 && (x1 !== lines[i - 1].p2.x || y1 !== lines[i - 1].p2.y))) {
         curPath += 'M' + x1.toFixed(0) + ',' + y1.toFixed(1);
       }
-      if (curColour === '') {
-        curColour = lines[i].isCommitted ? colour : '#808080';
+      if (curColor === '') {
+        curColor = lines[i].isCommitted ? color : '#808080';
       }
       if (x1 === x2) {
         curPath += 'L' + x2.toFixed(0) + ',' + y2.toFixed(1);
@@ -123,17 +123,17 @@ class Edge {
         }
       }
     }
-    this.drawPath(svg, curPath, curColour);
+    this.drawPath(svg, curPath, curColor);
   }
 
-  drawPath(svg, path, colour) {
+  drawPath(svg, path, color) {
     var line1 = document.createElementNS('http://www.w3.org/2000/svg', 'path'),
       line2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     line1.setAttribute('class', 'shadow');
     line1.setAttribute('d', path);
     line2.setAttribute('class', 'line');
     line2.setAttribute('d', path);
-    line2.setAttribute('stroke', colour);
+    line2.setAttribute('stroke', color);
     svg.appendChild(line1);
     svg.appendChild(line2);
   }

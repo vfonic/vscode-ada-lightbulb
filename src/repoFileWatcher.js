@@ -16,7 +16,7 @@ class RepoFileWatcher {
   }
 
   start(repo) {
-    if (this.fsWatcher !== null) {
+    if (this.fsWatcher != null) {
       this.stop();
     }
     this.repo = repo;
@@ -27,7 +27,7 @@ class RepoFileWatcher {
   }
 
   stop() {
-    if (this.fsWatcher !== null) {
+    if (this.fsWatcher != null) {
       this.fsWatcher.dispose();
       this.fsWatcher = null;
     }
@@ -57,7 +57,7 @@ class RepoFileWatcher {
     if (new Date().getTime() < this.resumeAt) {
       return;
     }
-    if (this.refreshTimeout !== null) {
+    if (this.refreshTimeout != null) {
       clearTimeout(this.refreshTimeout);
     }
     this.refreshTimeout = setTimeout(() => {

@@ -4,7 +4,7 @@ class Graph {
     this.maxWidth = -1;
     this.vertices = [];
     this.edges = [];
-    this.availableColours = [];
+    this.availableColors = [];
     this.config = config;
 
     const svgNamespace = 'http://www.w3.org/2000/svg';
@@ -16,7 +16,7 @@ class Graph {
   loadCommits(commits, commitHead, commitLookup) {
     this.vertices = [];
     this.edges = [];
-    this.availableColours = [];
+    this.availableColors = [];
     var i, j;
     for (i = 0; i < commits.length; i++) {
       this.vertices.push(new Vertex(i));
@@ -32,7 +32,7 @@ class Graph {
       if (commits[0].hash === '*') {
         this.vertices[0].setCurrent();
         this.vertices[0].setNotCommited();
-      } else if (commitHead !== null && typeof commitLookup[commitHead] === 'number') {
+      } else if (commitHead != null && typeof commitLookup[commitHead] === 'number') {
         this.vertices[commitLookup[commitHead]].setCurrent();
       }
     }
@@ -75,8 +75,8 @@ class Graph {
     return this.vertices.length * this.config.grid.y + this.config.grid.offsetY - this.config.grid.y / 2;
   }
 
-  getVertexColour(v) {
-    return this.vertices[v].getColour() % this.config.graphColours.length;
+  getVertexColor(v) {
+    return this.vertices[v].getColor() % this.config.graphColors.length;
   }
 
   setDimensions(width, height) {
@@ -90,12 +90,12 @@ class Graph {
       parentVertex = this.vertices[i].getNextParent();
     var lastPoint = vertex.isNotOnEdge() ? vertex.getNextPoint() : vertex.getPoint(),
       curPoint;
-    if (parentVertex !== null && vertex.isMerge() && !vertex.isNotOnEdge() && !parentVertex.isNotOnEdge()) {
+    if (parentVertex != null && vertex.isMerge() && !vertex.isNotOnEdge() && !parentVertex.isNotOnEdge()) {
       var foundPointToParent = false,
         parentEdge = parentVertex.getEdge();
       for (i = startAt + 1; i < this.vertices.length; i++) {
         curPoint = this.vertices[i].getPointConnectingTo(parentVertex, parentEdge);
-        if (curPoint !== null) {
+        if (curPoint != null) {
           foundPointToParent = true;
         } else {
           curPoint = this.vertices[i].getNextPoint();
@@ -114,7 +114,7 @@ class Graph {
         }
       }
     } else {
-      var edge = new Edge(this.getAvailableColour(startAt));
+      var edge = new Edge(this.getAvailableColor(startAt));
       vertex.addToEdge(edge, lastPoint.x);
       vertex.registerUnavailablePoint(lastPoint.x, vertex, edge);
       for (i = startAt + 1; i < this.vertices.length; i++) {
@@ -138,26 +138,26 @@ class Graph {
       }
       edge.setEnd(i);
       this.edges.push(edge);
-      this.availableColours[edge.getColour()] = i;
+      this.availableColors[edge.getColor()] = i;
     }
   }
 
   findStart() {
     for (var i = 0; i < this.vertices.length; i++) {
-      if (this.vertices[i].getNextParent() !== null || this.vertices[i].isNotOnEdge()) {
+      if (this.vertices[i].getNextParent() != null || this.vertices[i].isNotOnEdge()) {
         return i;
       }
     }
     return -1;
   }
 
-  getAvailableColour(startAt) {
-    for (var i = 0; i < this.availableColours.length; i++) {
-      if (startAt > this.availableColours[i]) {
+  getAvailableColor(startAt) {
+    for (var i = 0; i < this.availableColors.length; i++) {
+      if (startAt > this.availableColors[i]) {
         return i;
       }
     }
-    this.availableColours.push(0);
-    return this.availableColours.length - 1;
+    this.availableColors.push(0);
+    return this.availableColors.length - 1;
   }
 }

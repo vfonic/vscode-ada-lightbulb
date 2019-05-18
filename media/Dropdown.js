@@ -1,6 +1,5 @@
 class Dropdown {
   constructor(id, showInfo, dropdownType, changeCallback) {
-    var _this = this;
     this.options = [];
     this.selectedOption = 0;
     this.dropdownVisible = false;
@@ -27,6 +26,7 @@ class Dropdown {
     this.currentValueElem.className = 'dropdownCurrentValue';
     this.elem.appendChild(this.currentValueElem);
     this.elem.appendChild(this.menuElem);
+    const _this = this;
     document.addEventListener(
       'click',
       function(e) {
@@ -49,7 +49,7 @@ class Dropdown {
           } else {
             var option = e.target.closest('.dropdownOption');
             if (
-              option !== null &&
+              option != null &&
               option.parentNode === _this.optionsElem &&
               typeof option.dataset.id !== 'undefined'
             ) {

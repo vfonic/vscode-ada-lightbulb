@@ -2,9 +2,8 @@ window.vscode = acquireVsCodeApi();
 
 new ContextMenu();
 var graphViewConfig = {
-  autoCenterCommitDetailsView: viewState.autoCenterCommitDetailsView,
   fetchAvatars: viewState.fetchAvatars,
-  graphColours: viewState.graphColours,
+  graphColors: viewState.graphColors,
   graphStyle: viewState.graphStyle,
   grid: { x: 16, y: 24, offsetX: 8, offsetY: 12, expandY: 250 },
   initialLoadCommits: viewState.initialLoadCommits,
@@ -28,7 +27,7 @@ window.addEventListener('message', function(event) {
       refreshGraphOrDisplayError(msg.status, 'Unable to Cherry Pick Commit');
       break;
     case 'commitDetails':
-      if (msg.commitDetails === null) {
+      if (msg.commitDetails == null) {
         gitGraph.hideCommitDetails();
         Dialog.showErrorDialog('Unable to load commit details', null, null);
       } else {
@@ -91,7 +90,7 @@ window.addEventListener('message', function(event) {
 });
 
 function refreshGraphOrDisplayError(status, errorMessage) {
-  if (status === null) {
+  if (status == null) {
     gitGraph.refresh(true);
   } else {
     Dialog.showErrorDialog(errorMessage, status, null);

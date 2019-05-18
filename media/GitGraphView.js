@@ -120,8 +120,7 @@ class GitGraphView {
     var repoPaths = Object.keys(repos),
       changedRepo = false;
     if (typeof repos[this.currentRepo] === 'undefined') {
-      this.currentRepo =
-        lastActiveRepo !== null && typeof repos[lastActiveRepo] !== 'undefined' ? lastActiveRepo : repoPaths[0];
+      this.currentRepo = lastActiveRepo != null && repos[lastActiveRepo] ? lastActiveRepo : repoPaths[0];
       this.saveState();
       changedRepo = true;
     }
@@ -160,11 +159,11 @@ class GitGraphView {
     this.gitBranches = branchOptions;
     this.gitBranchHead = branchHead;
     if (
-      this.currentBranch === null ||
+      this.currentBranch == null ||
       (this.currentBranch !== '' && this.gitBranches.indexOf(this.currentBranch) === -1)
     ) {
       this.currentBranch =
-        this.config.showCurrentBranchByDefault && this.gitBranchHead !== null ? this.gitBranchHead : '';
+        this.config.showCurrentBranchByDefault && this.gitBranchHead != null ? this.gitBranchHead : '';
     }
     this.saveState();
     var options = [
@@ -184,7 +183,7 @@ class GitGraphView {
   }
 
   triggerLoadBranchesCallback(changes, isRepo) {
-    if (this.loadBranchesCallback !== null) {
+    if (this.loadBranchesCallback != null) {
       this.loadBranchesCallback(changes, isRepo);
       this.loadBranchesCallback = null;
     }
@@ -251,7 +250,7 @@ class GitGraphView {
   }
 
   triggerLoadCommitsCallback(changes) {
-    if (this.loadCommitsCallback !== null) {
+    if (this.loadCommitsCallback != null) {
       this.loadCommitsCallback(changes);
       this.loadCommitsCallback = null;
     }
@@ -271,7 +270,7 @@ class GitGraphView {
 
   refresh(hard) {
     if (hard) {
-      if (this.expandedCommit !== null) {
+      if (this.expandedCommit != null) {
         this.expandedCommit = null;
         this.saveState();
       }
@@ -281,7 +280,7 @@ class GitGraphView {
   }
 
   requestLoadBranches(hard, loadedCallback) {
-    if (this.loadBranchesCallback !== null) {
+    if (this.loadBranchesCallback != null) {
       return;
     }
     this.loadBranchesCallback = loadedCallback;
@@ -294,14 +293,14 @@ class GitGraphView {
   }
 
   requestLoadCommits(hard, loadedCallback) {
-    if (this.loadCommitsCallback !== null) {
+    if (this.loadCommitsCallback != null) {
       return;
     }
     this.loadCommitsCallback = loadedCallback;
     sendMessage({
       command: 'loadCommits',
       repo: this.currentRepo,
-      branchName: this.currentBranch !== null ? this.currentBranch : '',
+      branchName: this.currentBranch != null ? this.currentBranch : '',
       maxCommits: this.maxCommits,
       showRemoteBranches: this.showRemoteBranches,
       hard: hard,
@@ -362,7 +361,7 @@ class GitGraphView {
 
   renderGraph() {
     var colHeadersElem = document.getElementById('tableColHeaders');
-    if (colHeadersElem === null) {
+    if (colHeadersElem == null) {
       return;
     }
     const headerHeight = colHeadersElem.clientHeight + 1;
@@ -415,7 +414,7 @@ class GitGraphView {
         ' data-id="' +
         i +
         '" data-color="' +
-        this.graph.getVertexColour(i) +
+        this.graph.getVertexColor(i) +
         '"><td></td><td>' +
         refs +
         (this.commits[i].hash === currentHash ? '<b>' + message + '</b>' : message) +
@@ -468,14 +467,14 @@ class GitGraphView {
           break;
         }
       }
-      if (elem === null) {
+      if (elem == null) {
         this.expandedCommit = null;
         this.saveState();
       } else {
         this.expandedCommit.id = parseInt(elem.dataset.id);
         this.expandedCommit.srcElem = elem;
         this.saveState();
-        if (this.expandedCommit.commitDetails != null && this.expandedCommit.fileTree !== null) {
+        if (this.expandedCommit.commitDetails != null && this.expandedCommit.fileTree != null) {
           this.showCommitDetails(this.expandedCommit.commitDetails, this.expandedCommit.fileTree);
         } else {
           this.loadCommitDetails(elem);
@@ -748,11 +747,7 @@ class GitGraphView {
 
     addListenerToClass('commit', 'click', function(e) {
       var sourceElem = e.target.closest('.commit');
-      if (sourceElem.dataset.hash === '*') {
-        _this.loadUncommittedChanges();
-      } else {
-        _this.loadCommitDetails(sourceElem);
-      }
+      _this.loadCommitDetails(sourceElem);
     });
 
     addListenerToClass('gitRef', 'contextmenu', function(e) {
@@ -1096,10 +1091,6 @@ class GitGraphView {
     });
   }
 
-  loadUncommittedChanges() {
-    console.log(JSON.stringify(this.commits[0])); //const unsavedChanges = this.getGitUnsavedChanges(repo);
-  }
-
   loadCommitDetails(sourceElem) {
     this.expandedCommit = {
       id: parseInt(sourceElem.dataset.id),
@@ -1116,7 +1107,7 @@ class GitGraphView {
   }
 
   hideCommitDetails() {
-    if (this.expandedCommit !== null) {
+    if (this.expandedCommit != null) {
       var elem = document.getElementById('commitDetails');
       emptyElement(elem);
       this.expandedCommit = null;
@@ -1172,7 +1163,7 @@ class GitGraphView {
 
     addListenerToClass('gitFile', 'click', function(e) {
       var sourceElem = e.target.closest('.gitFile');
-      if (_this.expandedCommit === null || !sourceElem.classList.contains('gitDiffPossible')) {
+      if (_this.expandedCommit == null || !sourceElem.classList.contains('gitDiffPossible')) {
         return;
       }
       sendMessage({

@@ -116,7 +116,7 @@ class Dialog {
           '" type="text" value="' +
           input.default +
           '"' +
-          (input.type === 'text' && input.placeholder !== null ? ' placeholder="' + input.placeholder + '"' : '') +
+          (input.type === 'text' && input.placeholder != null ? ' placeholder="' + input.placeholder + '"' : '') +
           '/>';
         if (input.type === 'text-ref') {
           textRefInput = i;
@@ -162,7 +162,7 @@ class Dialog {
       dialogInput_1.addEventListener('keyup', function() {
         const REF_INVALID_MATCHER = /^[-\/].*|[\\" ><~^:?*[]|\.\.|\/\/|\/\.|@{|[.\/]$|\.lock$|^@$/g;
         var noInput = dialogInput_1.value === '',
-          invalidInput = dialogInput_1.value.match(REF_INVALID_MATCHER) !== null;
+          invalidInput = dialogInput_1.value.match(REF_INVALID_MATCHER) != null;
         var newClassName = 'active' + (noInput ? ' noInput' : invalidInput ? ' inputInvalid' : '');
         if (dialog.className !== newClassName) {
           dialog.className = newClassName;
@@ -179,7 +179,7 @@ class Dialog {
       svgIcons.alert +
         'Error: ' +
         message +
-        (reason !== null
+        (reason != null
           ? '<br><span class="errorReason">' +
             escapeHtml(reason)
               .split('\n')
@@ -211,20 +211,20 @@ class Dialog {
     dialog.innerHTML =
       html +
       '<br>' +
-      (actionName !== null ? '<div id="dialogAction" class="roundedBtn">' + actionName + '</div>' : '') +
+      (actionName != null ? '<div id="dialogAction" class="roundedBtn">' + actionName + '</div>' : '') +
       '<div id="dialogDismiss" class="roundedBtn">' +
       dismissName +
       '</div>';
     var formEl = document.createElement('form');
     formEl.id = DIALOG_FORM_ID;
     dialog.appendChild(formEl);
-    if (actionName !== null && actioned !== null) {
+    if (actionName != null && actioned != null) {
       formEl.addEventListener('submit', actioned);
       document.getElementById('dialogAction').addEventListener('click', actioned);
     }
     document.getElementById('dialogDismiss').addEventListener('click', Dialog.hideDialog);
     this.dialogMenuSource = sourceElem;
-    if (this.dialogMenuSource !== null) {
+    if (this.dialogMenuSource != null) {
       this.dialogMenuSource.classList.add('dialogActive');
     }
   }
@@ -235,7 +235,7 @@ class Dialog {
     dialog.className = '';
     dialogBacking.className = '';
     dialog.innerHTML = '';
-    if (this.dialogMenuSource !== null) {
+    if (this.dialogMenuSource != null) {
       this.dialogMenuSource.classList.remove('dialogActive');
       this.dialogMenuSource = null;
     }

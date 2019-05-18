@@ -3,3 +3,4 @@ node_modules
 *.vsix
 .idea/*
 .vscode/*
+package-lock.json

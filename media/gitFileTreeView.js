@@ -48,7 +48,7 @@ class GitFileTreeView {
         html +=
           '<li class="gitFile ' +
           gitFile.type +
-          (gitFile.additions !== null && gitFile.deletions !== null ? ' gitDiffPossible' : '') +
+          (gitFile.additions != null && gitFile.deletions != null ? ' gitDiffPossible' : '') +
           '" data-oldfilepath="' +
           encodeURIComponent(gitFile.oldFilePath) +
           '" data-newfilepath="' +
@@ -56,7 +56,7 @@ class GitFileTreeView {
           '" data-type="' +
           gitFile.type +
           '"' +
-          (gitFile.additions === null || gitFile.deletions === null
+          (gitFile.additions == null || gitFile.deletions == null
             ? ' title="This is a binary file, unable to view diff."'
             : '') +
           '><span class="gitFileIcon">' +
@@ -68,7 +68,7 @@ class GitFileTreeView {
               escapeHtml(gitFile.oldFilePath + ' was renamed to ' + gitFile.newFilePath) +
               '">R</span>'
             : '') +
-          (gitFile.type !== 'A' && gitFile.type !== 'D' && gitFile.additions !== null && gitFile.deletions !== null
+          (gitFile.type !== 'A' && gitFile.type !== 'D' && gitFile.additions != null && gitFile.deletions != null
             ? '<span class="gitFileAddDel">(<span class="gitFileAdditions" title="' +
               gitFile.additions +
               ' addition' +

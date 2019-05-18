@@ -1,8 +1,6 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
 const vscode = require('vscode');
 const avatarManager_1 = require('./avatarManager');
-const dataSource_1 = require('./dataSource');
+const { DataSource } = require('./dataSource');
 const diffDocProvider_1 = require('./diffDocProvider');
 const ExtensionState = require('./extensionState').default;
 const gitGraphView_1 = require('./gitGraphView');
@@ -11,7 +9,7 @@ const statusBarItem_1 = require('./statusBarItem');
 
 function activate(context) {
   const extensionState = new ExtensionState(context);
-  const dataSource = new dataSource_1.DataSource();
+  const dataSource = new DataSource();
   const avatarManager = new avatarManager_1.AvatarManager(dataSource, extensionState);
   const statusBarItem = new statusBarItem_1.StatusBarItem(context);
   const repoManager = new repoManager_1.RepoManager(dataSource, extensionState, statusBarItem);
@@ -24,11 +22,6 @@ function activate(context) {
         avatarManager,
         repoManager
       );
-    })
-  );
-  context.subscriptions.push(
-    vscode.commands.registerCommand('ada-lightbulb.clearAvatarCache', () => {
-      avatarManager.clearCache();
     })
   );
   context.subscriptions.push(

@@ -48,7 +48,7 @@ class AvatarManager {
     this.avatarStorageFolder = this.extensionState.getAvatarStoragePath();
     this.avatars = this.extensionState.getAvatarCache();
     this.queue = new AvatarRequestQueue(() => {
-      if (this.interval !== null) {
+      if (this.interval != null) {
         return;
       }
       this.interval = setInterval(() => {
@@ -67,7 +67,7 @@ class AvatarManager {
       ) {
         this.queue.add(email, repo, commits, false);
       }
-      if (this.avatars[email].image !== null) {
+      if (this.avatars[email].image != null) {
         this.sendAvatarToWebview(email, () => {
           this.removeAvatarFromCache(email);
           this.queue.add(email, repo, commits, true);
@@ -100,7 +100,7 @@ class AvatarManager {
     return __awaiter(this, void 0, void 0, function*() {
       if (this.queue.hasItems()) {
         let avatarRequest = this.queue.takeItem();
-        if (avatarRequest === null) {
+        if (avatarRequest == null) {
           return;
         }
         let remoteSource = yield this.getRemoteSource(avatarRequest);
@@ -114,7 +114,7 @@ class AvatarManager {
           default:
             this.fetchFromGravatar(avatarRequest);
         }
-      } else if (this.interval !== null) {
+      } else if (this.interval != null) {
         clearInterval(this.interval);
         this.interval = null;
       }
@@ -128,7 +128,7 @@ class AvatarManager {
       } else {
         let remoteUrl = yield this.dataSource.getRemoteUrl(avatarRequest.repo),
           remoteSource;
-        if (remoteUrl !== null) {
+        if (remoteUrl != null) {
           if (remoteUrl.startsWith('https://github.com/')) {
             let remoteUrlComps = remoteUrl.split('/');
             remoteSource = {
@@ -184,7 +184,7 @@ class AvatarManager {
                 let commit = JSON.parse(respBody);
                 if (commit.author && commit.author.avatar_url) {
                   let img = yield this.downloadAvatarImage(avatarRequest.email, commit.author.avatar_url + '&size=54');
-                  if (img !== null) {
+                  if (img != null) {
                     this.saveAvatar(avatarRequest.email, img, false);
                   }
                   return;
@@ -248,7 +248,7 @@ class AvatarManager {
                 let users = JSON.parse(respBody);
                 if (users.length > 0 && users[0].avatar_url) {
                   let img = yield this.downloadAvatarImage(avatarRequest.email, users[0].avatar_url);
-                  if (img !== null) {
+                  if (img != null) {
                     this.saveAvatar(avatarRequest.email, img, false);
                   }
                   return;
@@ -283,14 +283,14 @@ class AvatarManager {
           'https://secure.gravatar.com/avatar/' + hash + '?s=54&d=404'
         ),
         identicon = false;
-      if (img === null) {
+      if (img == null) {
         img = yield this.downloadAvatarImage(
           avatarRequest.email,
           'https://secure.gravatar.com/avatar/' + hash + '?s=54&d=identicon'
         );
         identicon = true;
       }
-      if (img !== null) {
+      if (img != null) {
         this.saveAvatar(avatarRequest.email, img, identicon);
       }
     });
@@ -360,11 +360,11 @@ class AvatarManager {
   }
 
   sendAvatarToWebview(email, onError) {
-    if (this.view !== null) {
+    if (this.view != null) {
       fs.readFile(this.avatarStorageFolder + '/' + this.avatars[email].image, (err, data) => {
         if (err) {
           onError();
-        } else if (this.view !== null) {
+        } else if (this.view != null) {
           this.view.sendMessage({
             command: 'fetchAvatar',
             email: email,
