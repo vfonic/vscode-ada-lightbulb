@@ -1,3 +1,7 @@
+## 0.3.0 (2019-05-19)
+- Gitignore .vscode files
+- Add commit details view for uncommitted changes
+
 ## 0.2.1 (2019-05-14)
 - Update bump config
 
