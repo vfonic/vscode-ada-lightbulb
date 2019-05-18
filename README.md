@@ -2,6 +2,8 @@
 
 View a git graph of your repository, and easily perform Git actions from the graph.
 
+NOTE: The extension is currently under active development. Expect breaking changes until v1.0.0.
+
 <p><img src="https://github.com/vfonic/vscode-ada-lightbulb/raw/master/resources/Lightbolb.gif" height="300px"></p>
 
 ## Demo
