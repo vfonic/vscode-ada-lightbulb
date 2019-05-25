@@ -50,13 +50,7 @@ class DiffDocument {
 
 function encodeDiffDocUri(repo, path, commit) {
   return vscode.Uri.parse(
-    DiffDocProvider.scheme +
-      ':' +
-      utils_1.getPathFromStr(path) +
-      '?commit=' +
-      encodeURIComponent(commit) +
-      '&repo=' +
-      encodeURIComponent(repo)
+    DiffDocProvider.scheme + ':' + path + '?commit=' + encodeURIComponent(commit) + '&repo=' + encodeURIComponent(repo)
   );
 }
 

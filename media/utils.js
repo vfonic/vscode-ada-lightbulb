@@ -1,3 +1,12 @@
+window.exports =
+  window.exports ||
+  class {
+    set default(klass) {
+      window[klass.constructor.name] = klass;
+    }
+  };
+window.module = window.module || { exports: window.exports };
+
 const arraysEqual = (a, b, equalElements) => {
   if (a.length !== b.length) {
     return false;

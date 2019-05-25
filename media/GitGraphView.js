@@ -1,69 +1,32 @@
 class GitGraphView {
-  constructor(repos, lastActiveRepo, config, prevState) {
-    var _this = this;
+  constructor(repos, lastActiveRepo, config) {
     this.gitBranches = [];
-    this.gitBranchHead = null;
     this.commits = [];
-    this.commitHead = null;
     this.commitLookup = {};
-    this.avatars = {};
-    this.currentBranch = null;
-    this.moreCommitsAvailable = false;
-    this.showRemoteBranches = true;
-    this.expandedCommit = null;
-    this.loadBranchesCallback = null;
-    this.loadCommitsCallback = null;
     this.gitRepos = repos;
     this.config = config;
-    this.maxCommits = config.initialLoadCommits;
+    this.maxCommits = 75;
     this.graph = new Graph('commitGraph', this.config);
     this.tableElem = document.getElementById('commitTable');
     this.footerElem = document.getElementById('footer');
-    this.repoDropdown = new Dropdown('repoSelect', true, 'Repos', function(value) {
-      _this.currentRepo = value;
-      _this.maxCommits = _this.config.initialLoadCommits;
-      _this.expandedCommit = null;
-      _this.currentBranch = null;
-      _this.saveState();
-      _this.refresh(true);
-    });
-    this.branchDropdown = new Dropdown('branchSelect', false, 'Branches', function(value) {
-      _this.currentBranch = value;
-      _this.maxCommits = _this.config.initialLoadCommits;
-      _this.expandedCommit = null;
-      _this.saveState();
-      _this.renderShowLoading();
-      _this.requestLoadCommits(true, function() {});
-    });
-    this.showRemoteBranchesElem = document.getElementById('showRemoteBranchesCheckbox');
-    this.showRemoteBranchesElem.addEventListener('change', function() {
-      _this.showRemoteBranches = _this.showRemoteBranchesElem.checked;
-      _this.saveState();
-      _this.refresh(true);
-    });
     this.scrollShadowElem = new ScrollShadow();
-    document.getElementById('refreshBtn').addEventListener('click', function() {
-      _this.refresh(true);
-    });
     this.observeWindowSizeChanges();
-    this.observeWebviewStyleChanges();
     this.observeWebviewScroll();
     this.renderShowLoading();
-    if (prevState) {
-      this.currentBranch = prevState.currentBranch;
-      this.showRemoteBranches = prevState.showRemoteBranches;
-      this.showRemoteBranchesElem.checked = this.showRemoteBranches;
-      if (typeof this.gitRepos[prevState.currentRepo] !== 'undefined') {
-        this.currentRepo = prevState.currentRepo;
-        this.maxCommits = prevState.maxCommits;
-        this.expandedCommit = prevState.expandedCommit;
-        this.avatars = prevState.avatars;
-        this.loadBranches(prevState.gitBranches, prevState.gitBranchHead, true, true);
-        this.loadCommits(prevState.commits, prevState.commitHead, prevState.moreCommitsAvailable, true);
-      }
-    }
     this.loadRepos(this.gitRepos, lastActiveRepo);
     this.requestLoadBranchesAndCommits(false);
+    this.selectPreviousCommit = this.selectPreviousCommit.bind(this);
+    this.selectNextCommit = this.selectNextCommit.bind(this);
+    new HotkeyManager(this.selectPreviousCommit, this.selectNextCommit);
+  }
+
+  selectPreviousCommit() {
+    const commitIndex = this.expandedCommit ? this.expandedCommit.id : -1;
+    this.loadCommitDetails(Math.max(commitIndex - 1, 0));
+  }
+  selectNextCommit() {
+    const commitIndex = this.expandedCommit ? this.expandedCommit.id : -1;
+    this.loadCommitDetails(Math.min(commitIndex + 1, this.commits.length - 1));
   }
 
   static getCommitDate(dateVal) {
@@ -72,71 +35,15 @@ class GitGraphView {
     const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     var dateStr = date.getDate() + ' ' + MONTHS[date.getMonth()] + ' ' + date.getFullYear();
     var timeStr = pad2(date.getHours()) + ':' + pad2(date.getMinutes());
-    switch (viewState.dateFormat) {
-      case 'Date Only':
-        value = dateStr;
-        break;
-
-      case 'Relative':
-        var diff = Math.round(new Date().getTime() / 1e3) - dateVal,
-          unit = void 0;
-        if (diff < 60) {
-          unit = 'second';
-        } else if (diff < 3600) {
-          unit = 'minute';
-          diff /= 60;
-        } else if (diff < 86400) {
-          unit = 'hour';
-          diff /= 3600;
-        } else if (diff < 604800) {
-          unit = 'day';
-          diff /= 86400;
-        } else if (diff < 2629800) {
-          unit = 'week';
-          diff /= 604800;
-        } else if (diff < 31557600) {
-          unit = 'month';
-          diff /= 2629800;
-        } else {
-          unit = 'year';
-          diff /= 31557600;
-        }
-        diff = Math.round(diff);
-        value = diff + ' ' + unit + (diff !== 1 ? 's' : '') + ' ago';
-        break;
-
-      default:
-        value = dateStr + ' ' + timeStr;
-    }
-    return {
-      title: dateStr + ' ' + timeStr,
-      value: value,
-    };
+    value = dateStr + ' ' + timeStr;
+    return { title: value, value };
   }
 
   loadRepos(repos, lastActiveRepo) {
     this.gitRepos = repos;
-    this.saveState();
-    var repoPaths = Object.keys(repos),
-      changedRepo = false;
-    if (typeof repos[this.currentRepo] === 'undefined') {
+    if (repos[this.currentRepo] == null) {
+      const repoPaths = Object.keys(repos);
       this.currentRepo = lastActiveRepo != null && repos[lastActiveRepo] ? lastActiveRepo : repoPaths[0];
-      this.saveState();
-      changedRepo = true;
-    }
-    var options = [],
-      repoComps,
-      i;
-    for (i = 0; i < repoPaths.length; i++) {
-      repoComps = repoPaths[i].split('/');
-      options.push({
-        name: repoComps[repoComps.length - 1],
-        value: repoPaths[i],
-      });
-    }
-    document.getElementById('repoControl').style.display = repoPaths.length > 1 ? 'inline' : 'none';
-    this.repoDropdown.setOptions(options, this.currentRepo);
-    if (changedRepo) {
       this.refresh(true);
     }
   }
@@ -146,39 +53,15 @@ class GitGraphView {
       this.triggerLoadBranchesCallback(false, isRepo);
       return;
     }
-    if (
-      !hard &&
-      arraysEqual(this.gitBranches, branchOptions, function(a, b) {
-        return a === b;
-      }) &&
-      this.gitBranchHead === branchHead
-    ) {
+    if (!hard && arraysEqual(this.gitBranches, branchOptions, (a, b) => a === b) && this.gitBranchHead === branchHead) {
       this.triggerLoadBranchesCallback(false, isRepo);
       return;
     }
     this.gitBranches = branchOptions;
     this.gitBranchHead = branchHead;
-    if (
-      this.currentBranch == null ||
-      (this.currentBranch !== '' && this.gitBranches.indexOf(this.currentBranch) === -1)
-    ) {
-      this.currentBranch =
-        this.config.showCurrentBranchByDefault && this.gitBranchHead != null ? this.gitBranchHead : '';
+    if (!this.currentBranch || this.gitBranches.indexOf(this.currentBranch) === -1) {
+      this.currentBranch = '';
     }
-    this.saveState();
-    var options = [
-      {
-        name: 'Show All',
-        value: '',
-      },
-    ];
-    for (var i = 0; i < this.gitBranches.length; i++) {
-      options.push({
-        name: this.gitBranches[i].indexOf('remotes/') === 0 ? this.gitBranches[i].substring(8) : this.gitBranches[i],
-        value: this.gitBranches[i],
-      });
-    }
-    this.branchDropdown.setOptions(options, this.currentBranch);
     this.triggerLoadBranchesCallback(true, isRepo);
   }
 
@@ -190,27 +73,7 @@ class GitGraphView {
   }
 
   loadCommits(commits, commitHead, moreAvailable, hard) {
-    if (
-      !hard &&
-      this.moreCommitsAvailable === moreAvailable &&
-      this.commitHead === commitHead &&
-      arraysEqual(this.commits, commits, function(a, b) {
-        return (
-          a.hash === b.hash &&
-          arraysEqual(a.refs, b.refs, function(a, b) {
-            return a.name === b.name && a.type === b.type;
-          }) &&
-          arraysEqual(a.parentHashes, b.parentHashes, function(a, b) {
-            return a === b;
-          })
-        );
-      })
-    ) {
-      if (this.commits.length > 0 && this.commits[0].hash === '*') {
-        this.commits[0] = commits[0];
-        this.saveState();
-        this.renderUncommitedChanges();
-      }
+    if (!hard && this.moreCommitsAvailable === moreAvailable && this.commitHead === commitHead) {
       this.triggerLoadCommitsCallback(false);
       return;
     }
@@ -218,35 +81,10 @@ class GitGraphView {
     this.commits = commits;
     this.commitHead = commitHead;
     this.commitLookup = {};
-    this.saveState();
-    var i,
-      expandedCommitVisible = false,
-      avatarsNeeded = {};
-    for (i = 0; i < this.commits.length; i++) {
-      this.commitLookup[this.commits[i].hash] = i;
-      if (this.expandedCommit != null && this.expandedCommit.hash === this.commits[i].hash) {
-        expandedCommitVisible = true;
-      }
-      if (
-        this.config.fetchAvatars &&
-        typeof this.avatars[this.commits[i].email] !== 'string' &&
-        this.commits[i].email !== ''
-      ) {
-        if (typeof avatarsNeeded[this.commits[i].email] === 'undefined') {
-          avatarsNeeded[this.commits[i].email] = [this.commits[i].hash];
-        } else {
-          avatarsNeeded[this.commits[i].email].push(this.commits[i].hash);
-        }
-      }
-    }
+    this.commits.forEach((commit, i) => (this.commitLookup[commit.hash] = i));
     this.graph.loadCommits(this.commits, this.commitHead, this.commitLookup);
-    if (this.expandedCommit != null && !expandedCommitVisible) {
-      this.expandedCommit = null;
-      this.saveState();
-    }
     this.render();
     this.triggerLoadCommitsCallback(true);
-    this.fetchAvatars(avatarsNeeded);
   }
 
   triggerLoadCommitsCallback(changes) {
@@ -256,23 +94,10 @@ class GitGraphView {
     }
   }
 
-  loadAvatar(email, image) {
-    this.avatars[email] = image;
-    this.saveState();
-    var avatarsElems = document.getElementsByClassName('avatar'),
-      escapedEmail = escapeHtml(email);
-    for (var i = 0; i < avatarsElems.length; i++) {
-      if (avatarsElems[i].dataset.email === escapedEmail) {
-        avatarsElems[i].innerHTML = '<img class="avatarImg" src="' + image + '">';
-      }
-    }
-  }
-
   refresh(hard) {
     if (hard) {
       if (this.expandedCommit != null) {
         this.expandedCommit = null;
-        this.saveState();
       }
       this.renderShowLoading();
     }
@@ -287,7 +112,6 @@ class GitGraphView {
     sendMessage({
       command: 'loadBranches',
       repo: this.currentRepo,
-      showRemoteBranches: this.showRemoteBranches,
       hard: hard,
     });
   }
@@ -302,16 +126,14 @@ class GitGraphView {
       repo: this.currentRepo,
       branchName: this.currentBranch != null ? this.currentBranch : '',
       maxCommits: this.maxCommits,
-      showRemoteBranches: this.showRemoteBranches,
       hard: hard,
     });
   }
 
   requestLoadBranchesAndCommits(hard) {
-    var _this = this;
-    this.requestLoadBranches(hard, function(branchChanges, isRepo) {
+    this.requestLoadBranches(hard, (branchChanges, isRepo) => {
       if (isRepo) {
-        _this.requestLoadCommits(hard, function(commitChanges) {
+        this.requestLoadCommits(hard, commitChanges => {
           if (!hard && (branchChanges || commitChanges)) {
             ContextMenu.hideDialogAndContextMenu();
           }
@@ -325,18 +147,6 @@ class GitGraphView {
     });
   }
 
-  fetchAvatars(avatars) {
-    var emails = Object.keys(avatars);
-    for (var i = 0; i < emails.length; i++) {
-      sendMessage({
-        command: 'fetchAvatar',
-        repo: this.currentRepo,
-        email: emails[i],
-        commits: avatars[emails[i]],
-      });
-    }
-  }
-
   saveState() {
     vscode.setState({
       gitRepos: this.gitRepos,
@@ -344,12 +154,10 @@ class GitGraphView {
       gitBranchHead: this.gitBranchHead,
       commits: this.commits,
       commitHead: this.commitHead,
-      avatars: this.avatars,
       currentBranch: this.currentBranch,
       currentRepo: this.currentRepo,
       moreCommitsAvailable: this.moreCommitsAvailable,
       maxCommits: this.maxCommits,
-      showRemoteBranches: this.showRemoteBranches,
       expandedCommit: this.expandedCommit,
     });
   }
@@ -370,7 +178,6 @@ class GitGraphView {
   }
 
   renderTable() {
-    var _this = this;
     var html = `
         <thead>
           <tr id="tableColHeaders">
@@ -382,34 +189,33 @@ class GitGraphView {
           </tr>
         </thead>
         <tbody>`,
-      i,
       currentHash = this.commits.length > 0 && this.commits[0].hash === '*' ? '*' : this.commitHead;
-    for (i = 0; i < this.commits.length; i++) {
+    this.commits.forEach((commit, i) => {
       var refs = '',
-        message = escapeHtml(this.commits[i].message),
-        date = GitGraphView.getCommitDate(this.commits[i].date),
+        message = escapeHtml(commit.message),
+        date = GitGraphView.getCommitDate(commit.date),
         j = void 0,
         refName = void 0,
         refActive = void 0,
         refHtml = void 0;
-      for (j = 0; j < this.commits[i].refs.length; j++) {
-        refName = escapeHtml(this.commits[i].refs[j].name);
-        refActive = this.commits[i].refs[j].type === 'head' && this.commits[i].refs[j].name === this.gitBranchHead;
+      commit.refs.forEach(ref => {
+        refName = escapeHtml(ref.name);
+        refActive = ref.type === 'head' && ref.name === this.gitBranchHead;
         refHtml =
           '<span class="gitRef ' +
-          this.commits[i].refs[j].type +
+          ref.type +
           (refActive ? ' active' : '') +
           '" data-name="' +
           refName +
           '">' +
-          (this.commits[i].refs[j].type === 'tag' ? svgIcons.tag : svgIcons.branch) +
+          (ref.type === 'tag' ? svgIcons.tag : svgIcons.branch) +
           refName +
           '</span>';
         refs = refActive ? refHtml + refs : refs + refHtml;
-      }
+      });
       html +=
         '<tr class="commit" data-hash="' +
-        this.commits[i].hash +
+        commit.hash +
         '"' +
         ' data-id="' +
         i +
@@ -417,30 +223,21 @@ class GitGraphView {
         this.graph.getVertexColor(i) +
         '"><td></td><td>' +
         refs +
-        (this.commits[i].hash === currentHash ? '<b>' + message + '</b>' : message) +
+        (commit.hash === currentHash ? '<b>' + message + '</b>' : message) +
         '</td><td title="' +
         date.title +
         '">' +
         date.value +
         '</td><td title="' +
-        escapeHtml(this.commits[i].author + ' <' + this.commits[i].email + '>') +
+        escapeHtml(commit.author + ' <' + commit.email + '>') +
         '">' +
-        (this.config.fetchAvatars
-          ? '<span class="avatar" data-email="' +
-            escapeHtml(this.commits[i].email) +
-            '">' +
-            (typeof this.avatars[this.commits[i].email] === 'string'
-              ? '<img class="avatarImg" src="' + this.avatars[this.commits[i].email] + '">'
-              : '') +
-            '</span>'
-          : '') +
-        escapeHtml(this.commits[i].author) +
+        escapeHtml(commit.author) +
         '</td><td title="' +
-        escapeHtml(this.commits[i].hash) +
+        escapeHtml(commit.hash) +
         '">' +
-        abbrevCommit(this.commits[i].hash) +
+        abbrevCommit(commit.hash) +
         '</td></tr>';
-    }
+    });
     this.tableElem.innerHTML = '<table>' + html + '</tbody></table>';
     this.footerElem.innerHTML = this.moreCommitsAvailable
       ? '<div id="loadMoreCommitsBtn" class="roundedBtn">Load More Commits</div>'
@@ -449,40 +246,15 @@ class GitGraphView {
     this.initElementResizer();
 
     if (this.moreCommitsAvailable) {
-      document.getElementById('loadMoreCommitsBtn').addEventListener('click', function() {
+      document.getElementById('loadMoreCommitsBtn').addEventListener('click', () => {
         document.getElementById('loadMoreCommitsBtn').parentNode.innerHTML =
           '<h2 id="loadingHeader">' + svgIcons.loading + 'Loading ...</h2>';
-        _this.maxCommits += _this.config.loadMoreCommits;
-        _this.hideCommitDetails();
-        _this.saveState();
-        _this.requestLoadCommits(true, function() {});
+        this.maxCommits += 75;
+        this.requestLoadCommits(true, () => {});
       });
     }
-    if (this.expandedCommit != null) {
-      var elem = null,
-        elems = document.getElementsByClassName('commit');
-      for (i = 0; i < elems.length; i++) {
-        if (this.expandedCommit.hash === elems[i].dataset.hash) {
-          elem = elems[i];
-          break;
-        }
-      }
-      if (elem == null) {
-        this.expandedCommit = null;
-        this.saveState();
-      } else {
-        this.expandedCommit.id = parseInt(elem.dataset.id);
-        this.expandedCommit.srcElem = elem;
-        this.saveState();
-        if (this.expandedCommit.commitDetails != null && this.expandedCommit.fileTree != null) {
-          this.showCommitDetails(this.expandedCommit.commitDetails, this.expandedCommit.fileTree);
-        } else {
-          this.loadCommitDetails(elem);
-        }
-      }
-    }
 
-    addListenerToClass('commit', 'contextmenu', function(e) {
+    addListenerToClass('commit', 'contextmenu', e => {
       e.stopPropagation();
       var sourceElem = e.target.closest('.commit');
       var hash = sourceElem.dataset.hash;
@@ -491,7 +263,7 @@ class GitGraphView {
         [
           {
             title: 'Add Tag',
-            onClick: function() {
+            onClick: () => {
               Dialog.showFormDialog(
                 'Add tag to commit <b><i>' + abbrevCommit(hash) + '</i></b>:',
                 [
@@ -523,10 +295,10 @@ class GitGraphView {
                   },
                 ],
                 'Add Tag',
-                function(values) {
+                values => {
                   sendMessage({
                     command: 'addTag',
-                    repo: _this.currentRepo,
+                    repo: this.currentRepo,
                     tagName: values[0],
                     commitHash: hash,
                     lightweight: values[1] === 'lightweight',
@@ -539,17 +311,17 @@ class GitGraphView {
           },
           {
             title: 'Create Branch',
-            onClick: function() {
+            onClick: () => {
               Dialog.showRefInputDialog(
                 'Enter the name of the branch you would like to create from commit <b><i>' +
                   abbrevCommit(hash) +
                   '</i></b>:',
                 '',
                 'Create Branch',
-                function(name) {
+                name => {
                   sendMessage({
                     command: 'createBranch',
-                    repo: _this.currentRepo,
+                    repo: this.currentRepo,
                     branchName: name,
                     commitHash: hash,
                   });
@@ -561,15 +333,15 @@ class GitGraphView {
           null,
           {
             title: 'Checkout',
-            onClick: function() {
+            onClick: () => {
               Dialog.showConfirmationDialog(
                 'Are you sure you want to checkout commit <b><i>' +
                   abbrevCommit(hash) +
                   "</i></b>? This will result in a 'detached HEAD' state.",
-                function() {
+                () => {
                   sendMessage({
                     command: 'checkoutCommit',
-                    repo: _this.currentRepo,
+                    repo: this.currentRepo,
                     commitHash: hash,
                   });
                 },
@@ -579,14 +351,14 @@ class GitGraphView {
           },
           {
             title: 'Cherry Pick',
-            onClick: function() {
-              if (_this.commits[_this.commitLookup[hash]].parentHashes.length === 1) {
+            onClick: () => {
+              if (this.commits[this.commitLookup[hash]].parentHashes.length === 1) {
                 Dialog.showConfirmationDialog(
                   'Are you sure you want to cherry pick commit <b><i>' + abbrevCommit(hash) + '</i></b>?',
-                  function() {
+                  () => {
                     sendMessage({
                       command: 'cherrypickCommit',
-                      repo: _this.currentRepo,
+                      repo: this.currentRepo,
                       commitHash: hash,
                       parentIndex: 0,
                     });
@@ -594,12 +366,12 @@ class GitGraphView {
                   sourceElem
                 );
               } else {
-                var options = _this.commits[_this.commitLookup[hash]].parentHashes.map(function(hash, index) {
+                var options = this.commits[this.commitLookup[hash]].parentHashes.map((hash, index) => {
                   return {
                     name:
                       abbrevCommit(hash) +
-                      (typeof _this.commitLookup[hash] === 'number'
-                        ? ': ' + _this.commits[_this.commitLookup[hash]].message
+                      (typeof this.commitLookup[hash] === 'number'
+                        ? ': ' + this.commits[this.commitLookup[hash]].message
                         : ''),
                     value: (index + 1).toString(),
                   };
@@ -611,10 +383,10 @@ class GitGraphView {
                   '1',
                   options,
                   'Yes, cherry pick commit',
-                  function(parentIndex) {
+                  parentIndex => {
                     sendMessage({
                       command: 'cherrypickCommit',
-                      repo: _this.currentRepo,
+                      repo: this.currentRepo,
                       commitHash: hash,
                       parentIndex: parseInt(parentIndex),
                     });
@@ -626,14 +398,14 @@ class GitGraphView {
           },
           {
             title: 'Revert',
-            onClick: function() {
-              if (_this.commits[_this.commitLookup[hash]].parentHashes.length === 1) {
+            onClick: () => {
+              if (this.commits[this.commitLookup[hash]].parentHashes.length === 1) {
                 Dialog.showConfirmationDialog(
                   'Are you sure you want to revert commit <b><i>' + abbrevCommit(hash) + '</i></b>?',
-                  function() {
+                  () => {
                     sendMessage({
                       command: 'revertCommit',
-                      repo: _this.currentRepo,
+                      repo: this.currentRepo,
                       commitHash: hash,
                       parentIndex: 0,
                     });
@@ -641,12 +413,12 @@ class GitGraphView {
                   sourceElem
                 );
               } else {
-                var options = _this.commits[_this.commitLookup[hash]].parentHashes.map(function(hash, index) {
+                var options = this.commits[this.commitLookup[hash]].parentHashes.map((hash, index) => {
                   return {
                     name:
                       abbrevCommit(hash) +
-                      (typeof _this.commitLookup[hash] === 'number'
-                        ? ': ' + _this.commits[_this.commitLookup[hash]].message
+                      (typeof this.commitLookup[hash] === 'number'
+                        ? ': ' + this.commits[this.commitLookup[hash]].message
                         : ''),
                     value: (index + 1).toString(),
                   };
@@ -658,10 +430,10 @@ class GitGraphView {
                   '1',
                   options,
                   'Yes, revert commit',
-                  function(parentIndex) {
+                  parentIndex => {
                     sendMessage({
                       command: 'revertCommit',
-                      repo: _this.currentRepo,
+                      repo: this.currentRepo,
                       commitHash: hash,
                       parentIndex: parseInt(parentIndex),
                     });
@@ -674,7 +446,7 @@ class GitGraphView {
           null,
           {
             title: 'Merge into current branch',
-            onClick: function() {
+            onClick: () => {
               Dialog.showCheckboxDialog(
                 'Are you sure you want to merge commit <b><i>' +
                   abbrevCommit(hash) +
@@ -682,10 +454,10 @@ class GitGraphView {
                 'Create a new commit even if fast-forward is possible',
                 true,
                 'Yes, merge',
-                function(createNewCommit) {
+                createNewCommit => {
                   sendMessage({
                     command: 'mergeCommit',
-                    repo: _this.currentRepo,
+                    repo: this.currentRepo,
                     commitHash: hash,
                     createNewCommit: createNewCommit,
                   });
@@ -696,7 +468,7 @@ class GitGraphView {
           },
           {
             title: 'Reset current branch to this Commit',
-            onClick: function() {
+            onClick: () => {
               Dialog.showSelectDialog(
                 'Are you sure you want to reset the <b>current branch</b> to commit <b><i>' +
                   abbrevCommit(hash) +
@@ -717,10 +489,10 @@ class GitGraphView {
                   },
                 ],
                 'Yes, reset',
-                function(mode) {
+                mode => {
                   sendMessage({
                     command: 'resetToCommit',
-                    repo: _this.currentRepo,
+                    repo: this.currentRepo,
                     commitHash: hash,
                     resetMode: mode,
                   });
@@ -732,7 +504,7 @@ class GitGraphView {
           null,
           {
             title: 'Copy Commit Hash to Clipboard',
-            onClick: function() {
+            onClick: () => {
               sendMessage({
                 command: 'copyToClipboard',
                 type: 'Commit Hash',
@@ -745,12 +517,12 @@ class GitGraphView {
       );
     });
 
-    addListenerToClass('commit', 'click', function(e) {
+    addListenerToClass('commit', 'click', e => {
       var sourceElem = e.target.closest('.commit');
-      _this.loadCommitDetails(sourceElem);
+      this.loadCommitDetails(sourceElem.dataset.id);
     });
 
-    addListenerToClass('gitRef', 'contextmenu', function(e) {
+    addListenerToClass('gitRef', 'contextmenu', e => {
       e.stopPropagation();
       var sourceElem = e.target.closest('.gitRef');
       var refName = unescapeHtml(sourceElem.dataset.name),
@@ -762,13 +534,13 @@ class GitGraphView {
         menu = [
           {
             title: 'Delete Tag',
-            onClick: function() {
+            onClick: () => {
               Dialog.showConfirmationDialog(
                 'Are you sure you want to delete the tag <b><i>' + escapeHtml(refName) + '</i></b>?',
-                function() {
+                () => {
                   sendMessage({
                     command: 'deleteTag',
-                    repo: _this.currentRepo,
+                    repo: this.currentRepo,
                     tagName: refName,
                   });
                 },
@@ -778,13 +550,13 @@ class GitGraphView {
           },
           {
             title: 'Push Tag',
-            onClick: function() {
+            onClick: () => {
               Dialog.showConfirmationDialog(
                 'Are you sure you want to push the tag <b><i>' + escapeHtml(refName) + '</i></b>?',
-                function() {
+                () => {
                   sendMessage({
                     command: 'pushTag',
-                    repo: _this.currentRepo,
+                    repo: this.currentRepo,
                     tagName: refName,
                   });
                   Dialog.showActionRunningDialog('Pushing Tag');
@@ -798,25 +570,25 @@ class GitGraphView {
       } else {
         if (sourceElem.classList.contains('head')) {
           menu = [];
-          if (_this.gitBranchHead !== refName) {
+          if (this.gitBranchHead !== refName) {
             menu.push({
               title: 'Checkout Branch',
-              onClick: function() {
-                return _this.checkoutBranchAction(sourceElem, refName);
+              onClick: () => {
+                return this.checkoutBranchAction(sourceElem, refName);
               },
             });
           }
           menu.push({
             title: 'Rename Branch',
-            onClick: function() {
+            onClick: () => {
               Dialog.showRefInputDialog(
                 'Enter the new name for branch <b><i>' + escapeHtml(refName) + '</i></b>:',
                 refName,
                 'Rename Branch',
-                function(newName) {
+                newName => {
                   sendMessage({
                     command: 'renameBranch',
-                    repo: _this.currentRepo,
+                    repo: this.currentRepo,
                     oldName: refName,
                     newName: newName,
                   });
@@ -825,20 +597,20 @@ class GitGraphView {
               );
             },
           });
-          if (_this.gitBranchHead !== refName) {
+          if (this.gitBranchHead !== refName) {
             menu.push(
               {
                 title: 'Delete Branch',
-                onClick: function() {
+                onClick: () => {
                   Dialog.showCheckboxDialog(
                     'Are you sure you want to delete the branch <b><i>' + escapeHtml(refName) + '</i></b>?',
                     'Force Delete',
                     false,
                     'Delete Branch',
-                    function(forceDelete) {
+                    forceDelete => {
                       sendMessage({
                         command: 'deleteBranch',
-                        repo: _this.currentRepo,
+                        repo: this.currentRepo,
                         branchName: refName,
                         forceDelete: forceDelete,
                       });
@@ -849,7 +621,7 @@ class GitGraphView {
               },
               {
                 title: 'Merge into current branch',
-                onClick: function() {
+                onClick: () => {
                   Dialog.showCheckboxDialog(
                     'Are you sure you want to merge branch <b><i>' +
                       escapeHtml(refName) +
@@ -857,10 +629,10 @@ class GitGraphView {
                     'Create a new commit even if fast-forward is possible',
                     true,
                     'Yes, merge',
-                    function(createNewCommit) {
+                    createNewCommit => {
                       sendMessage({
                         command: 'mergeBranch',
-                        repo: _this.currentRepo,
+                        repo: this.currentRepo,
                         branchName: refName,
                         createNewCommit: createNewCommit,
                       });
@@ -875,8 +647,8 @@ class GitGraphView {
           menu = [
             {
               title: 'Checkout Branch',
-              onClick: function() {
-                return _this.checkoutBranchAction(sourceElem, refName);
+              onClick: () => {
+                return this.checkoutBranchAction(sourceElem, refName);
               },
             },
           ];
@@ -885,7 +657,7 @@ class GitGraphView {
       }
       menu.push(null, {
         title: 'Copy ' + copyType + ' to Clipboard',
-        onClick: function() {
+        onClick: () => {
           sendMessage({
             command: 'copyToClipboard',
             type: copyType,
@@ -896,11 +668,11 @@ class GitGraphView {
       ContextMenu.showContextMenu(e, menu, sourceElem);
     });
 
-    addListenerToClass('gitRef', 'dblclick', function(e) {
+    addListenerToClass('gitRef', 'dblclick', e => {
       e.stopPropagation();
       hideDialogAndContextMenu();
       var sourceElem = e.target.closest('.gitRef');
-      _this.checkoutBranchAction(sourceElem, unescapeHtml(sourceElem.dataset.name));
+      this.checkoutBranchAction(sourceElem, unescapeHtml(sourceElem.dataset.name));
     });
   }
 
@@ -1000,18 +772,6 @@ class GitGraphView {
     new ElementResizer(trElement, resizeClassName, onResizeStart, onResize, onResizeEnd);
   }
 
-  renderUncommitedChanges() {
-    var date = GitGraphView.getCommitDate(this.commits[0].date);
-    document.getElementsByClassName('unsavedChanges')[0].innerHTML =
-      '<td></td><td><b>' +
-      escapeHtml(this.commits[0].message) +
-      '</b></td><td title="' +
-      date.title +
-      '">' +
-      date.value +
-      '</td><td title="* <>">*</td><td title="*">*</td>';
-  }
-
   renderShowLoading() {
     hideDialogAndContextMenu();
     this.graph.clear();
@@ -1020,7 +780,6 @@ class GitGraphView {
   }
 
   checkoutBranchAction(sourceElem, refName) {
-    var _this = this;
     if (sourceElem.classList.contains('head')) {
       sendMessage({
         command: 'checkoutBranch',
@@ -1036,10 +795,10 @@ class GitGraphView {
           '</i></b>:',
         refNameComps[refNameComps.length - 1],
         'Checkout Branch',
-        function(newBranch) {
+        newBranch => {
           sendMessage({
             command: 'checkoutBranch',
-            repo: _this.currentRepo,
+            repo: this.currentRepo,
             branchName: newBranch,
             remoteBranch: refName,
           });
@@ -1050,12 +809,11 @@ class GitGraphView {
   }
 
   observeWindowSizeChanges() {
-    var _this = this;
     var windowWidth = window.outerWidth,
       windowHeight = window.outerHeight;
-    window.addEventListener('resize', function() {
+    window.addEventListener('resize', () => {
       if (windowWidth === window.outerWidth && windowHeight === window.outerHeight) {
-        _this.renderGraph();
+        this.renderGraph();
       } else {
         windowWidth = window.outerWidth;
         windowHeight = window.outerHeight;
@@ -1063,117 +821,132 @@ class GitGraphView {
     });
   }
 
-  observeWebviewStyleChanges() {
-    var _this = this;
-    var fontFamily = getVSCodeStyle('--vscode-editor-font-family');
-    new MutationObserver(function() {
-      var ff = getVSCodeStyle('--vscode-editor-font-family');
-      if (ff !== fontFamily) {
-        fontFamily = ff;
-        _this.repoDropdown.refresh();
-        _this.branchDropdown.refresh();
-      }
-    }).observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['style'],
-    });
-  }
-
   observeWebviewScroll() {
-    var _this = this;
     var active = window.scrollY > 0;
     this.scrollShadowElem.className = active ? 'active' : '';
-    document.addEventListener('scroll', function() {
+    document.addEventListener('scroll', () => {
       if (active !== window.scrollY > 0) {
         active = window.scrollY > 0;
-        _this.scrollShadowElem.className = active ? 'active' : '';
+        this.scrollShadowElem.className = active ? 'active' : '';
       }
     });
   }
 
-  loadCommitDetails(sourceElem) {
+  loadCommitDetails(commitIndex) {
+    const commitData = document.querySelector('.commit[data-id="' + commitIndex + '"]').dataset;
     this.expandedCommit = {
-      id: parseInt(sourceElem.dataset.id),
-      hash: sourceElem.dataset.hash,
+      id: parseInt(commitData.id),
+      hash: commitData.hash,
       commitDetails: null,
-      fileTree: null,
     };
-    this.saveState();
     sendMessage({
       command: 'commitDetails',
       repo: this.currentRepo,
-      commitHash: sourceElem.dataset.hash,
+      commitHash: commitData.hash,
     });
   }
 
-  hideCommitDetails() {
-    if (this.expandedCommit != null) {
-      var elem = document.getElementById('commitDetails');
-      emptyElement(elem);
-      this.expandedCommit = null;
-      this.saveState();
-    }
-  }
+  showCommitDetails() {
+    new CommitView(this.expandedCommit, this.gitRepos[this.currentRepo], this.currentRepo).render();
 
-  showCommitDetails(commitDetails, fileTree) {
-    var commitDetailsEl = document.getElementById('commitDetails');
-    new CommitView(
-      commitDetailsEl,
-      commitDetails,
-      fileTree,
-      this.expandedCommit,
-      this.avatars,
-      this.gitRepos,
-      this.currentRepo
-    ).render();
-    this.saveState();
-
-    var _this = this;
-    // TODO: remove
-    // document.getElementById('commitDetailsClose').addEventListener('click', function() {
-    //   _this.hideCommitDetails();
-    // });
-    // TODO: remove
-    addListenerToClass('gitFolder', 'click', function(e) {
-      function alterGitFileTree(folder, folderPath, open) {
-        var path = folderPath.split('/'),
-          i,
-          cur = folder;
-        for (i = 0; i < path.length; i++) {
-          if (typeof cur.contents[path[i]] !== 'undefined') {
-            cur = cur.contents[path[i]];
-            if (i === path.length - 1) {
-              cur.open = open;
-              return;
-            }
-          } else {
-            return;
-          }
-        }
-      }
-      var sourceElem = e.target.closest('.gitFolder');
-      var parent = sourceElem.parentElement;
-      parent.classList.toggle('closed');
-      var isOpen = !parent.classList.contains('closed');
-      parent.children[0].children[0].innerHTML = isOpen ? svgIcons.openFolder : svgIcons.closedFolder;
-      parent.children[1].classList.toggle('hidden');
-      alterGitFileTree(_this.expandedCommit.fileTree, decodeURIComponent(sourceElem.dataset.folderpath), isOpen);
-      _this.saveState();
-    });
-
-    addListenerToClass('gitFile', 'click', function(e) {
+    addListenerToClass('gitFile', 'click', e => {
       var sourceElem = e.target.closest('.gitFile');
-      if (_this.expandedCommit == null || !sourceElem.classList.contains('gitDiffPossible')) {
+      if (!sourceElem.classList.contains('gitDiffPossible')) {
         return;
       }
       sendMessage({
         command: 'viewDiff',
-        repo: _this.currentRepo,
-        commitHash: _this.expandedCommit.hash,
-        oldFilePath: decodeURIComponent(sourceElem.dataset.oldfilepath),
+        repo: this.currentRepo,
+        commitHash: this.expandedCommit.hash,
+        filePath: decodeURIComponent(sourceElem.dataset.filepath),
         newFilePath: decodeURIComponent(sourceElem.dataset.newfilepath),
-        type: sourceElem.dataset.type,
+        statusCode: sourceElem.dataset.statuscode,
       });
     });
+  }
+
+  get commitDetails() {
+    return this._commitDetails;
+  }
+  set commitDetails(value) {
+    this._expandedCommit.commitDetails = value;
+    this.saveState();
+  }
+  get commitHead() {
+    return this._commitHead;
+  }
+  set commitHead(value) {
+    this._commitHead = value;
+    this.saveState();
+  }
+  get commitLookup() {
+    return this._commitLookup;
+  }
+  set commitLookup(value) {
+    this._commitLookup = value;
+    this.saveState();
+  }
+  get commits() {
+    return this._commits;
+  }
+  set commits(value) {
+    this._commits = value;
+    this.saveState();
+  }
+  get currentBranch() {
+    return this._currentBranch;
+  }
+  set currentBranch(value) {
+    this._currentBranch = value;
+    this.saveState();
+  }
+  get currentRepo() {
+    return this._currentRepo;
+  }
+  set currentRepo(value) {
+    this._currentRepo = value;
+    this.saveState();
+  }
+  get expandedCommit() {
+    return this._expandedCommit;
+  }
+  set expandedCommit(value) {
+    this._expandedCommit = value;
+    this.saveState();
+  }
+  get gitBranches() {
+    return this._gitBranches;
+  }
+  set gitBranches(value) {
+    this._gitBranches = value;
+    this.saveState();
+  }
+  get gitBranchHead() {
+    return this._gitBranchHead;
+  }
+  set gitBranchHead(value) {
+    this._gitBranchHead = value;
+    this.saveState();
+  }
+  get gitRepos() {
+    return this._gitRepos;
+  }
+  set gitRepos(value) {
+    this._gitRepos = value;
+    this.saveState();
+  }
+  get maxCommits() {
+    return this._maxCommits;
+  }
+  set maxCommits(value) {
+    this._maxCommits = value;
+    this.saveState();
+  }
+  get moreCommitsAvailable() {
+    return this._moreCommitsAvailable;
+  }
+  set moreCommitsAvailable(value) {
+    this._moreCommitsAvailable = value;
+    this.saveState();
   }
 }

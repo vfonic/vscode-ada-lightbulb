@@ -1,27 +1,17 @@
 const vscode = require('vscode');
-const avatarManager_1 = require('./avatarManager');
-const { DataSource } = require('./dataSource');
+const { DataSource } = require('./DataSource');
 const diffDocProvider_1 = require('./diffDocProvider');
-const ExtensionState = require('./extensionState').default;
-const gitGraphView_1 = require('./gitGraphView');
-const repoManager_1 = require('./repoManager');
-const statusBarItem_1 = require('./statusBarItem');
+const ExtensionState = require('./ExtensionState').default;
+const gitGraphView_1 = require('./GitGraphView');
+const repoManager_1 = require('./RepoManager');
 
 function activate(context) {
   const extensionState = new ExtensionState(context);
   const dataSource = new DataSource();
-  const avatarManager = new avatarManager_1.AvatarManager(dataSource, extensionState);
-  const statusBarItem = new statusBarItem_1.StatusBarItem(context);
-  const repoManager = new repoManager_1.RepoManager(dataSource, extensionState, statusBarItem);
+  const repoManager = new repoManager_1.RepoManager(dataSource, extensionState);
   context.subscriptions.push(
     vscode.commands.registerCommand('ada-lightbulb.view', () => {
-      gitGraphView_1.GitGraphView.createOrShow(
-        context.extensionPath,
-        dataSource,
-        extensionState,
-        avatarManager,
-        repoManager
-      );
+      gitGraphView_1.GitGraphView.createOrShow(context.extensionPath, dataSource, extensionState, repoManager);
     })
   );
   context.subscriptions.push(
@@ -32,13 +22,7 @@ function activate(context) {
   );
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration(e => {
-      if (e.affectsConfiguration('ada-lightbulb.showStatusBarItem')) {
-        statusBarItem.refresh();
-      } else if (e.affectsConfiguration('ada-lightbulb.dateType')) {
-        dataSource.generateGitCommandFormats();
-      } else if (e.affectsConfiguration('ada-lightbulb.maxDepthOfRepoSearch')) {
-        repoManager.maxDepthOfRepoSearchChanged();
-      } else if (e.affectsConfiguration('git.path')) {
+      if (e.affectsConfiguration('git.path')) {
         dataSource.registerGitPath();
       }
     })

@@ -31,12 +31,6 @@ class WebviewHtmlGenerator {
       .join(' ');
     if (numRepos > 0) {
       body = `<body style="${colorVars}">
-      <div id="controls">
-        <span id="repoControl"><span class="unselectable">Repo: </span><div id="repoSelect" class="dropdown"></div></span>
-        <span id="branchControl"><span class="unselectable">Branch: </span><div id="branchSelect" class="dropdown"></div></span>
-        <label id="showRemoteBranchesControl"><input type="checkbox" id="showRemoteBranchesCheckbox" value="1" checked>Show Remote Branches</label>
-        <div id="refreshBtn" class="roundedBtn">Refresh</div>
-      </div>
       <div id="content">
         <div id="commitGraph"></div>
         <div id="commitTable"></div>
@@ -52,13 +46,15 @@ class WebviewHtmlGenerator {
       <script src="${this.getMediaUri('utils.js')}"></script>
       <script src="${this.getMediaUri('commit_utils.js')}"></script>
       <script src="${this.getMediaUri('html_utils.js')}"></script>
+      <script src="${this.getMediaUri('HotkeyManager.js')}"></script>
       <script src="${this.getMediaUri('CommitView.js')}"></script>
       <script src="${this.getMediaUri('ContextMenu.js')}"></script>
       <script src="${this.getMediaUri('Dialog.js')}"></script>
       <script src="${this.getMediaUri('Dropdown.js')}"></script>
       <script src="${this.getMediaUri('Edge.js')}"></script>
       <script src="${this.getMediaUri('ElementResizer.js')}"></script>
-      <script src="${this.getMediaUri('GitFileTreeView.js')}"></script>
+      <script src="${this.getMediaUri('CommitFileListView.js')}"></script>
+      <script src="${this.getMediaUri('CommitStatusCode.js')}"></script>
       <script src="${this.getMediaUri('GitGraphView.js')}"></script>
       <script src="${this.getMediaUri('Graph.js')}"></script>
       <script src="${this.getMediaUri('Vertex.js')}"></script>
@@ -80,6 +76,10 @@ class WebviewHtmlGenerator {
 
   getMediaUri(file) {
     return this.state.assetLoader.getUri('media', file).with({ scheme: 'vscode-resource' });
+  }
+
+  getNodeModulesUri(file) {
+    return this.state.assetLoader.getUri('node_modules', file).with({ scheme: 'vscode-resource' });
   }
 }
 

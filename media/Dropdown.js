@@ -26,39 +26,34 @@ class Dropdown {
     this.currentValueElem.className = 'dropdownCurrentValue';
     this.elem.appendChild(this.currentValueElem);
     this.elem.appendChild(this.menuElem);
-    const _this = this;
     document.addEventListener(
       'click',
-      function(e) {
+      e => {
         if (!e.target) {
           return;
         }
-        if (e.target === _this.currentValueElem) {
-          _this.dropdownVisible = !_this.dropdownVisible;
-          if (_this.dropdownVisible) {
-            _this.filterInput.value = '';
-            _this.filter();
+        if (e.target === this.currentValueElem) {
+          this.dropdownVisible = !this.dropdownVisible;
+          if (this.dropdownVisible) {
+            this.filterInput.value = '';
+            this.filter();
           }
-          _this.elem.classList.toggle('dropdownOpen');
-          if (_this.dropdownVisible) {
-            _this.filterInput.focus();
+          this.elem.classList.toggle('dropdownOpen');
+          if (this.dropdownVisible) {
+            this.filterInput.focus();
           }
-        } else if (_this.dropdownVisible) {
-          if (e.target.closest('.dropdown') !== _this.elem) {
-            _this.close();
+        } else if (this.dropdownVisible) {
+          if (e.target.closest('.dropdown') !== this.elem) {
+            this.close();
           } else {
             var option = e.target.closest('.dropdownOption');
-            if (
-              option != null &&
-              option.parentNode === _this.optionsElem &&
-              typeof option.dataset.id !== 'undefined'
-            ) {
+            if (option != null && option.parentNode === this.optionsElem && typeof option.dataset.id !== 'undefined') {
               var selectedOption = parseInt(option.dataset.id);
-              _this.close();
-              if (_this.selectedOption !== selectedOption) {
-                _this.selectedOption = selectedOption;
-                _this.render();
-                _this.changeCallback(_this.options[_this.selectedOption].value);
+              this.close();
+              if (this.selectedOption !== selectedOption) {
+                this.selectedOption = selectedOption;
+                this.render();
+                this.changeCallback(this.options[this.selectedOption].value);
               }
             }
           }
@@ -68,22 +63,22 @@ class Dropdown {
     );
     document.addEventListener(
       'contextmenu',
-      function() {
-        return _this.close();
+      () => {
+        return this.close();
       },
       true
     );
     document.addEventListener(
       'keyup',
-      function(e) {
+      e => {
         if (e.key === 'Escape') {
-          _this.close();
+          this.close();
         }
       },
       true
     );
-    this.filterInput.addEventListener('keyup', function() {
-      return _this.filter();
+    this.filterInput.addEventListener('keyup', () => {
+      return this.filter();
     });
   }
 

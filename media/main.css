@@ -1,18 +1,11 @@
 /* variables */
-body {
-  --ada-lightbulb-controls-line-height: 32px;
-  --ada-lightbulb-controls-padding-topBottom: 4px;
-  --ada-lightbulb-controls-border-width: 1px;
-  --ada-lightbulb-controls-height: calc(
-    var(--ada-lightbulb-controls-line-height) + var(--ada-lightbulb-controls-padding-topBottom) +
-    var(--ada-lightbulb-controls-border-width)
-  );
+:root {
   --ada-lightbulb-border: 1px solid rgba(128, 128, 128, 0.5);
   --ada-lightbulb-tableTh-height: 30px;
   --ada-lightbulb-z-index-commitGraph: 2;
   --ada-lightbulb-z-index-scrollShadow: 5;
   --ada-lightbulb-z-index-commitTable: 7;
-  --ada-lightbulb-z-index-controls: 8;
+  --ada-lightbulb-z-index-contextMenu: 8;
   --ada-lightbulb-z-index-dialogBacking: 9;
   --ada-lightbulb-z-index-dialog: 10;
   --ada-lightbulb-z-index-resizer: 20;
@@ -22,7 +15,6 @@ body {
 body {
   margin: 0;
   padding: 0;
-  padding-top: calc(var(--ada-lightbulb-controls-height) - var(--ada-lightbulb-controls-border-width));
 }
 body.unableToLoad {
   margin: 0 20px;
@@ -45,7 +37,7 @@ body.unableToLoad p {
   z-index: var(--ada-lightbulb-z-index-scrollShadow);
 }
 #scrollShadow-top {
-  top: calc(var(--ada-lightbulb-controls-height) + var(--ada-lightbulb-tableTh-height));
+  top: var(--ada-lightbulb-tableTh-height);
   box-shadow: 0 -6px 6px 6px var(--vscode-scrollbar-shadow);
 }
 #scrollShadow-bottom {
@@ -86,6 +78,10 @@ body.unableToLoad p {
 }
 
 /* Commit Table */
+#commitTable {
+  position: relative;
+  z-index: var(--ada-lightbulb-z-index-commitTable);
+}
 #commitTable table {
   width: 100%;
   border-collapse: collapse;
@@ -109,6 +105,15 @@ body.unableToLoad p {
   text-overflow: ellipsis;
   overflow: hidden;
 }
+#commitTable td {
+  background-color: var(--vscode-editor-background);
+  line-height: 24px;
+  padding: 0 4px;
+}
+#commitTable td:first-child {
+  background-color: transparent;
+  z-index: var(--ada-lightbulb-z-index-commitTable);
+}
 #commitTable tr.commit:hover td,
 #commitTable tr.commit.contextMenuActive td,
 #commitTable tr.commit.dialogActive td,
@@ -118,16 +123,12 @@ body.unableToLoad p {
 #commitTable tr.commit:hover td {
   cursor: pointer;
 }
-#commitTable td {
-  line-height: 24px;
-  padding: 0 4px;
-}
 #commitTable th {
   position: sticky;
 
   /* needed for .resizeCol */
   overflow: visible;
-  top: calc(var(--ada-lightbulb-controls-height) - var(--ada-lightbulb-controls-border-width));
+  top: 0;
   z-index: var(--ada-lightbulb-z-index-commitTable);
   border-bottom: var(--ada-lightbulb-border);
   background-color: var(--vscode-editor-background);
@@ -248,25 +249,12 @@ body.unableToLoad p {
 .commitDetailsSummaryTopRow {
   display: table-row;
 }
-.commitDetailsSummaryKeyValues,
-.commitDetailsSummaryAvatar {
+.commitDetailsSummaryKeyValues {
   display: table-cell;
   vertical-align: top;
-}
-.commitDetailsSummaryKeyValues {
   max-width: 0;
   overflow-x: hidden;
   text-overflow: ellipsis;
-}
-.commitDetailsSummaryTop.withAvatar .commitDetailsSummaryKeyValues {
-  padding-right: 10px;
-}
-.commitDetailsSummaryAvatar {
-  width: 54px;
-}
-.commitDetailsSummaryAvatar > img {
-  width: 54px;
-  border-radius: 4px;
 }
 #commitDetailsFiles {
   position: absolute;
@@ -298,25 +286,6 @@ body.unableToLoad p {
   text-overflow: ellipsis;
   overflow-x: hidden;
 }
-#commitDetailsClose {
-  position: absolute;
-  right: 4px;
-  top: 4px;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-}
-#commitDetailsClose svg {
-  width: 24px;
-  height: 24px;
-  fill: var(--vscode-editor-foreground);
-  fill-opacity: 0.6;
-}
-#commitDetailsClose:hover svg {
-  stroke: var(--vscode-editor-foreground);
-  stroke-width: 1;
-  stroke-opacity: 0.2;
-}
 svg.openFolderIcon,
 svg.closedFolderIcon,
 svg.fileIcon {
@@ -337,11 +306,14 @@ svg.fileIcon {
 .gitFile {
   color: var(--vscode-gitDecoration-modifiedResourceForeground);
 }
-.gitFile.A {
+[data-statuscode="A"] {
   color: var(--vscode-gitDecoration-addedResourceForeground);
 }
-.gitFile.D {
+[data-statuscode="D"] {
   color: var(--vscode-gitDecoration-deletedResourceForeground);
+}
+[data-statuscode="R"] {
+  color: var(--vscode-gitDecoration-submoduleResourceForeground);
 }
 .gitFile.gitDiffPossible {
   cursor: pointer;
@@ -364,14 +336,6 @@ svg.fileIcon {
 }
 .gitFileRename {
   cursor: help;
-}
-.commit .avatar > img {
-  display: inline-block;
-  width: 18px;
-  border-radius: 4px;
-  vertical-align: top;
-  margin-top: 3px;
-  margin-right: 4px;
 }
 .commitHeadDot {
   width: 6px;
@@ -440,63 +404,12 @@ svg.fileIcon {
     transform: rotate(360deg);
   }
 }
-
-/* Controls */
-#controls {
-  display: block;
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  padding: var(--ada-lightbulb-controls-padding-topBottom) 96px var(--ada-lightbulb-controls-padding-topBottom) 0;
-  border-bottom: var(--ada-lightbulb-border);
-  background-color: var(--vscode-editor-background);
-  z-index: var(--ada-lightbulb-z-index-controls);
-  line-height: var(--ada-lightbulb-controls-line-height);
-  text-align: center;
-  font-weight: 700;
-  font-size: 13px;
-}
-#repoControl,
-#branchControl,
-#showRemoteBranchesControl {
-  white-space: nowrap;
-  margin: 0 10px;
-}
-#repoSelect,
-#branchSelect {
-  margin-left: 3px;
-}
-#showRemoteBranchesCheckbox {
-  width: 14px;
-  vertical-align: text-top;
-}
-#refreshBtn {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  width: 80px;
-  height: 22px;
-  line-height: 22px;
-  border-radius: 11px;
-  margin-top: -12px;
-}
 #loadMoreCommitsBtn {
   width: 180px;
   height: 28px;
   margin: 10px auto;
   border-radius: 14px;
   line-height: 28px;
-}
-#controls select:focus,
-#controls input:focus {
-  outline: none;
-}
-#controls label {
-  cursor: pointer;
-}
-#commitTable td {
-  background-color: var(--vscode-editor-background);
 }
 
 /* Context Menu */
@@ -509,6 +422,7 @@ svg.fileIcon {
   list-style-type: none;
   margin: 0;
   padding: 4px 0;
+  z-index: var(--ada-lightbulb-z-index-contextMenu);
 }
 #contextMenu.active {
   display: block;
@@ -667,7 +581,6 @@ svg.fileIcon {
 .gitRef,
 #loadingHeader,
 .unselectable,
-.roundedBtn,
-#controls label {
+.roundedBtn {
   user-select: none;
 }

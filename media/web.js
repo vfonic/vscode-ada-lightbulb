@@ -2,15 +2,10 @@ window.vscode = acquireVsCodeApi();
 
 new ContextMenu();
 var graphViewConfig = {
-  fetchAvatars: viewState.fetchAvatars,
   graphColors: viewState.graphColors,
-  graphStyle: viewState.graphStyle,
   grid: { x: 16, y: 24, offsetX: 8, offsetY: 12, expandY: 250 },
-  initialLoadCommits: viewState.initialLoadCommits,
-  loadMoreCommits: viewState.loadMoreCommits,
-  showCurrentBranchByDefault: viewState.showCurrentBranchByDefault,
 };
-const gitGraph = new GitGraphView(viewState.repos, viewState.lastActiveRepo, graphViewConfig, vscode.getState());
+const gitGraph = new GitGraphView(viewState.repos, viewState.lastActiveRepo, graphViewConfig);
 window.addEventListener('message', function(event) {
   var msg = event.data;
   switch (msg.command) {
@@ -27,12 +22,8 @@ window.addEventListener('message', function(event) {
       refreshGraphOrDisplayError(msg.status, 'Unable to Cherry Pick Commit');
       break;
     case 'commitDetails':
-      if (msg.commitDetails == null) {
-        gitGraph.hideCommitDetails();
-        Dialog.showErrorDialog('Unable to load commit details', null, null);
-      } else {
-        gitGraph.showCommitDetails(msg.commitDetails, generateGitFileTree(msg.commitDetails.fileChanges));
-      }
+      gitGraph.commitDetails = msg.commitDetails;
+      gitGraph.showCommitDetails();
       break;
     case 'copyToClipboard':
       if (msg.success === false) {
@@ -47,9 +38,6 @@ window.addEventListener('message', function(event) {
       break;
     case 'deleteTag':
       refreshGraphOrDisplayError(msg.status, 'Unable to Delete Tag');
-      break;
-    case 'fetchAvatar':
-      gitGraph.loadAvatar(msg.email, msg.image);
       break;
     case 'loadBranches':
       gitGraph.loadBranches(msg.branches, msg.head, msg.hard, msg.isRepo);
@@ -95,29 +83,4 @@ function refreshGraphOrDisplayError(status, errorMessage) {
   } else {
     Dialog.showErrorDialog(errorMessage, status, null);
   }
-}
-
-function generateGitFileTree(gitFiles) {
-  const files = { type: 'folder', name: '', folderPath: '', contents: {}, open: true };
-  gitFiles.forEach((gitFile, i) => {
-    let cur = files;
-    const newFilePaths = gitFile.newFilePath.split('/');
-    newFilePaths.forEach((newFilePath, j) => {
-      if (j < newFilePaths.length - 1) {
-        if (typeof cur.contents[newFilePath] === 'undefined') {
-          cur.contents[newFilePath] = {
-            type: 'folder',
-            name: newFilePath,
-            folderPath: newFilePaths.slice(0, j + 1).join('/'),
-            contents: {},
-            open: true,
-          };
-        }
-        cur = cur.contents[newFilePath];
-      } else {
-        cur.contents[newFilePath] = { type: 'file', name: newFilePath, index: i };
-      }
-    });
-  });
-  return files;
 }

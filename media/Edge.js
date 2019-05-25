@@ -43,7 +43,7 @@ class Edge {
       lines = [],
       curPath = '',
       curColor = '',
-      d = config.grid.y * (config.graphStyle === 'angular' ? 0.38 : 0.8);
+      d = config.grid.y * 0.8;
     for (i = 0; i < this.lines.length; i++) {
       x1 = this.lines[i].p1.x * config.grid.x + config.grid.offsetX;
       y1 = this.lines[i].p1.y * config.grid.y + config.grid.offsetY;
@@ -96,31 +96,19 @@ class Edge {
       if (x1 === x2) {
         curPath += 'L' + x2.toFixed(0) + ',' + y2.toFixed(1);
       } else {
-        if (config.graphStyle === 'angular') {
-          curPath +=
-            'L' +
-            (lines[i].lockedFirst
-              ? x2.toFixed(0) + ',' + (y2 - d).toFixed(1)
-              : x1.toFixed(0) + ',' + (y1 + d).toFixed(1)) +
-            'L' +
-            x2.toFixed(0) +
-            ',' +
-            y2.toFixed(1);
-        } else {
-          curPath +=
-            'C' +
-            x1.toFixed(0) +
-            ',' +
-            (y1 + d).toFixed(1) +
-            ' ' +
-            x2.toFixed(0) +
-            ',' +
-            (y2 - d).toFixed(1) +
-            ' ' +
-            x2.toFixed(0) +
-            ',' +
-            y2.toFixed(1);
-        }
+        curPath +=
+          'C' +
+          x1.toFixed(0) +
+          ',' +
+          (y1 + d).toFixed(1) +
+          ' ' +
+          x2.toFixed(0) +
+          ',' +
+          (y2 - d).toFixed(1) +
+          ' ' +
+          x2.toFixed(0) +
+          ',' +
+          y2.toFixed(1);
       }
     }
     this.drawPath(svg, curPath, curColor);

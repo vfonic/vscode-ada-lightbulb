@@ -1,17 +1,18 @@
 const path = require('path');
 const vscode = require('vscode');
-const Config = require('./config').default;
-const CommitDetailsFactory = require('./CommitDetailsFactory').default;
+const Config = require('./Config').default;
+const CommitDetailsFetcherFactory = require('./CommitDetailsFetcherFactory').default;
 const diffDocProvider_1 = require('./diffDocProvider');
-const RepoFileWatcher = require('./repoFileWatcher').default;
+const RepoFileWatcher = require('./RepoFileWatcher').default;
 const utils_1 = require('./utils');
-const AssetLoader = require('./assetLoader').default;
+const AssetLoader = require('./AssetLoader').default;
 const WebviewHtmlGenerator = require('./webviewHtmlGenerator').default;
+const CommitStatusCode = require('../media/CommitStatusCode').CommitStatusCode;
 
 const configuration = new Config();
 
 class GitGraphView {
-  constructor(panel, extensionPath, dataSource, extensionState, avatarManager, repoManager) {
+  constructor(panel, extensionPath, dataSource, extensionState, repoManager) {
     this.disposables = [];
     this.isGraphViewLoaded = false;
     this.isPanelVisible = true;
@@ -19,18 +20,10 @@ class GitGraphView {
     this.panel = panel;
     this.assetLoader = new AssetLoader(extensionPath);
     this.extensionPath = extensionPath;
-    this.avatarManager = avatarManager;
     this.dataSource = dataSource;
     this.extensionState = extensionState;
     this.repoManager = repoManager;
-    this.avatarManager.registerView(this);
-    panel.iconPath =
-      configuration.tabIconColorTheme === 'color'
-        ? this.assetLoader.getUri('resources', 'webview-icon.svg')
-        : {
-            light: this.assetLoader.getUri('resources', 'webview-icon-light.svg'),
-            dark: this.assetLoader.getUri('resources', 'webview-icon-dark.svg'),
-          };
+    panel.iconPath = this.assetLoader.getUri('resources', 'webview-icon.svg');
     this.update();
     this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
     this.panel.onDidChangeViewState(
@@ -76,9 +69,6 @@ class GitGraphView {
               status: await this.dataSource.addTag(msg.repo, msg.tagName, msg.commitHash, msg.lightweight, msg.message),
             });
             break;
-          case 'fetchAvatar':
-            this.avatarManager.fetchAvatarImage(msg.email, msg.repo, msg.commits);
-            break;
           case 'checkoutBranch':
             this.sendMessage({
               command: 'checkoutBranch',
@@ -100,7 +90,7 @@ class GitGraphView {
           case 'commitDetails':
             this.sendMessage({
               command: 'commitDetails',
-              commitDetails: await CommitDetailsFactory.initialize(msg.repo, msg.commitHash).call(),
+              commitDetails: await CommitDetailsFetcherFactory.initialize(msg.repo, msg.commitHash).call(),
             });
             break;
           case 'copyToClipboard':
@@ -129,7 +119,7 @@ class GitGraphView {
             });
             break;
           case 'loadBranches':
-            const branchData = await this.dataSource.getBranches(msg.repo, msg.showRemoteBranches);
+            const branchData = await this.dataSource.getBranches(msg.repo);
             const isRepo = branchData.error ? await this.dataSource.isGitRepository(msg.repo) : true;
             this.sendMessage({
               command: 'loadBranches',
@@ -148,7 +138,7 @@ class GitGraphView {
             this.sendMessage(
               Object.assign(
                 { command: 'loadCommits' },
-                await this.dataSource.getCommits(msg.repo, msg.branchName, msg.maxCommits, msg.showRemoteBranches),
+                await this.dataSource.getCommits(msg.repo, msg.branchName, msg.maxCommits),
                 { hard: msg.hard }
               )
             );
@@ -200,7 +190,7 @@ class GitGraphView {
           case 'viewDiff':
             this.sendMessage({
               command: 'viewDiff',
-              success: await this.viewDiff(msg.repo, msg.commitHash, msg.oldFilePath, msg.newFilePath, msg.type),
+              success: await this.viewDiff(msg.repo, msg.commitHash, msg.filePath, msg.newFilePath, msg.statusCode),
             });
             break;
         }
@@ -211,7 +201,7 @@ class GitGraphView {
     );
   }
 
-  static createOrShow(extensionPath, dataSource, extensionState, avatarManager, repoManager) {
+  static createOrShow(extensionPath, dataSource, extensionState, repoManager) {
     const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : vscode.ViewColumn.One;
     if (GitGraphView.currentPanel) {
       GitGraphView.currentPanel.panel.reveal(column);
@@ -219,16 +209,12 @@ class GitGraphView {
     }
     const panel = vscode.window.createWebviewPanel('ada-lightbulb', 'Ada Lightbulb', column, {
       enableScripts: true,
-      localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media'))],
+      localResourceRoots: [
+        vscode.Uri.file(path.join(extensionPath, 'media')),
+        vscode.Uri.file(path.join(extensionPath, 'node_modules')),
+      ],
     });
-    GitGraphView.currentPanel = new GitGraphView(
-      panel,
-      extensionPath,
-      dataSource,
-      extensionState,
-      avatarManager,
-      repoManager
-    );
+    GitGraphView.currentPanel = new GitGraphView(panel, extensionPath, dataSource, extensionState, repoManager);
   }
 
   sendMessage(msg) {
@@ -238,7 +224,6 @@ class GitGraphView {
   dispose() {
     GitGraphView.currentPanel = undefined;
     this.panel.dispose();
-    this.avatarManager.deregisterView();
     this.repoFileWatcher.stop();
     this.repoManager.deregisterViewCallback();
     while (this.disposables.length) {
@@ -252,15 +237,9 @@ class GitGraphView {
   async update() {
     const viewState = {
       assetLoader: this.assetLoader,
-      dateFormat: configuration.dateFormat,
-      fetchAvatars: configuration.fetchAvatars && this.extensionState.isAvatarStorageAvailable(),
       graphColors: configuration.graphColors,
-      graphStyle: configuration.graphStyle,
-      initialLoadCommits: configuration.initialLoadCommits,
       lastActiveRepo: this.extensionState.getLastActiveRepo(),
-      loadMoreCommits: configuration.loadMoreCommits,
       repos: this.repoManager.getRepos(),
-      showCurrentBranchByDefault: configuration.showCurrentBranchByDefault,
     };
     this.panel.webview.html = new WebviewHtmlGenerator(viewState).getHtmlForWebview();
 
@@ -276,15 +255,15 @@ class GitGraphView {
     });
   }
 
-  viewDiff(repo, commitHash, oldFilePath, newFilePath, type) {
+  viewDiff(repo, commitHash, filePath, newFilePath, statusCode) {
     const abbrevHash = utils_1.abbrevCommit(commitHash);
     const pathComponents = newFilePath.split('/');
     const title =
       pathComponents[pathComponents.length - 1] +
       ' (' +
-      (type === 'A'
+      (statusCode === CommitStatusCode.ADDED
         ? 'Added in ' + abbrevHash
-        : type === 'D'
+        : statusCode === CommitStatusCode.DELETED
         ? 'Deleted in ' + abbrevHash
         : utils_1.abbrevCommit(commitHash) + '^ ↔ ' + utils_1.abbrevCommit(commitHash)) +
       ')';
@@ -292,7 +271,7 @@ class GitGraphView {
       vscode.commands
         .executeCommand(
           'vscode.diff',
-          diffDocProvider_1.encodeDiffDocUri(repo, oldFilePath, commitHash + '^'),
+          diffDocProvider_1.encodeDiffDocUri(repo, filePath, commitHash + '^'),
           diffDocProvider_1.encodeDiffDocUri(repo, newFilePath, commitHash),
           title,
           { preview: true }

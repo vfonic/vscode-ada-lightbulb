@@ -1,5 +1,3 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
 const vscode = require('vscode');
 const utils_1 = require('./utils');
 

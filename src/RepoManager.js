@@ -1,4 +1,3 @@
-'use strict';
 var __awaiter =
   (this && this.__awaiter) ||
   function(thisArg, _arguments, P, generator) {
@@ -30,16 +29,13 @@ var __awaiter =
       step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
   };
-Object.defineProperty(exports, '__esModule', { value: true });
 const fs = require('fs');
 const vscode = require('vscode');
-const Config = require('./config').default;
 
-const configuration = new Config();
 const utils_1 = require('./utils');
 
 class RepoManager {
-  constructor(dataSource, extensionState, statusBarItem) {
+  constructor(dataSource, extensionState) {
     this.folderWatchers = {};
     this.viewCallback = null;
     this.createEventPaths = [];
@@ -48,9 +44,7 @@ class RepoManager {
     this.processChangeEventsTimeout = null;
     this.dataSource = dataSource;
     this.extensionState = extensionState;
-    this.statusBarItem = statusBarItem;
     this.repos = extensionState.getRepos();
-    this.maxDepthOfRepoSearch = configuration.maxDepthOfRepoSearch;
     this.startupTasks();
     this.folderChangeHandler = vscode.workspace.onDidChangeWorkspaceFolders(e =>
       __awaiter(this, void 0, void 0, function*() {
@@ -59,7 +53,7 @@ class RepoManager {
             changes = false;
           for (let i = 0; i < e.added.length; i++) {
             path = utils_1.getPathFromUri(e.added[i].uri);
-            if (yield this.searchDirectoryForRepos(path, this.maxDepthOfRepoSearch)) {
+            if (yield this.searchDirectoryForRepos(path)) {
               changes = true;
             }
             this.startWatchingFolder(path);
@@ -103,16 +97,6 @@ class RepoManager {
 
   deregisterViewCallback() {
     this.viewCallback = null;
-  }
-
-  maxDepthOfRepoSearchChanged() {
-    let newDepth = configuration.maxDepthOfRepoSearch;
-    if (newDepth > this.maxDepthOfRepoSearch) {
-      this.maxDepthOfRepoSearch = newDepth;
-      this.searchWorkspaceForRepos();
-    } else {
-      this.maxDepthOfRepoSearch = newDepth;
-    }
   }
 
   startupTasks() {
@@ -191,7 +175,6 @@ class RepoManager {
   sendRepos() {
     let repos = this.getRepos();
     let numRepos = Object.keys(repos).length;
-    this.statusBarItem.setNumRepos(numRepos);
     if (this.viewCallback != null) {
       this.viewCallback(repos, numRepos);
     }
@@ -229,9 +212,7 @@ class RepoManager {
         changes = false;
       if (typeof rootFolders !== 'undefined') {
         for (let i = 0; i < rootFolders.length; i++) {
-          if (
-            yield this.searchDirectoryForRepos(utils_1.getPathFromUri(rootFolders[i].uri), this.maxDepthOfRepoSearch)
-          ) {
+          if (yield this.searchDirectoryForRepos(utils_1.getPathFromUri(rootFolders[i].uri))) {
             changes = true;
           }
         }
@@ -242,7 +223,7 @@ class RepoManager {
     });
   }
 
-  searchDirectoryForRepos(directory, maxDepth) {
+  searchDirectoryForRepos(directory) {
     return new Promise(resolve => {
       if (this.isDirectoryWithinRepos(directory)) {
         resolve(false);
@@ -253,30 +234,8 @@ class RepoManager {
         .then(isRepo => {
           if (isRepo) {
             this.addRepo(directory);
-            resolve(true);
-          } else if (maxDepth > 0) {
-            fs.readdir(directory, (err, dirContents) =>
-              __awaiter(this, void 0, void 0, function*() {
-                if (err) {
-                  resolve(false);
-                } else {
-                  let dirs = [];
-                  for (let i = 0; i < dirContents.length; i++) {
-                    if (dirContents[i] !== '.git' && (yield isDirectory(directory + '/' + dirContents[i]))) {
-                      dirs.push(directory + '/' + dirContents[i]);
-                    }
-                  }
-                  resolve(
-                    (yield utils_1.evalPromises(dirs, 2, dir =>
-                      this.searchDirectoryForRepos(dir, maxDepth - 1)
-                    )).indexOf(true) > -1
-                  );
-                }
-              })
-            );
-          } else {
-            resolve(false);
           }
+          resolve(isRepo);
         })
         .catch(() => resolve(false));
     });
@@ -361,7 +320,7 @@ class RepoManager {
         changes = false;
       while ((path = this.createEventPaths.shift())) {
         if (yield isDirectory(path)) {
-          if (yield this.searchDirectoryForRepos(path, this.maxDepthOfRepoSearch)) {
+          if (yield this.searchDirectoryForRepos(path)) {
             changes = true;
           }
         }

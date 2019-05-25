@@ -1,13 +1,9 @@
 class CommitView {
-  constructor(commitDetailsEl, commitDetails, fileTree, expandedCommit, avatars, gitRepos, currentRepo) {
-    this.gitRepos = gitRepos;
+  constructor(expandedCommit, repoDetails, currentRepo) {
     this.currentRepo = currentRepo;
-    this.repoDetails = this.gitRepos[this.currentRepo];
-    this.commitDetailsEl = commitDetailsEl;
+    this.repoDetails = repoDetails;
+    this.commitDetailsEl = document.getElementById('commitDetails');
     this.expandedCommit = expandedCommit;
-    this.expandedCommit.commitDetails = commitDetails;
-    this.expandedCommit.fileTree = fileTree;
-    this.avatars = avatars;
   }
 
   applyHeightChanges(commitDetailsHeight) {
@@ -54,7 +50,7 @@ class CommitView {
       sendMessage({
         command: 'saveRepoState',
         repo: this.currentRepo,
-        state: this.gitRepos[this.currentRepo],
+        state: this.repoDetails,
       });
     };
 
@@ -68,7 +64,13 @@ class CommitView {
       return null;
     }
 
-    const { commitDetails, fileTree } = this.expandedCommit;
+    const previouslySelectedCommitEl = document.querySelector('.commit.commitDetailsOpen');
+    if (previouslySelectedCommitEl) {
+      previouslySelectedCommitEl.classList.remove('commitDetailsOpen');
+    }
+    document.querySelector('[data-hash="' + this.expandedCommit.hash + '"]').classList.add('commitDetailsOpen');
+
+    const { commitDetails } = this.expandedCommit;
 
     this.initElementResizerForCommitDetails();
 
@@ -76,10 +78,7 @@ class CommitView {
 
     let html = '';
     html += '<div id="commitDetailsSummary">';
-    html +=
-      '<span class="commitDetailsSummaryTop' +
-      (typeof this.avatars[commitDetails.email] === 'string' ? ' withAvatar' : '') +
-      '">';
+    html += '<span class="commitDetailsSummaryTop">';
     html += '<span class="commitDetailsSummaryTopRow"><span class="commitDetailsSummaryKeyValues">';
     html += '<b>Commit: </b>' + escapeHtml(commitDetails.hash) + '<br>';
     html += '<b>Parents: </b>' + commitDetails.parents.join(', ') + '<br>';
@@ -87,14 +86,9 @@ class CommitView {
       '<b>Author: </b>' + escapeHtml(commitDetails.author) + ' &lt;' + escapeHtml(commitDetails.email) + '&gt;<br>';
     html += '<b>Date: </b>' + new Date(commitDetails.date * 1e3).toString() + '<br>';
     html += '<b>Committer: </b>' + escapeHtml(commitDetails.committer) + '</span>';
-    if (typeof this.avatars[commitDetails.email] === 'string') {
-      html += '<span class="commitDetailsSummaryAvatar"><img src="' + this.avatars[commitDetails.email] + '"></span>';
-    }
     html += '</span></span><br><br>';
     html += escapeHtml(commitDetails.body).replace(/\n/g, '<br>') + '</div>';
-    html +=
-      '<div id="commitDetailsFiles">' + new GitFileTreeView(fileTree, commitDetails.fileChanges).render() + '</div>';
-    // html += '<div id="commitDetailsClose">' + svgIcons.close + '</div>';
+    html += '<div id="commitDetailsFiles">' + new CommitFileListView(commitDetails.fileChanges).render() + '</div>';
     divEl.innerHTML = html;
     this.commitDetailsEl.appendChild(divEl);
   }

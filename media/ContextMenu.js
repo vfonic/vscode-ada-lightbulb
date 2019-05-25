@@ -31,15 +31,14 @@ class ContextMenu {
   static showContextMenu(e, items, sourceElem) {
     const contextMenu = ContextMenu.getContextMenuElement();
     var html = '',
-      i,
       event = e;
     const ELLIPSIS = '&#8230;';
-    for (i = 0; i < items.length; i++) {
+    items.forEach((item, i) => {
       html +=
-        items[i] != null
-          ? '<li class="contextMenuItem" data-index="' + i + '">' + items[i].title + ELLIPSIS + '</li>'
+        item != null
+          ? '<li class="contextMenuItem" data-index="' + i + '">' + item.title + ELLIPSIS + '</li>'
           : '<li class="contextMenuDivider"></li>';
-    }
+    });
     ContextMenu.hideContextMenuListener();
     contextMenu.style.opacity = '0';
     contextMenu.className = 'active';
@@ -54,7 +53,7 @@ class ContextMenu {
         ? event.pageY - 2
         : event.pageY - bounds.height + 2) + 'px';
     contextMenu.style.opacity = '1';
-    addListenerToClass('contextMenuItem', 'click', function(e) {
+    addListenerToClass('contextMenuItem', 'click', e => {
       e.stopPropagation();
       ContextMenu.hideContextMenu();
       items[parseInt(e.target.dataset.index)].onClick();

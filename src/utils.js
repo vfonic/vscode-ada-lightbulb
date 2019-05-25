@@ -1,5 +1,3 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
 const vscode = require('vscode');
 
 const FS_REGEX = /\\/g;
@@ -23,12 +21,6 @@ function getPathFromUri(uri) {
 }
 
 exports.getPathFromUri = getPathFromUri;
-
-function getPathFromStr(str) {
-  return str.replace(FS_REGEX, '/');
-}
-
-exports.getPathFromStr = getPathFromStr;
 
 function evalPromises(data, maxParallel, createPromise) {
   return new Promise((resolve, reject) => {
