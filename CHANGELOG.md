@@ -1,3 +1,8 @@
+## 0.4.0 (2019-05-26)
+- Add note about active development
+- Create FUNDING.yml
+- Changelist:
+
 ## 0.3.2 (2019-05-19)
 
 - Gitignore .vscode files
