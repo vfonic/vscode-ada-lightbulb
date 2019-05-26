@@ -1,7 +1,14 @@
 ## 0.4.0 (2019-05-26)
 - Add note about active development
-- Create FUNDING.yml
-- Changelist:
+- Global: Remove configuration
+- Webview: Remove top view controls
+- Commit Details: Don't show additions/deletions for each file
+- Commit Details: Render commit file list flat instead of a tree
+- Commit Details: Show renamed files in blue color
+- Global: Remove avatars
+- Always show remote branches
+- Highlight currently selected commit
+- Use arrow keys to go prev/next commit
 
 ## 0.3.2 (2019-05-19)
 
