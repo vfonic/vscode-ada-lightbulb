@@ -239,9 +239,7 @@ class GitGraphView {
         '</td></tr>';
     });
     this.tableElem.innerHTML = '<table>' + html + '</tbody></table>';
-    this.footerElem.innerHTML = this.moreCommitsAvailable
-      ? '<div id="loadMoreCommitsBtn" class="roundedBtn">Load More Commits</div>'
-      : '';
+    this.footerElem.innerHTML = this.moreCommitsAvailable ? '<div id="loadMoreCommitsBtn" class="roundedBtn">Load More Commits</div>' : '';
 
     this.initElementResizer();
 
@@ -313,9 +311,7 @@ class GitGraphView {
             title: 'Create Branch',
             onClick: () => {
               Dialog.showRefInputDialog(
-                'Enter the name of the branch you would like to create from commit <b><i>' +
-                  abbrevCommit(hash) +
-                  '</i></b>:',
+                'Enter the name of the branch you would like to create from commit <b><i>' + abbrevCommit(hash) + '</i></b>:',
                 '',
                 'Create Branch',
                 name => {
@@ -370,9 +366,7 @@ class GitGraphView {
                   return {
                     name:
                       abbrevCommit(hash) +
-                      (typeof this.commitLookup[hash] === 'number'
-                        ? ': ' + this.commits[this.commitLookup[hash]].message
-                        : ''),
+                      (typeof this.commitLookup[hash] === 'number' ? ': ' + this.commits[this.commitLookup[hash]].message : ''),
                     value: (index + 1).toString(),
                   };
                 });
@@ -417,9 +411,7 @@ class GitGraphView {
                   return {
                     name:
                       abbrevCommit(hash) +
-                      (typeof this.commitLookup[hash] === 'number'
-                        ? ': ' + this.commits[this.commitLookup[hash]].message
-                        : ''),
+                      (typeof this.commitLookup[hash] === 'number' ? ': ' + this.commits[this.commitLookup[hash]].message : ''),
                     value: (index + 1).toString(),
                   };
                 });
@@ -448,9 +440,7 @@ class GitGraphView {
             title: 'Merge into current branch',
             onClick: () => {
               Dialog.showCheckboxDialog(
-                'Are you sure you want to merge commit <b><i>' +
-                  abbrevCommit(hash) +
-                  '</i></b> into the current branch?',
+                'Are you sure you want to merge commit <b><i>' + abbrevCommit(hash) + '</i></b> into the current branch?',
                 'Create a new commit even if fast-forward is possible',
                 true,
                 'Yes, merge',
@@ -470,9 +460,7 @@ class GitGraphView {
             title: 'Reset current branch to this Commit',
             onClick: () => {
               Dialog.showSelectDialog(
-                'Are you sure you want to reset the <b>current branch</b> to commit <b><i>' +
-                  abbrevCommit(hash) +
-                  '</i></b>?',
+                'Are you sure you want to reset the <b>current branch</b> to commit <b><i>' + abbrevCommit(hash) + '</i></b>?',
                 'mixed',
                 [
                   {
@@ -623,9 +611,7 @@ class GitGraphView {
                 title: 'Merge into current branch',
                 onClick: () => {
                   Dialog.showCheckboxDialog(
-                    'Are you sure you want to merge branch <b><i>' +
-                      escapeHtml(refName) +
-                      '</i></b> into the current branch?',
+                    'Are you sure you want to merge branch <b><i>' + escapeHtml(refName) + '</i></b> into the current branch?',
                     'Create a new commit even if fast-forward is possible',
                     true,
                     'Yes, merge',
@@ -687,9 +673,7 @@ class GitGraphView {
       this.tableElem.className = 'autoLayout';
       thElements[0].style.padding =
         '0 ' +
-        Math.round(
-          (Math.max(this.graph.getWidth() + 16, ElementResizer.MIN_WIDTH_HEIGHT) - (thElements[0].offsetWidth - 24)) / 2
-        ) +
+        Math.round((Math.max(this.graph.getWidth() + 16, ElementResizer.MIN_WIDTH_HEIGHT) - (thElements[0].offsetWidth - 24)) / 2) +
         'px';
       columnWidths = [
         thElements[0].clientWidth - 24,
@@ -847,7 +831,7 @@ class GitGraphView {
   }
 
   showCommitDetails() {
-    new CommitView(this.expandedCommit, this.gitRepos[this.currentRepo], this.currentRepo).render();
+    new CommitView(this.expandedCommit, this.gitRepos[this.currentRepo], this.currentRepo).render(vscode);
 
     addListenerToClass('gitFile', 'click', e => {
       var sourceElem = e.target.closest('.gitFile');

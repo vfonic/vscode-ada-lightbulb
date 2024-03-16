@@ -136,11 +136,9 @@ class GitGraphView {
             break;
           case 'loadCommits':
             this.sendMessage(
-              Object.assign(
-                { command: 'loadCommits' },
-                await this.dataSource.getCommits(msg.repo, msg.branchName, msg.maxCommits),
-                { hard: msg.hard }
-              )
+              Object.assign({ command: 'loadCommits' }, await this.dataSource.getCommits(msg.repo, msg.branchName, msg.maxCommits), {
+                hard: msg.hard,
+              })
             );
             break;
           case 'loadRepos':
@@ -209,10 +207,7 @@ class GitGraphView {
     }
     const panel = vscode.window.createWebviewPanel('ada-lightbulb', 'Ada Lightbulb', column, {
       enableScripts: true,
-      localResourceRoots: [
-        vscode.Uri.file(path.join(extensionPath, 'media')),
-        vscode.Uri.file(path.join(extensionPath, 'node_modules')),
-      ],
+      localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media')), vscode.Uri.file(path.join(extensionPath, 'node_modules'))],
     });
     GitGraphView.currentPanel = new GitGraphView(panel, extensionPath, dataSource, extensionState, repoManager);
   }
@@ -264,8 +259,8 @@ class GitGraphView {
       (statusCode === CommitStatusCode.ADDED
         ? 'Added in ' + abbrevHash
         : statusCode === CommitStatusCode.DELETED
-        ? 'Deleted in ' + abbrevHash
-        : utils_1.abbrevCommit(commitHash) + '^ ↔ ' + utils_1.abbrevCommit(commitHash)) +
+          ? 'Deleted in ' + abbrevHash
+          : utils_1.abbrevCommit(commitHash) + '^ ↔ ' + utils_1.abbrevCommit(commitHash)) +
       ')';
     return new Promise(resolve => {
       vscode.commands

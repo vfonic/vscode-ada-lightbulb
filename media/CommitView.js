@@ -57,39 +57,48 @@ class CommitView {
     new ElementResizer(this.commitDetailsEl, resizeClassName, onResizeStart, onResize, onResizeEnd);
   }
 
-  render() {
-    emptyElement(this.commitDetailsEl);
+  render(vscode) {
+    // emptyElement(this.commitDetailsEl);
 
-    if (this.expandedCommit == null) {
-      return null;
-    }
+    if (this.expandedCommit == null) return null;
 
     const previouslySelectedCommitEl = document.querySelector('.commit.commitDetailsOpen');
-    if (previouslySelectedCommitEl) {
-      previouslySelectedCommitEl.classList.remove('commitDetailsOpen');
-    }
+    if (previouslySelectedCommitEl) previouslySelectedCommitEl.classList.remove('commitDetailsOpen');
     document.querySelector('[data-hash="' + this.expandedCommit.hash + '"]').classList.add('commitDetailsOpen');
 
     const { commitDetails } = this.expandedCommit;
 
-    this.initElementResizerForCommitDetails();
+    // this.initElementResizerForCommitDetails();
 
     const divEl = document.createElement('div');
+    divEl.innerHTML = `
+      <div id="commitDetailsSummary">
+      <span class="commitDetailsSummaryTop">
+      <span class="commitDetailsSummaryTopRow"><span class="commitDetailsSummaryKeyValues">
+      <b>Commit: </b>${escapeHtml(commitDetails.hash)}<br>
+      <b>Parents: </b>${commitDetails.parents.join(', ')}<br>
+      <b>Author: </b>${escapeHtml(commitDetails.author)} &lt;${escapeHtml(commitDetails.email)}&gt;<br>
+      <b>Date: </b>${new Date(commitDetails.date * 1e3).toString()}<br>
+      <b>Committer: </b>${escapeHtml(commitDetails.committer)}</span>
+      </span></span><br><br>
+      ${escapeHtml(commitDetails.body).replace(/\n/g, '<br>')}</div>
+      <div id="commitDetailsFiles">${new CommitFileListView(commitDetails.fileChanges).render()}</div>
+    `;
+    const panel = vscode.window.createWebviewPanel('myBottomPanel', 'My Bottom Panel', vscode.ViewColumn.Three, {});
 
-    let html = '';
-    html += '<div id="commitDetailsSummary">';
-    html += '<span class="commitDetailsSummaryTop">';
-    html += '<span class="commitDetailsSummaryTopRow"><span class="commitDetailsSummaryKeyValues">';
-    html += '<b>Commit: </b>' + escapeHtml(commitDetails.hash) + '<br>';
-    html += '<b>Parents: </b>' + commitDetails.parents.join(', ') + '<br>';
-    html +=
-      '<b>Author: </b>' + escapeHtml(commitDetails.author) + ' &lt;' + escapeHtml(commitDetails.email) + '&gt;<br>';
-    html += '<b>Date: </b>' + new Date(commitDetails.date * 1e3).toString() + '<br>';
-    html += '<b>Committer: </b>' + escapeHtml(commitDetails.committer) + '</span>';
-    html += '</span></span><br><br>';
-    html += escapeHtml(commitDetails.body).replace(/\n/g, '<br>') + '</div>';
-    html += '<div id="commitDetailsFiles">' + new CommitFileListView(commitDetails.fileChanges).render() + '</div>';
-    divEl.innerHTML = html;
-    this.commitDetailsEl.appendChild(divEl);
+    panel.webview.html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <title>Commitsa</title>
+      </head>
+      <body>
+          ${divEl.innerHTML}
+      </body>
+      </html>
+  `;
+
+    // this.commitDetailsEl.appendChild(divEl);
   }
 }
