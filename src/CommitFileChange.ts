@@ -1,3 +1,4 @@
+// @ts-nocheck
 class CommitFileChange {
   static get REQUIRED_KEYS() {
     return ['filePath', 'newFilePath', 'statusCode'];
@@ -13,4 +14,4 @@ class CommitFileChange {
   }
 }
 
-exports.default = CommitFileChange;
+export default CommitFileChange;

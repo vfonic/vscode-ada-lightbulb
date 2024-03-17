@@ -1,4 +1,5 @@
-const CommitFileChange = require('./CommitFileChange').default;
+// @ts-nocheck
+import CommitFileChange from './CommitFileChange';
 
 class CommitDetailsProcessor {
   constructor(resolve) {

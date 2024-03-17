@@ -1,4 +1,5 @@
-const vscode = require('vscode');
+// @ts-nocheck
+import vscode from 'vscode';
 
 class Config {
   get config() {
@@ -15,4 +16,4 @@ class Config {
   }
 }
 
-exports.default = Config;
+export default Config;

@@ -1,3 +1,5 @@
+console.warn('web.js');
+
 window.vscode = acquireVsCodeApi();
 
 new ContextMenu();
@@ -6,8 +8,9 @@ var graphViewConfig = {
   grid: { x: 16, y: 24, offsetX: 8, offsetY: 12, expandY: 250 },
 };
 const gitGraph = new GitGraphView(viewState.repos, viewState.lastActiveRepo, graphViewConfig);
-window.addEventListener('message', function(event) {
+window.addEventListener('message', function (event) {
   var msg = event.data;
+  console.warn('Received', msg.command);
   switch (msg.command) {
     case 'addTag':
       refreshGraphOrDisplayError(msg.status, 'Unable to Add Tag');
@@ -23,6 +26,7 @@ window.addEventListener('message', function(event) {
       break;
     case 'commitDetails':
       gitGraph.commitDetails = msg.commitDetails;
+      console.warn({ msg2: msg });
       gitGraph.showCommitDetails();
       break;
     case 'copyToClipboard':

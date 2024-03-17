@@ -1,5 +1,7 @@
+// @ts-nocheck
 class WebviewHtmlGenerator {
   constructor(state) {
+    console.warn('WebviewHtmlGenerator.constructor');
     this.state = state;
   }
 
@@ -24,11 +26,9 @@ class WebviewHtmlGenerator {
   }
 
   getHtmlBodyForWebview(nonce) {
-    let body,
-      numRepos = Object.keys(this.state.repos).length;
-    const colorVars = this.state.graphColors
-      .map((graphColor, index) => '--ada-lightbulb-color' + index + ':' + graphColor + ';')
-      .join(' ');
+    let body;
+    const numRepos = Object.keys(this.state.repos).length;
+    const colorVars = this.state.graphColors.map((graphColor, index) => '--ada-lightbulb-color' + index + ':' + graphColor + ';').join(' ');
     if (numRepos > 0) {
       body = `<body style="${colorVars}">
       <div id="content">
@@ -83,7 +83,7 @@ class WebviewHtmlGenerator {
   }
 }
 
-exports.default = WebviewHtmlGenerator;
+export default WebviewHtmlGenerator;
 
 function getNonce() {
   let text = '';

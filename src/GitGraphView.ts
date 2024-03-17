@@ -1,18 +1,23 @@
-const path = require('path');
-const vscode = require('vscode');
-const Config = require('./Config').default;
-const CommitDetailsFetcherFactory = require('./CommitDetailsFetcherFactory').default;
-const diffDocProvider_1 = require('./diffDocProvider');
-const RepoFileWatcher = require('./RepoFileWatcher').default;
-const utils_1 = require('./utils');
-const AssetLoader = require('./AssetLoader').default;
-const WebviewHtmlGenerator = require('./webviewHtmlGenerator').default;
-const CommitStatusCode = require('../media/CommitStatusCode').CommitStatusCode;
+// @ts-nocheck
+console.warn('GitGraphView.js');
+import { abbrevCommit, copyToClipboard } from './utils';
+import { encodeDiffDocUri } from './DiffDocProvider';
+import AssetLoader from './AssetLoader';
+import CommitDetailsFetcherFactory from './CommitDetailsFetcherFactory';
+import CommitStatusCode from './CommitStatusCode';
+import CommitView from './CommitView';
+import Config from './Config';
+import RepoFileWatcher from './RepoFileWatcher';
+import WebviewHtmlGenerator from './webviewHtmlGenerator';
+import path from 'path';
+import vscode from 'vscode';
 
 const configuration = new Config();
 
 class GitGraphView {
-  constructor(panel, extensionPath, dataSource, extensionState, repoManager) {
+  constructor(panel, extensionPath, dataSource, extensionState, repoManager, viewProvider) {
+    console.warn('GitGraphView.constructor');
+    this.viewProvider = viewProvider;
     this.disposables = [];
     this.isGraphViewLoaded = false;
     this.isPanelVisible = true;
@@ -61,7 +66,9 @@ class GitGraphView {
         if (this.dataSource == null) {
           return;
         }
+
         this.repoFileWatcher.mute();
+        console.warn('Web view received', msg.command);
         switch (msg.command) {
           case 'addTag':
             this.sendMessage({
@@ -87,17 +94,28 @@ class GitGraphView {
               status: await this.dataSource.cherrypickCommit(msg.repo, msg.commitHash, msg.parentIndex),
             });
             break;
-          case 'commitDetails':
+          case 'commitDetails': {
+            console.warn('SHOWING SOME GOOD STUFF!!!!!');
+            console.warn({ msg });
+            const { commitId: id, commitHash: hash } = msg;
+            const expandedCommit = {
+              id,
+              hash,
+              commitDetails: await CommitDetailsFetcherFactory.initialize(msg.repo, msg.commitHash).call(),
+            };
+            const html = new CommitView(expandedCommit).render();
+            viewProvider.showWebview(html);
             this.sendMessage({
               command: 'commitDetails',
               commitDetails: await CommitDetailsFetcherFactory.initialize(msg.repo, msg.commitHash).call(),
             });
             break;
+          }
           case 'copyToClipboard':
             this.sendMessage({
               command: 'copyToClipboard',
               type: msg.type,
-              success: await utils_1.copyToClipboard(msg.data),
+              success: await copyToClipboard(msg.data),
             });
             break;
           case 'createBranch':
@@ -118,7 +136,7 @@ class GitGraphView {
               status: await this.dataSource.deleteTag(msg.repo, msg.tagName),
             });
             break;
-          case 'loadBranches':
+          case 'loadBranches': {
             const branchData = await this.dataSource.getBranches(msg.repo);
             const isRepo = branchData.error ? await this.dataSource.isGitRepository(msg.repo) : true;
             this.sendMessage({
@@ -134,6 +152,7 @@ class GitGraphView {
               this.repoFileWatcher.start(msg.repo);
             }
             break;
+          }
           case 'loadCommits':
             this.sendMessage(
               Object.assign({ command: 'loadCommits' }, await this.dataSource.getCommits(msg.repo, msg.branchName, msg.maxCommits), {
@@ -199,17 +218,17 @@ class GitGraphView {
     );
   }
 
-  static createOrShow(extensionPath, dataSource, extensionState, repoManager) {
+  static createOrShow(extensionPath, dataSource, extensionState, repoManager, viewProvider) {
     const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : vscode.ViewColumn.One;
     if (GitGraphView.currentPanel) {
-      GitGraphView.currentPanel.panel.reveal(column);
-      return;
+      return GitGraphView.currentPanel.panel.reveal(column);
     }
+
     const panel = vscode.window.createWebviewPanel('ada-lightbulb', 'Ada Lightbulb', column, {
       enableScripts: true,
       localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media')), vscode.Uri.file(path.join(extensionPath, 'node_modules'))],
     });
-    GitGraphView.currentPanel = new GitGraphView(panel, extensionPath, dataSource, extensionState, repoManager);
+    GitGraphView.currentPanel = new GitGraphView(panel, extensionPath, dataSource, extensionState, repoManager, viewProvider);
   }
 
   sendMessage(msg) {
@@ -222,10 +241,7 @@ class GitGraphView {
     this.repoFileWatcher.stop();
     this.repoManager.deregisterViewCallback();
     while (this.disposables.length) {
-      const x = this.disposables.pop();
-      if (x) {
-        x.dispose();
-      }
+      this.disposables.pop()?.dispose();
     }
   }
 
@@ -251,7 +267,7 @@ class GitGraphView {
   }
 
   viewDiff(repo, commitHash, filePath, newFilePath, statusCode) {
-    const abbrevHash = utils_1.abbrevCommit(commitHash);
+    const abbrevHash = abbrevCommit(commitHash);
     const pathComponents = newFilePath.split('/');
     const title =
       pathComponents[pathComponents.length - 1] +
@@ -260,14 +276,14 @@ class GitGraphView {
         ? 'Added in ' + abbrevHash
         : statusCode === CommitStatusCode.DELETED
           ? 'Deleted in ' + abbrevHash
-          : utils_1.abbrevCommit(commitHash) + '^ ↔ ' + utils_1.abbrevCommit(commitHash)) +
+          : abbrevCommit(commitHash) + '^ ↔ ' + abbrevCommit(commitHash)) +
       ')';
     return new Promise(resolve => {
       vscode.commands
         .executeCommand(
           'vscode.diff',
-          diffDocProvider_1.encodeDiffDocUri(repo, filePath, commitHash + '^'),
-          diffDocProvider_1.encodeDiffDocUri(repo, newFilePath, commitHash),
+          encodeDiffDocUri(repo, filePath, commitHash + '^'),
+          encodeDiffDocUri(repo, newFilePath, commitHash),
           title,
           { preview: true }
         )
@@ -277,4 +293,4 @@ class GitGraphView {
   }
 }
 
-exports.GitGraphView = GitGraphView;
+export default GitGraphView;

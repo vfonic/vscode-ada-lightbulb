@@ -1,7 +1,8 @@
-var __awaiter =
+// @ts-nocheck
+const __awaiter =
   (this && this.__awaiter) ||
-  function(thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function(resolve, reject) {
+  function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
       function fulfilled(value) {
         try {
           step(generator.next(value));
@@ -19,20 +20,21 @@ var __awaiter =
       }
 
       function step(result) {
-        result.done
-          ? resolve(result.value)
-          : new P(function(resolve) {
-              resolve(result.value);
-            }).then(fulfilled, rejected);
+        if (result.done) {
+          resolve(result.value);
+        } else {
+          new P(function (resolve) {
+            resolve(result.value);
+          }).then(fulfilled, rejected);
+        }
       }
 
       step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
   };
-const fs = require('fs');
-const vscode = require('vscode');
-
-const utils_1 = require('./utils');
+import { evalPromises, getPathFromUri } from './utils';
+import fs from 'fs';
+import vscode from 'vscode';
 
 class RepoManager {
   constructor(dataSource, extensionState) {
@@ -47,12 +49,12 @@ class RepoManager {
     this.repos = extensionState.getRepos();
     this.startupTasks();
     this.folderChangeHandler = vscode.workspace.onDidChangeWorkspaceFolders(e =>
-      __awaiter(this, void 0, void 0, function*() {
+      __awaiter(this, void 0, void 0, function* () {
         if (e.added.length > 0) {
           let path,
             changes = false;
           for (let i = 0; i < e.added.length; i++) {
-            path = utils_1.getPathFromUri(e.added[i].uri);
+            path = getPathFromUri(e.added[i].uri);
             if (yield this.searchDirectoryForRepos(path)) {
               changes = true;
             }
@@ -66,7 +68,7 @@ class RepoManager {
           let changes = false,
             path;
           for (let i = 0; i < e.removed.length; i++) {
-            path = utils_1.getPathFromUri(e.removed[i].uri);
+            path = getPathFromUri(e.removed[i].uri);
             if (this.removeReposWithinFolder(path)) {
               changes = true;
             }
@@ -85,7 +87,7 @@ class RepoManager {
       this.folderChangeHandler.dispose();
       this.folderChangeHandler = null;
     }
-    let folders = Object.keys(this.folderWatchers);
+    const folders = Object.keys(this.folderWatchers);
     for (let i = 0; i < folders.length; i++) {
       this.stopWatchingFolder(folders[i]);
     }
@@ -100,7 +102,7 @@ class RepoManager {
   }
 
   startupTasks() {
-    return __awaiter(this, void 0, void 0, function*() {
+    return __awaiter(this, void 0, void 0, function* () {
       this.removeReposNotInWorkspace();
       if (!(yield this.checkReposExist())) {
         this.sendRepos();
@@ -111,14 +113,14 @@ class RepoManager {
   }
 
   removeReposNotInWorkspace() {
-    let rootsExact = [],
-      rootsFolder = [],
-      workspaceFolders = vscode.workspace.workspaceFolders,
-      repoPaths = Object.keys(this.repos),
-      path;
+    const rootsExact = [];
+    const rootsFolder = [];
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    const repoPaths = Object.keys(this.repos);
+    let path;
     if (typeof workspaceFolders !== 'undefined') {
       for (let i = 0; i < workspaceFolders.length; i++) {
-        path = utils_1.getPathFromUri(workspaceFolders[i].uri);
+        path = getPathFromUri(workspaceFolders[i].uri);
         rootsExact.push(path);
         rootsFolder.push(path + '/');
       }
@@ -131,7 +133,7 @@ class RepoManager {
   }
 
   getRepos() {
-    let repoPaths = Object.keys(this.repos).sort(),
+    const repoPaths = Object.keys(this.repos).sort(),
       repos = {};
     for (let i = 0; i < repoPaths.length; i++) {
       repos[repoPaths[i]] = this.repos[repoPaths[i]];
@@ -150,9 +152,9 @@ class RepoManager {
   }
 
   removeReposWithinFolder(path) {
-    let pathFolder = path + '/',
-      repoPaths = Object.keys(this.repos),
-      changes = false;
+    const pathFolder = path + '/';
+    const repoPaths = Object.keys(this.repos);
+    let changes = false;
     for (let i = 0; i < repoPaths.length; i++) {
       if (repoPaths[i] === path || repoPaths[i].startsWith(pathFolder)) {
         this.removeRepo(repoPaths[i]);
@@ -163,7 +165,7 @@ class RepoManager {
   }
 
   isDirectoryWithinRepos(path) {
-    let repoPaths = Object.keys(this.repos);
+    const repoPaths = Object.keys(this.repos);
     for (let i = 0; i < repoPaths.length; i++) {
       if (path === repoPaths[i] || path.startsWith(repoPaths[i] + '/')) {
         return true;
@@ -173,8 +175,8 @@ class RepoManager {
   }
 
   sendRepos() {
-    let repos = this.getRepos();
-    let numRepos = Object.keys(repos).length;
+    const repos = this.getRepos();
+    const numRepos = Object.keys(repos).length;
     if (this.viewCallback != null) {
       this.viewCallback(repos, numRepos);
     }
@@ -182,22 +184,20 @@ class RepoManager {
 
   checkReposExist() {
     return new Promise(resolve => {
-      let repoPaths = Object.keys(this.repos),
-        changes = false;
-      utils_1
-        .evalPromises(repoPaths, 3, path => this.dataSource.isGitRepository(path))
-        .then(results => {
-          for (let i = 0; i < repoPaths.length; i++) {
-            if (!results[i]) {
-              this.removeRepo(repoPaths[i]);
-              changes = true;
-            }
+      const repoPaths = Object.keys(this.repos);
+      let changes = false;
+      evalPromises(repoPaths, 3, path => this.dataSource.isGitRepository(path)).then(results => {
+        for (let i = 0; i < repoPaths.length; i++) {
+          if (!results[i]) {
+            this.removeRepo(repoPaths[i]);
+            changes = true;
           }
-          if (changes) {
-            this.sendRepos();
-          }
-          resolve(changes);
-        });
+        }
+        if (changes) {
+          this.sendRepos();
+        }
+        resolve(changes);
+      });
     });
   }
 
@@ -207,12 +207,12 @@ class RepoManager {
   }
 
   searchWorkspaceForRepos() {
-    return __awaiter(this, void 0, void 0, function*() {
-      let rootFolders = vscode.workspace.workspaceFolders,
-        changes = false;
+    return __awaiter(this, void 0, void 0, function* () {
+      const rootFolders = vscode.workspace.workspaceFolders;
+      let changes = false;
       if (typeof rootFolders !== 'undefined') {
         for (let i = 0; i < rootFolders.length; i++) {
-          if (yield this.searchDirectoryForRepos(utils_1.getPathFromUri(rootFolders[i].uri))) {
+          if (yield this.searchDirectoryForRepos(getPathFromUri(rootFolders[i].uri))) {
             changes = true;
           }
         }
@@ -242,16 +242,16 @@ class RepoManager {
   }
 
   startWatchingFolders() {
-    let rootFolders = vscode.workspace.workspaceFolders;
+    const rootFolders = vscode.workspace.workspaceFolders;
     if (typeof rootFolders !== 'undefined') {
       for (let i = 0; i < rootFolders.length; i++) {
-        this.startWatchingFolder(utils_1.getPathFromUri(rootFolders[i].uri));
+        this.startWatchingFolder(getPathFromUri(rootFolders[i].uri));
       }
     }
   }
 
   startWatchingFolder(path) {
-    let watcher = vscode.workspace.createFileSystemWatcher(path + '/**');
+    const watcher = vscode.workspace.createFileSystemWatcher(path + '/**');
     watcher.onDidCreate(uri => this.onWatcherCreate(uri));
     watcher.onDidChange(uri => this.onWatcherChange(uri));
     watcher.onDidDelete(uri => this.onWatcherDelete(uri));
@@ -264,8 +264,9 @@ class RepoManager {
   }
 
   onWatcherCreate(uri) {
-    return __awaiter(this, void 0, void 0, function*() {
-      let path = utils_1.getPathFromUri(uri);
+    // eslint-disable-next-line require-yield
+    return __awaiter(this, void 0, void 0, function* () {
+      let path = getPathFromUri(uri);
       if (path.indexOf('/.git/') > -1) {
         return;
       }
@@ -284,7 +285,7 @@ class RepoManager {
   }
 
   onWatcherChange(uri) {
-    let path = utils_1.getPathFromUri(uri);
+    let path = getPathFromUri(uri);
     if (path.indexOf('/.git/') > -1) {
       return;
     }
@@ -302,7 +303,7 @@ class RepoManager {
   }
 
   onWatcherDelete(uri) {
-    let path = utils_1.getPathFromUri(uri);
+    let path = getPathFromUri(uri);
     if (path.indexOf('/.git/') > -1) {
       return;
     }
@@ -315,7 +316,7 @@ class RepoManager {
   }
 
   processCreateEvents() {
-    return __awaiter(this, void 0, void 0, function*() {
+    return __awaiter(this, void 0, void 0, function* () {
       let path,
         changes = false;
       while ((path = this.createEventPaths.shift())) {
@@ -333,7 +334,7 @@ class RepoManager {
   }
 
   processChangeEvents() {
-    return __awaiter(this, void 0, void 0, function*() {
+    return __awaiter(this, void 0, void 0, function* () {
       let path,
         changes = false;
       while ((path = this.changeEventPaths.shift())) {
@@ -351,7 +352,7 @@ class RepoManager {
   }
 }
 
-exports.RepoManager = RepoManager;
+export default RepoManager;
 
 function isDirectory(path) {
   return new Promise(resolve => {

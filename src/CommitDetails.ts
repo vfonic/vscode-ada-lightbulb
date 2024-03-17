@@ -1,3 +1,4 @@
+// @ts-nocheck
 class CommitDetails {
   static get REQUIRED_KEYS() {
     return ['hash', 'parents', 'author', 'email', 'date', 'committer', 'body', 'fileChanges'];
@@ -13,4 +14,4 @@ class CommitDetails {
   }
 }
 
-exports.default = CommitDetails;
+export default CommitDetails;

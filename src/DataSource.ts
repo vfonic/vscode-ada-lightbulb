@@ -1,5 +1,6 @@
-const cp = require('child_process');
-const Config = require('./Config').default;
+// @ts-nocheck
+import Config from './Config';
+import cp from 'child_process';
 
 const configuration = new Config();
 
@@ -135,9 +136,7 @@ class DataSource {
   checkoutBranch(repo, branchName, remoteBranch) {
     return this.runGitCommand(
       'checkout ' +
-        (remoteBranch == null
-          ? escapeRefName(branchName)
-          : ' -b ' + escapeRefName(branchName) + ' ' + escapeRefName(remoteBranch)),
+        (remoteBranch == null ? escapeRefName(branchName) : ' -b ' + escapeRefName(branchName) + ' ' + escapeRefName(remoteBranch)),
       repo
     );
   }
@@ -147,10 +146,7 @@ class DataSource {
   }
 
   deleteBranch(repo, branchName, forceDelete) {
-    return this.runGitCommand(
-      'branch --delete' + (forceDelete ? ' --force' : '') + ' ' + escapeRefName(branchName),
-      repo
-    );
+    return this.runGitCommand('branch --delete' + (forceDelete ? ' --force' : '') + ' ' + escapeRefName(branchName), repo);
   }
 
   renameBranch(repo, oldName, newName) {
@@ -180,15 +176,15 @@ class DataSource {
   getRefs(repo) {
     return new Promise(resolve => {
       DataSource.execGit('show-ref -d --head', repo, (err, stdout) => {
-        let refData = { head: null, refs: [] };
+        const refData = { head: null, refs: [] };
         if (!err) {
-          let lines = stdout.split(DataSource.eolRegex).map(line => line.split(' '));
+          const lines = stdout.split(DataSource.eolRegex).map(line => line.split(' '));
           lines.forEach(line => {
             if (line.length < 2) {
               return;
             }
-            let hash = line.shift();
-            let ref = line.join(' ');
+            const hash = line.shift();
+            const ref = line.join(' ');
             if (ref.startsWith('refs/heads/')) {
               refData.refs.push({
                 hash: hash,
@@ -335,7 +331,7 @@ class DataSource {
 }
 
 DataSource.eolRegex = /\r\n|\r|\n/g;
-exports.DataSource = DataSource;
+export default DataSource;
 
 function escapeRefName(str) {
   return str.replace(/'/g, "'");

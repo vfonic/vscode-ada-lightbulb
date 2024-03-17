@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2024",
+    "outDir": "out",
+    "lib": ["ES2024"],
+    "sourceMap": true,
+    "rootDir": "src",
+    "strict": true,
+    "noImplicitAny": false
+  },
+  "exclude": ["node_modules", ".vscode-test"]
+}

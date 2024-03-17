@@ -1,7 +1,9 @@
-const vscode = require('vscode');
-const utils_1 = require('./utils');
+// @ts-nocheck
+import { getPathFromUri } from './utils';
+import vscode from 'vscode';
 
-const fileChangeRegex = /(^\.git\/(config|index|HEAD|refs\/stash|refs\/heads\/.*|refs\/remotes\/.*|refs\/tags\/.*)$)|(^(?!\.git).*$)|(^\.git[^\/]+$)/;
+const fileChangeRegex =
+  /(^\.git\/(config|index|HEAD|refs\/stash|refs\/heads\/.*|refs\/remotes\/.*|refs\/tags\/.*)$)|(^(?!\.git).*$)|(^\.git[^/]+$)/;
 
 class RepoFileWatcher {
   constructor(repoChangeCallback) {
@@ -45,8 +47,7 @@ class RepoFileWatcher {
       return;
     }
     if (
-      !utils_1
-        .getPathFromUri(uri)
+      !getPathFromUri(uri)
         .replace(this.repo + '/', '')
         .match(fileChangeRegex)
     ) {
@@ -64,4 +65,4 @@ class RepoFileWatcher {
   }
 }
 
-exports.default = RepoFileWatcher;
+export default RepoFileWatcher;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 const LAST_ACTIVE_REPO = 'lastActiveRepo';
 const REPO_STATES = 'repoStates';
 
@@ -25,4 +26,4 @@ class ExtensionState {
   }
 }
 
-exports.default = ExtensionState;
+export default ExtensionState;

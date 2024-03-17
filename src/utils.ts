@@ -1,4 +1,5 @@
-const vscode = require('vscode');
+// @ts-nocheck
+import vscode from 'vscode';
 
 const FS_REGEX = /\\/g;
 
@@ -6,21 +7,24 @@ function abbrevCommit(commitHash) {
   return commitHash.substring(0, 8);
 }
 
-exports.abbrevCommit = abbrevCommit;
+export { abbrevCommit };
 
 function copyToClipboard(text) {
   return new Promise(resolve => {
-    vscode.env.clipboard.writeText(text).then(() => resolve(true), () => resolve(false));
+    vscode.env.clipboard.writeText(text).then(
+      () => resolve(true),
+      () => resolve(false)
+    );
   });
 }
 
-exports.copyToClipboard = copyToClipboard;
+export { copyToClipboard };
 
 function getPathFromUri(uri) {
   return uri.fsPath.replace(FS_REGEX, '/');
 }
 
-exports.getPathFromUri = getPathFromUri;
+export { getPathFromUri };
 
 function evalPromises(data, maxParallel, createPromise) {
   return new Promise((resolve, reject) => {
@@ -31,13 +35,13 @@ function evalPromises(data, maxParallel, createPromise) {
     } else if (data.length === 0) {
       resolve([]);
     } else {
-      let results = new Array(data.length),
-        nextPromise = 0,
+      const results = new Array(data.length);
+      let nextPromise = 0,
         rejected = false,
         completed = 0;
 
       function startNext() {
-        let cur = nextPromise;
+        const cur = nextPromise;
         nextPromise++;
         createPromise(data[cur])
           .then(result => {
@@ -64,4 +68,4 @@ function evalPromises(data, maxParallel, createPromise) {
   });
 }
 
-exports.evalPromises = evalPromises;
+export { evalPromises };

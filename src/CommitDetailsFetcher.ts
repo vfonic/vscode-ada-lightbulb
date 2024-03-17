@@ -1,6 +1,7 @@
-const dataSource_1 = require('./DataSource');
-const CommitDetails = require('./CommitDetails').default;
-const CommitDetailsProcessor = require('./CommitDetailsProcessor').default;
+// @ts-nocheck
+import CommitDetails from './CommitDetails';
+import CommitDetailsProcessor from './CommitDetailsProcessor';
+import DataSource from './DataSource';
 
 const gitLogSeparator = 'XX7Nal-YARtTpjCikii9nJxER19D6diSyk-AWkPb';
 const gitCommitDetailsFormat = ['%H', '%P', '%an', '%ae', '%at', '%cn'].join(gitLogSeparator) + '%n%B';
@@ -9,7 +10,7 @@ class CommitDetailsFetcher {
   constructor(repo, commitHash) {
     this.repo = repo;
     this.commitHash = commitHash;
-    this.dataSource = dataSource_1.DataSource;
+    this.dataSource = DataSource;
   }
 
   call() {
@@ -25,7 +26,7 @@ class CommitDetailsFetcher {
                 reject(new Error(err));
               } else {
                 const lines = stdout.split(this.dataSource.eolRegex).filter(Boolean);
-                let commitInfo = lines[0].split(gitLogSeparator);
+                const commitInfo = lines[0].split(gitLogSeparator);
                 resolve(
                   new CommitDetails({
                     hash: commitInfo[0],
@@ -66,4 +67,4 @@ class CommitDetailsFetcher {
   }
 }
 
-exports.default = CommitDetailsFetcher;
+export default CommitDetailsFetcher;

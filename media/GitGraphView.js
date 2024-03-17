@@ -1,5 +1,6 @@
 class GitGraphView {
   constructor(repos, lastActiveRepo, config) {
+    console.warn('GitGraphView.constructor');
     this.gitBranches = [];
     this.commits = [];
     this.commitLookup = {};
@@ -827,26 +828,28 @@ class GitGraphView {
       command: 'commitDetails',
       repo: this.currentRepo,
       commitHash: commitData.hash,
+      commitId: commitData.id,
     });
   }
 
   showCommitDetails() {
-    new CommitView(this.expandedCommit, this.gitRepos[this.currentRepo], this.currentRepo).render(vscode);
+    console.warn({ expandedCommit: this.expandedCommit });
+    // new CommitView(this.expandedCommit, this.gitRepos[this.currentRepo], this.currentRepo).render();
 
-    addListenerToClass('gitFile', 'click', e => {
-      var sourceElem = e.target.closest('.gitFile');
-      if (!sourceElem.classList.contains('gitDiffPossible')) {
-        return;
-      }
-      sendMessage({
-        command: 'viewDiff',
-        repo: this.currentRepo,
-        commitHash: this.expandedCommit.hash,
-        filePath: decodeURIComponent(sourceElem.dataset.filepath),
-        newFilePath: decodeURIComponent(sourceElem.dataset.newfilepath),
-        statusCode: sourceElem.dataset.statuscode,
-      });
-    });
+    // addListenerToClass('gitFile', 'click', e => {
+    //   var sourceElem = e.target.closest('.gitFile');
+    //   if (!sourceElem.classList.contains('gitDiffPossible')) {
+    //     return;
+    //   }
+    //   sendMessage({
+    //     command: 'viewDiff',
+    //     repo: this.currentRepo,
+    //     commitHash: this.expandedCommit.hash,
+    //     filePath: decodeURIComponent(sourceElem.dataset.filepath),
+    //     newFilePath: decodeURIComponent(sourceElem.dataset.newfilepath),
+    //     statusCode: sourceElem.dataset.statuscode,
+    //   });
+    // });
   }
 
   get commitDetails() {

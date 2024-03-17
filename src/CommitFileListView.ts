@@ -1,3 +1,7 @@
+// @ts-nocheck
+import CommitStatusCode from './CommitStatusCode';
+import { svgIcons } from './html_utils';
+
 class CommitFileListView {
   constructor(gitFiles) {
     this.gitFiles = gitFiles;
@@ -5,7 +9,7 @@ class CommitFileListView {
 
   render() {
     const { gitFiles } = this;
-    var html = '<ul class="gitFolderContents">';
+    let html = '<ul class="gitFolderContents">';
     gitFiles.forEach(gitFile => {
       html +=
         '<li class="gitFile" data-filepath="' +
@@ -24,3 +28,5 @@ class CommitFileListView {
     return html + '</ul>';
   }
 }
+
+export default CommitFileListView;

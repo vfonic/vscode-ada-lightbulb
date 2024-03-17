@@ -1,12 +1,13 @@
-const dataSource_1 = require('./DataSource');
-const CommitDetails = require('./CommitDetails').default;
-const CommitFileChange = require('./CommitFileChange').default;
+// @ts-nocheck
+import CommitDetails from './CommitDetails';
+import CommitFileChange from './CommitFileChange';
+import DataSource from './DataSource';
 
 class UncommittedDetailsFetcher {
   constructor(repo, commitHash) {
     this.repo = repo;
     this.commitHash = commitHash;
-    this.dataSource = dataSource_1.DataSource;
+    this.dataSource = DataSource;
   }
 
   call() {

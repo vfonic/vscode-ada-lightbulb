@@ -1,5 +1,6 @@
-const path = require('path');
-const vscode = require('vscode');
+// @ts-nocheck
+import path from 'path';
+import vscode from 'vscode';
 
 class AssetLoader {
   constructor(extensionPath) {
@@ -11,4 +12,4 @@ class AssetLoader {
   }
 }
 
-exports.default = AssetLoader;
+export default AssetLoader;

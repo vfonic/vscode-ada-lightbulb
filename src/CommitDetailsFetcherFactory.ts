@@ -1,5 +1,6 @@
-const CommitDetailsFetcher = require('./CommitDetailsFetcher').default;
-const UncommittedDetailsFetcher = require('./UncommittedDetailsFetcher').default;
+// @ts-nocheck
+import CommitDetailsFetcher from './CommitDetailsFetcher';
+import UncommittedDetailsFetcher from './UncommittedDetailsFetcher';
 
 class CommitDetailsFetcherFactory {
   static initialize(repo, commitHash) {
@@ -11,4 +12,4 @@ class CommitDetailsFetcherFactory {
   }
 }
 
-exports.default = CommitDetailsFetcherFactory;
+export default CommitDetailsFetcherFactory;

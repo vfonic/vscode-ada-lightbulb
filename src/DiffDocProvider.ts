@@ -1,7 +1,5 @@
-'use strict';
-Object.defineProperty(exports, '__esModule', { value: true });
-const vscode = require('vscode');
-const utils_1 = require('./utils');
+// @ts-nocheck
+import vscode from 'vscode';
 
 class DiffDocProvider {
   constructor(dataSource) {
@@ -22,13 +20,13 @@ class DiffDocProvider {
   }
 
   provideTextDocumentContent(uri) {
-    let document = this.docs.get(uri.toString());
+    const document = this.docs.get(uri.toString());
     if (document) {
       return document.value;
     }
-    let request = decodeDiffDocUri(uri);
+    const request = decodeDiffDocUri(uri);
     return this.dataSource.getCommitFile(request.repo, request.commit, request.filePath).then(data => {
-      let document = new DiffDocument(data);
+      const document = new DiffDocument(data);
       this.docs.set(uri.toString(), document);
       return document.value;
     });
@@ -36,7 +34,7 @@ class DiffDocProvider {
 }
 
 DiffDocProvider.scheme = 'ada-lightbulb';
-exports.DiffDocProvider = DiffDocProvider;
+export default DiffDocProvider;
 
 class DiffDocument {
   constructor(body) {
@@ -54,21 +52,20 @@ function encodeDiffDocUri(repo, path, commit) {
   );
 }
 
-exports.encodeDiffDocUri = encodeDiffDocUri;
+export { encodeDiffDocUri };
 
 function decodeDiffDocUri(uri) {
-  let queryArgs = decodeUriQueryArgs(uri.query);
+  const queryArgs = decodeUriQueryArgs(uri.query);
   return { filePath: uri.path, commit: queryArgs.commit, repo: queryArgs.repo };
 }
 
-exports.decodeDiffDocUri = decodeDiffDocUri;
+export { decodeDiffDocUri };
 
 function decodeUriQueryArgs(query) {
-  let queryComps = query.split('&'),
-    queryArgs = {},
-    i;
-  for (i = 0; i < queryComps.length; i++) {
-    let pair = queryComps[i].split('=');
+  const queryComps = query.split('&');
+  const queryArgs = {};
+  for (let i = 0; i < queryComps.length; i++) {
+    const pair = queryComps[i].split('=');
     queryArgs[pair[0]] = decodeURIComponent(pair[1]);
   }
   return queryArgs;
