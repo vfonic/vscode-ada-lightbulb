@@ -20,8 +20,7 @@ class CommitView {
 
     // const divEl = document.createElement('div');
     // divEl.innerHTML =
-    return `
-      <div id="commitDetailsSummary">
+    const summary = `
       <span class="commitDetailsSummaryTop">
       <span class="commitDetailsSummaryTopRow"><span class="commitDetailsSummaryKeyValues">
       <b>Commit: </b>${escapeHtml(commitDetails.hash)}<br>
@@ -30,9 +29,11 @@ class CommitView {
       <b>Date: </b>${new Date(commitDetails.date * 1e3).toString()}<br>
       <b>Committer: </b>${escapeHtml(commitDetails.committer)}</span>
       </span></span><br><br>
-      ${escapeHtml(commitDetails.body).replace(/\n/g, '<br>')}</div>
-      <div id="commitDetailsFiles">${new CommitFileListView(commitDetails.fileChanges).render()}</div>
-    `;
+      ${escapeHtml(commitDetails.body).replace(/\n/g, '<br>')}`;
+
+    const fileList = new CommitFileListView(commitDetails.fileChanges).render();
+
+    return { summary, fileList };
 
     // const panel = vscode.window.createWebviewPanel('myBottomPanel', 'My Bottom Panel', vscode.ViewColumn.Three, {});
     // panel.webview.html = `

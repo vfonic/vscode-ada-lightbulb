@@ -98,6 +98,10 @@ class DataSource {
     return this.spawnGit(['show', commitHash + ':' + filePath], repo, stdout => stdout, '');
   }
 
+  getFileDiff(repo, commitHash, filePath) {
+    return this.spawnGit(['diff-tree', '-p', '--root', '--no-commit-id', commitHash, '--', filePath], repo, stdout => stdout, '');
+  }
+
   getRemoteUrl(repo) {
     return new Promise(resolve => {
       DataSource.execGit('config --get remote.origin.url', repo, (err, stdout) => {

@@ -95,20 +95,12 @@ class GitGraphView {
             });
             break;
           case 'commitDetails': {
-            console.warn('SHOWING SOME GOOD STUFF!!!!!');
-            console.warn({ msg });
             const { commitId: id, commitHash: hash } = msg;
-            const expandedCommit = {
-              id,
-              hash,
-              commitDetails: await CommitDetailsFetcherFactory.initialize(msg.repo, msg.commitHash).call(),
-            };
-            const html = new CommitView(expandedCommit).render();
-            viewProvider.showWebview(html);
-            this.sendMessage({
-              command: 'commitDetails',
-              commitDetails: await CommitDetailsFetcherFactory.initialize(msg.repo, msg.commitHash).call(),
-            });
+            const commitDetails = await CommitDetailsFetcherFactory.initialize(msg.repo, msg.commitHash).call();
+            const expandedCommit = { id, hash, commitDetails };
+            const parts = new CommitView(expandedCommit).render();
+            viewProvider.showCommitDetails(msg.repo, msg.commitHash, parts);
+            this.sendMessage({ command: 'commitDetails', commitDetails });
             break;
           }
           case 'copyToClipboard':
