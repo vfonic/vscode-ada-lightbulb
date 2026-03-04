@@ -26,8 +26,10 @@ window.addEventListener('message', function (event) {
       break;
     case 'commitDetails':
       gitGraph.commitDetails = msg.commitDetails;
-      console.warn({ msg2: msg });
-      gitGraph.showCommitDetails();
+      gitGraph.showCommitDetails(msg.summaryHtml, msg.fileListHtml);
+      break;
+    case 'fileDiff':
+      gitGraph.showFileDiff(msg.diff);
       break;
     case 'copyToClipboard':
       if (msg.success === false) {

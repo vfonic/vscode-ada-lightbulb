@@ -203,23 +203,10 @@ body.unableToLoad p {
   z-index: 99999;
   width: 100%;
   background: var(--vscode-editor-background);
-}
-#commitDetails td {
-  background-color: rgba(128, 128, 128, 0.1);
-  position: relative;
-  font-size: 13px;
-  line-height: 18px;
-  white-space: normal;
-}
-#commitDetails td:after {
-  content: "";
-  display: block;
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
-  background-color: rgba(128, 128, 128, 0.2);
+  display: flex;
+  flex-direction: column;
+  height: 300px;
+  border-top: 1px solid rgba(128, 128, 128, 0.3);
 }
 #commitTable tr.commit.commitDetailsOpen td {
   background-color: rgba(128, 128, 128, 0.25);
@@ -228,19 +215,14 @@ body.unableToLoad p {
   background-color: rgba(128, 128, 128, 0.35);
 }
 #commitDetailsSummary {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 2px;
-  width: 45%;
-  padding: 10px;
-  box-sizing: border-box;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.2);
   overflow-x: hidden;
   overflow-y: auto;
-  text-overflow: ellipsis;
-  border-left: 1px solid rgba(128, 128, 128, 0.2);
-  border-right: 1px solid rgba(128, 128, 128, 0.2);
+  max-height: 100px;
+  font-size: 0.9em;
   user-select: text;
+  flex-shrink: 0;
 }
 .commitDetailsSummaryTop {
   display: inline-table;
@@ -256,13 +238,34 @@ body.unableToLoad p {
   overflow-x: hidden;
   text-overflow: ellipsis;
 }
-#commitDetailsFiles {
-  position: absolute;
-  right: 32px;
-  top: 0;
-  bottom: 2px;
-  left: 45%;
+#commitDetailsSplit {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+#commitDetailsFileList {
+  width: 250px;
+  min-width: 150px;
+  overflow-y: auto;
   border-right: 1px solid rgba(128, 128, 128, 0.2);
+  padding: 4px 0;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+#commitDetailsDiff {
+  flex: 1;
+  overflow: auto;
+  padding: 4px 8px;
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: var(--vscode-editor-font-size, 12px);
+  white-space: pre;
+}
+.diff-line { display: block; }
+.diff-add { background: var(--vscode-diffEditor-insertedLineBackground, rgba(155,185,85,0.2)); }
+.diff-del { background: var(--vscode-diffEditor-removedLineBackground, rgba(255,0,0,0.2)); }
+.diff-hunk { color: var(--vscode-descriptionForeground, #888); }
+.diff-header { font-weight: bold; color: var(--vscode-descriptionForeground, #888); }
+#commitDetailsFiles {
   overflow-x: hidden;
   overflow-y: scroll;
   padding-top: 4px;
@@ -305,6 +308,24 @@ svg.fileIcon {
 }
 .gitFile {
   color: var(--vscode-gitDecoration-modifiedResourceForeground);
+  cursor: pointer;
+  padding: 2px 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 3px;
+}
+.gitFile:hover {
+  background: var(--vscode-list-hoverBackground, rgba(255,255,255,0.05));
+}
+.gitFile.selected {
+  background: var(--vscode-list-activeSelectionBackground, #094771);
+  color: var(--vscode-list-activeSelectionForeground, #fff);
+}
+.gitFileIcon svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
 }
 [data-statuscode="A"] {
   color: var(--vscode-gitDecoration-addedResourceForeground);

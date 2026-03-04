@@ -99,8 +99,17 @@ class GitGraphView {
             const commitDetails = await CommitDetailsFetcherFactory.initialize(msg.repo, msg.commitHash).call();
             const expandedCommit = { id, hash, commitDetails };
             const parts = new CommitView(expandedCommit).render();
-            viewProvider.showCommitDetails(msg.repo, msg.commitHash, parts);
-            this.sendMessage({ command: 'commitDetails', commitDetails });
+            this.sendMessage({
+              command: 'commitDetails',
+              commitDetails,
+              summaryHtml: parts.summary,
+              fileListHtml: parts.fileList,
+            });
+            break;
+          }
+          case 'requestFileDiff': {
+            const diff = await this.dataSource.getFileDiff(msg.repo, msg.commitHash, msg.filePath);
+            this.sendMessage({ command: 'fileDiff', diff });
             break;
           }
           case 'copyToClipboard':

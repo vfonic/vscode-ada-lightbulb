@@ -819,6 +819,11 @@ class GitGraphView {
 
   loadCommitDetails(commitIndex) {
     const commitData = document.querySelector('.commit[data-id="' + commitIndex + '"]').dataset;
+
+    var prev = document.querySelector('.commit.commitDetailsOpen');
+    if (prev) prev.classList.remove('commitDetailsOpen');
+    document.querySelector('.commit[data-id="' + commitIndex + '"]').classList.add('commitDetailsOpen');
+
     this.expandedCommit = {
       id: parseInt(commitData.id),
       hash: commitData.hash,
@@ -832,24 +837,67 @@ class GitGraphView {
     });
   }
 
-  showCommitDetails() {
-    console.warn({ expandedCommit: this.expandedCommit });
-    // new CommitView(this.expandedCommit, this.gitRepos[this.currentRepo], this.currentRepo).render();
+  showCommitDetails(summaryHtml, fileListHtml) {
+    var detailsEl = document.getElementById('commitDetails');
+    if (!summaryHtml) return;
 
-    // addListenerToClass('gitFile', 'click', e => {
-    //   var sourceElem = e.target.closest('.gitFile');
-    //   if (!sourceElem.classList.contains('gitDiffPossible')) {
-    //     return;
-    //   }
-    //   sendMessage({
-    //     command: 'viewDiff',
-    //     repo: this.currentRepo,
-    //     commitHash: this.expandedCommit.hash,
-    //     filePath: decodeURIComponent(sourceElem.dataset.filepath),
-    //     newFilePath: decodeURIComponent(sourceElem.dataset.newfilepath),
-    //     statusCode: sourceElem.dataset.statuscode,
-    //   });
-    // });
+    detailsEl.innerHTML =
+      '<div id="commitDetailsSummary">' +
+      summaryHtml +
+      '</div>' +
+      '<div id="commitDetailsSplit">' +
+      '<div id="commitDetailsFileList">' +
+      fileListHtml +
+      '</div>' +
+      '<div id="commitDetailsDiff"><em>Select a file to view diff</em></div>' +
+      '</div>';
+
+    detailsEl.style.display = '';
+
+    var self = this;
+    detailsEl.querySelectorAll('.gitFile').forEach(function (li) {
+      li.addEventListener('click', function () {
+        detailsEl.querySelectorAll('.gitFile').forEach(function (el) {
+          el.classList.remove('selected');
+        });
+        li.classList.add('selected');
+        document.getElementById('commitDetailsDiff').innerHTML = '<em>Loading diff...</em>';
+        sendMessage({
+          command: 'requestFileDiff',
+          repo: self.currentRepo,
+          commitHash: self.expandedCommit.hash,
+          filePath: decodeURIComponent(li.dataset.filepath),
+        });
+      });
+    });
+
+    var firstFile = detailsEl.querySelector('.gitFile');
+    if (firstFile) firstFile.click();
+  }
+
+  showFileDiff(diff) {
+    var el = document.getElementById('commitDetailsDiff');
+    if (!el) return;
+    if (!diff) {
+      el.innerHTML = '<em>No diff available</em>';
+      return;
+    }
+    var lines = diff.split(/\r?\n/);
+    el.innerHTML = lines
+      .map(function (line) {
+        var cls = '';
+        if (line.startsWith('+++') || line.startsWith('---') || line.startsWith('diff ')) {
+          cls = ' diff-header';
+        } else if (line.startsWith('@@')) {
+          cls = ' diff-hunk';
+        } else if (line.startsWith('+')) {
+          cls = ' diff-add';
+        } else if (line.startsWith('-')) {
+          cls = ' diff-del';
+        }
+        return '<span class="diff-line' + cls + '">' + escapeHtml(line) + '</span>';
+      })
+      .join('');
   }
 
   get commitDetails() {

@@ -47,14 +47,11 @@ class WebviewHtmlGenerator {
       <script src="${this.getMediaUri('commit_utils.js')}"></script>
       <script src="${this.getMediaUri('html_utils.js')}"></script>
       <script src="${this.getMediaUri('HotkeyManager.js')}"></script>
-      <script src="${this.getMediaUri('CommitView.js')}"></script>
       <script src="${this.getMediaUri('ContextMenu.js')}"></script>
       <script src="${this.getMediaUri('Dialog.js')}"></script>
       <script src="${this.getMediaUri('Dropdown.js')}"></script>
       <script src="${this.getMediaUri('Edge.js')}"></script>
       <script src="${this.getMediaUri('ElementResizer.js')}"></script>
-      <script src="${this.getMediaUri('CommitFileListView.js')}"></script>
-      <script src="${this.getMediaUri('CommitStatusCode.js')}"></script>
       <script src="${this.getMediaUri('GitGraphView.js')}"></script>
       <script src="${this.getMediaUri('Graph.js')}"></script>
       <script src="${this.getMediaUri('Vertex.js')}"></script>
