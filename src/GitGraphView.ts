@@ -15,9 +15,8 @@ import vscode from 'vscode';
 const configuration = new Config();
 
 class GitGraphView {
-  constructor(panel, extensionPath, dataSource, extensionState, repoManager, viewProvider) {
+  constructor(panel, extensionPath, dataSource, extensionState, repoManager) {
     console.warn('GitGraphView.constructor');
-    this.viewProvider = viewProvider;
     this.disposables = [];
     this.isGraphViewLoaded = false;
     this.isPanelVisible = true;
@@ -219,7 +218,7 @@ class GitGraphView {
     );
   }
 
-  static createOrShow(extensionPath, dataSource, extensionState, repoManager, viewProvider) {
+  static createOrShow(extensionPath, dataSource, extensionState, repoManager) {
     const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : vscode.ViewColumn.One;
     if (GitGraphView.currentPanel) {
       return GitGraphView.currentPanel.panel.reveal(column);
@@ -229,7 +228,7 @@ class GitGraphView {
       enableScripts: true,
       localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media')), vscode.Uri.file(path.join(extensionPath, 'node_modules'))],
     });
-    GitGraphView.currentPanel = new GitGraphView(panel, extensionPath, dataSource, extensionState, repoManager, viewProvider);
+    GitGraphView.currentPanel = new GitGraphView(panel, extensionPath, dataSource, extensionState, repoManager);
   }
 
   sendMessage(msg) {

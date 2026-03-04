@@ -18,7 +18,9 @@ class GitGraphView {
     this.requestLoadBranchesAndCommits(false);
     this.selectPreviousCommit = this.selectPreviousCommit.bind(this);
     this.selectNextCommit = this.selectNextCommit.bind(this);
-    new HotkeyManager(this.selectPreviousCommit, this.selectNextCommit);
+    this.selectPreviousFile = this.selectPreviousFile.bind(this);
+    this.selectNextFile = this.selectNextFile.bind(this);
+    this.hotkeyManager = new HotkeyManager(this.selectPreviousCommit, this.selectNextCommit, this.selectPreviousFile, this.selectNextFile);
   }
 
   selectPreviousCommit() {
@@ -28,6 +30,20 @@ class GitGraphView {
   selectNextCommit() {
     const commitIndex = this.expandedCommit ? this.expandedCommit.id : -1;
     this.loadCommitDetails(Math.min(commitIndex + 1, this.commits.length - 1));
+  }
+
+  selectPreviousFile() {
+    const current = document.querySelector('.gitFile.selected');
+    if (!current) return;
+    const prev = current.previousElementSibling;
+    if (prev && prev.classList.contains('gitFile')) prev.click();
+  }
+
+  selectNextFile() {
+    const current = document.querySelector('.gitFile.selected');
+    if (!current) return;
+    const next = current.nextElementSibling;
+    if (next && next.classList.contains('gitFile')) next.click();
   }
 
   static getCommitDate(dateVal) {
@@ -508,6 +524,7 @@ class GitGraphView {
 
     addListenerToClass('commit', 'click', e => {
       var sourceElem = e.target.closest('.commit');
+      this.hotkeyManager.setFocusedPane('commits');
       this.loadCommitDetails(sourceElem.dataset.id);
     });
 
@@ -818,6 +835,7 @@ class GitGraphView {
   }
 
   loadCommitDetails(commitIndex) {
+    this.hotkeyManager.setFocusedPane('commits');
     const commitData = document.querySelector('.commit[data-id="' + commitIndex + '"]').dataset;
 
     var prev = document.querySelector('.commit.commitDetailsOpen');
@@ -857,6 +875,7 @@ class GitGraphView {
     var self = this;
     detailsEl.querySelectorAll('.gitFile').forEach(function (li) {
       li.addEventListener('click', function () {
+        self.hotkeyManager.setFocusedPane('files');
         detailsEl.querySelectorAll('.gitFile').forEach(function (el) {
           el.classList.remove('selected');
         });

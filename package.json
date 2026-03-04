@@ -26,24 +26,6 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
-    "viewsContainers": {
-      "panel": [
-        {
-          "id": "my-fancy-view",
-          "title": "Fancy View",
-          "icon": "resources/icon.png"
-        }
-      ]
-    },
-    "views": {
-      "my-fancy-view": [
-        {
-          "type": "webview",
-          "id": "my-webview",
-          "name": "Webview"
-        }
-      ]
-    },
     "commands": [
       {
         "title": "Ada Lightbulb: Open graph",
