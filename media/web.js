@@ -78,6 +78,20 @@ window.addEventListener('message', function (event) {
     case 'revertCommit':
       refreshGraphOrDisplayError(msg.status, 'Unable to Revert Commit');
       break;
+    case 'stageFile':
+      if (msg.status == null) {
+        gitGraph.refreshUncommittedDetails();
+      } else {
+        Dialog.showErrorDialog('Unable to Stage File', msg.status, null);
+      }
+      break;
+    case 'unstageFile':
+      if (msg.status == null) {
+        gitGraph.refreshUncommittedDetails();
+      } else {
+        Dialog.showErrorDialog('Unable to Unstage File', msg.status, null);
+      }
+      break;
     case 'viewDiff':
       if (msg.success === false) {
         Dialog.showErrorDialog('Unable to view diff of file', null, null);

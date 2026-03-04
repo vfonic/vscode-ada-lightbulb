@@ -107,8 +107,26 @@ class GitGraphView {
             break;
           }
           case 'requestFileDiff': {
-            const diff = await this.dataSource.getFileDiff(msg.repo, msg.commitHash, msg.filePath);
+            let diff;
+            if (msg.commitHash === '*') {
+              diff =
+                msg.section === 'staged'
+                  ? await this.dataSource.getStagedFileDiff(msg.repo, msg.filePath)
+                  : await this.dataSource.getUnstagedFileDiff(msg.repo, msg.filePath);
+            } else {
+              diff = await this.dataSource.getFileDiff(msg.repo, msg.commitHash, msg.filePath);
+            }
             this.sendMessage({ command: 'fileDiff', diff });
+            break;
+          }
+          case 'stageFile': {
+            const status = await this.dataSource.stageFile(msg.repo, msg.filePath);
+            this.sendMessage({ command: 'stageFile', status });
+            break;
+          }
+          case 'unstageFile': {
+            const status = await this.dataSource.unstageFile(msg.repo, msg.filePath);
+            this.sendMessage({ command: 'unstageFile', status });
             break;
           }
           case 'copyToClipboard':

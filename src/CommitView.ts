@@ -1,5 +1,6 @@
 // @ts-nocheck
 import CommitFileListView from './CommitFileListView';
+import UncommittedFileListView from './UncommittedFileListView';
 import { escapeHtml } from './html_utils';
 
 class CommitView {
@@ -12,14 +13,12 @@ class CommitView {
       return null;
     }
 
-    // const previouslySelectedCommitEl = document.querySelector('.commit.commitDetailsOpen');
-    // if (previouslySelectedCommitEl) previouslySelectedCommitEl.classList.remove('commitDetailsOpen');
-    // document.querySelector('[data-hash="' + this.expandedCommit.hash + '"]').classList.add('commitDetailsOpen');
-
     const { commitDetails } = this.expandedCommit;
 
-    // const divEl = document.createElement('div');
-    // divEl.innerHTML =
+    if (commitDetails.hash === '*') {
+      return this.renderUncommitted(commitDetails);
+    }
+
     const summary = `
       <span class="commitDetailsSummaryTop">
       <span class="commitDetailsSummaryTopRow"><span class="commitDetailsSummaryKeyValues">
@@ -34,20 +33,12 @@ class CommitView {
     const fileList = new CommitFileListView(commitDetails.fileChanges).render();
 
     return { summary, fileList };
+  }
 
-    // const panel = vscode.window.createWebviewPanel('myBottomPanel', 'My Bottom Panel', vscode.ViewColumn.Three, {});
-    // panel.webview.html = `
-    //   <!DOCTYPE html>
-    //   <html lang="en">
-    //   <head>
-    //       <meta charset="UTF-8">
-    //       <title>Commitsa</title>
-    //   </head>
-    //   <body>
-    //       ${divEl.innerHTML}
-    //   </body>
-    //   </html>
-    // `;
+  renderUncommitted(commitDetails) {
+    const summary = '<span class="commitDetailsSummaryTop"><b>Uncommitted Changes</b></span>';
+    const fileList = new UncommittedFileListView(commitDetails.unstagedFileChanges, commitDetails.stagedFileChanges).render();
+    return { summary, fileList };
   }
 }
 

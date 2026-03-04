@@ -102,6 +102,22 @@ class DataSource {
     return this.spawnGit(['diff-tree', '-p', '--root', '--no-commit-id', commitHash, '--', filePath], repo, stdout => stdout, '');
   }
 
+  getUnstagedFileDiff(repo, filePath) {
+    return this.spawnGit(['diff', '--', filePath], repo, stdout => stdout, '');
+  }
+
+  getStagedFileDiff(repo, filePath) {
+    return this.spawnGit(['diff', '--cached', '--', filePath], repo, stdout => stdout, '');
+  }
+
+  stageFile(repo, filePath) {
+    return this.runGitCommandSpawn(['add', '--', filePath], repo);
+  }
+
+  unstageFile(repo, filePath) {
+    return this.runGitCommandSpawn(['reset', 'HEAD', '--', filePath], repo);
+  }
+
   getRemoteUrl(repo) {
     return new Promise(resolve => {
       DataSource.execGit('config --get remote.origin.url', repo, (err, stdout) => {

@@ -311,6 +311,27 @@ svg.fileIcon {
 .gitFolder {
   cursor: pointer;
 }
+.fileSection {
+  border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+}
+.fileSection:last-child {
+  border-bottom: none;
+}
+.fileSectionHeader {
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--vscode-descriptionForeground, #888);
+  background: rgba(128, 128, 128, 0.06);
+  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+  user-select: none;
+}
+.fileSection.focused .fileSectionHeader {
+  color: var(--vscode-editor-foreground);
+  background: rgba(128, 128, 128, 0.12);
+}
 .gitFile {
   color: var(--vscode-gitDecoration-modifiedResourceForeground);
   cursor: pointer;

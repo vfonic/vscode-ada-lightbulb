@@ -20,7 +20,9 @@ class GitGraphView {
     this.selectNextCommit = this.selectNextCommit.bind(this);
     this.selectPreviousFile = this.selectPreviousFile.bind(this);
     this.selectNextFile = this.selectNextFile.bind(this);
-    this.hotkeyManager = new HotkeyManager(this.selectPreviousCommit, this.selectNextCommit, this.selectPreviousFile, this.selectNextFile);
+    this.enterFile = this.enterFile.bind(this);
+    this.hotkeyManager = new HotkeyManager(this.selectPreviousCommit, this.selectNextCommit, this.selectPreviousFile, this.selectNextFile, this.enterFile);
+    this.hotkeyManager.onSectionChange = section => this.onSectionChange(section);
   }
 
   goToUncommittedChanges() {
@@ -58,12 +60,22 @@ class GitGraphView {
     if (focusedCommit) focusedCommit.classList.remove('focused');
     var focusedFile = document.querySelector('.gitFile.focused');
     if (focusedFile) focusedFile.classList.remove('focused');
+    document.querySelectorAll('.fileSection.focused').forEach(el => el.classList.remove('focused'));
     if (pane === 'commits') {
+      this.hotkeyManager.focusedSection = null;
       var active = document.querySelector('.commit.commitDetailsOpen');
       if (active) active.classList.add('focused');
     } else {
       var selected = document.querySelector('.gitFile.selected');
-      if (selected) selected.classList.add('focused');
+      if (selected) {
+        selected.classList.add('focused');
+        var section = selected.dataset.section || null;
+        this.hotkeyManager.focusedSection = section;
+        if (section) {
+          var sectionEl = document.querySelector('.fileSection[data-section="' + section + '"]');
+          if (sectionEl) sectionEl.classList.add('focused');
+        }
+      }
     }
   }
 
@@ -900,14 +912,25 @@ class GitGraphView {
         detailsEl.querySelectorAll('.gitFile').forEach(function (el) {
           el.classList.remove('selected', 'focused');
         });
+        document.querySelectorAll('.fileSection.focused').forEach(function (el) {
+          el.classList.remove('focused');
+        });
         li.classList.add('selected');
-        if (self.hotkeyManager.focusedPane === 'files') li.classList.add('focused');
+        if (self.hotkeyManager.focusedPane === 'files') {
+          li.classList.add('focused');
+          if (li.dataset.section) {
+            self.hotkeyManager.focusedSection = li.dataset.section;
+            var sectionEl = li.closest('.fileSection');
+            if (sectionEl) sectionEl.classList.add('focused');
+          }
+        }
         document.getElementById('commitDetailsDiff').innerHTML = '<em>Loading diff...</em>';
         sendMessage({
           command: 'requestFileDiff',
           repo: self.currentRepo,
           commitHash: self.expandedCommit.hash,
           filePath: decodeURIComponent(li.dataset.filepath),
+          section: li.dataset.section || null,
         });
       });
     });
@@ -939,6 +962,35 @@ class GitGraphView {
         return '<span class="diff-line' + cls + '">' + escapeHtml(line) + '</span>';
       })
       .join('');
+  }
+
+  enterFile() {
+    var selected = document.querySelector('.gitFile.selected');
+    if (!selected || !selected.dataset.section) return;
+    var section = selected.dataset.section;
+    var filePath = decodeURIComponent(selected.dataset.filepath);
+    if (section === 'unstaged') {
+      sendMessage({ command: 'stageFile', repo: this.currentRepo, filePath: filePath });
+    } else if (section === 'staged') {
+      sendMessage({ command: 'unstageFile', repo: this.currentRepo, filePath: filePath });
+    }
+  }
+
+  onSectionChange(section) {
+    var sectionEl = document.querySelector('.fileSection[data-section="' + section + '"]');
+    if (!sectionEl) return;
+    var firstFile = sectionEl.querySelector('.gitFile');
+    if (firstFile) firstFile.click();
+  }
+
+  refreshUncommittedDetails() {
+    if (!this.expandedCommit || this.expandedCommit.hash !== '*') return;
+    sendMessage({
+      command: 'commitDetails',
+      repo: this.currentRepo,
+      commitHash: '*',
+      commitId: this.expandedCommit.id,
+    });
   }
 
   get commitDetails() {
