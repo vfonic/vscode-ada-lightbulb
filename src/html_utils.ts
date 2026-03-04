@@ -1,5 +1,14 @@
 // @ts-nocheck
 
+const htmlEscapes = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+  '/': '&#x2F;',
+};
+
 const htmlEscaper = /[&<>"'/]/g;
 
 export const escapeHtml = str => str.replace(htmlEscaper, match => htmlEscapes[match]);
