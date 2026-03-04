@@ -203,10 +203,13 @@ body.unableToLoad p {
   z-index: 99999;
   width: 100%;
   background: var(--vscode-editor-background);
-  display: flex;
+  display: none;
   flex-direction: column;
   height: 300px;
   border-top: 1px solid rgba(128, 128, 128, 0.3);
+}
+#commitDetails.active {
+  display: flex;
 }
 #commitTable tr.commit.commitDetailsOpen td {
   background-color: rgba(128, 128, 128, 0.25);

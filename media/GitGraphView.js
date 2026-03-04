@@ -852,7 +852,7 @@ class GitGraphView {
       '<div id="commitDetailsDiff"><em>Select a file to view diff</em></div>' +
       '</div>';
 
-    detailsEl.style.display = '';
+    detailsEl.classList.add('active');
 
     var self = this;
     detailsEl.querySelectorAll('.gitFile').forEach(function (li) {
