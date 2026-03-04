@@ -114,13 +114,12 @@ body.unableToLoad p {
   background-color: transparent;
   z-index: var(--ada-lightbulb-z-index-commitTable);
 }
-#commitTable tr.commit:hover td,
 #commitTable tr.commit.contextMenuActive td,
-#commitTable tr.commit.dialogActive td,
-#commitTable tr.commit.commitDetailsOpen td {
+#commitTable tr.commit.dialogActive td {
   background-color: var(--vscode-editor-hoverHighlightBackground);
 }
 #commitTable tr.commit:hover td {
+  background-color: var(--vscode-editor-hoverHighlightBackground);
   cursor: pointer;
 }
 #commitTable th {
