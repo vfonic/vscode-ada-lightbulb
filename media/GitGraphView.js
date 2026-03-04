@@ -16,12 +16,15 @@ class GitGraphView {
     this.renderShowLoading();
     this.loadRepos(this.gitRepos, lastActiveRepo);
     this.requestLoadBranchesAndCommits(false);
+    this.selectedFiles = new Set();
+    this.selectionAnchor = null;
     this.selectPreviousCommit = this.selectPreviousCommit.bind(this);
     this.selectNextCommit = this.selectNextCommit.bind(this);
     this.selectPreviousFile = this.selectPreviousFile.bind(this);
     this.selectNextFile = this.selectNextFile.bind(this);
     this.enterFile = this.enterFile.bind(this);
-    this.hotkeyManager = new HotkeyManager(this.selectPreviousCommit, this.selectNextCommit, this.selectPreviousFile, this.selectNextFile, this.enterFile);
+    this.selectAllFiles = this.selectAllFiles.bind(this);
+    this.hotkeyManager = new HotkeyManager(this.selectPreviousCommit, this.selectNextCommit, this.selectPreviousFile, this.selectNextFile, this.enterFile, this.selectAllFiles);
     this.hotkeyManager.onSectionChange = section => this.onSectionChange(section);
   }
 
@@ -40,18 +43,36 @@ class GitGraphView {
     this.loadCommitDetails(Math.min(commitIndex + 1, this.commits.length - 1));
   }
 
-  selectPreviousFile() {
-    const current = document.querySelector('.gitFile.selected');
-    if (!current) return;
-    const prev = current.previousElementSibling;
-    if (prev && prev.classList.contains('gitFile')) prev.click();
+  selectPreviousFile(extend) {
+    var anchor = this.selectionAnchor || document.querySelector('.gitFile.selected');
+    if (!anchor) return;
+    var prev = anchor.previousElementSibling;
+    if (!prev || !prev.classList.contains('gitFile')) return;
+    if (extend) {
+      this.addFileToSelection(prev);
+      this.selectionAnchor = prev;
+      this.updateSelectionVisuals();
+      this.requestDiffForFile(prev);
+      prev.scrollIntoView({ block: 'nearest' });
+    } else {
+      prev.click();
+    }
   }
 
-  selectNextFile() {
-    const current = document.querySelector('.gitFile.selected');
-    if (!current) return;
-    const next = current.nextElementSibling;
-    if (next && next.classList.contains('gitFile')) next.click();
+  selectNextFile(extend) {
+    var anchor = this.selectionAnchor || document.querySelector('.gitFile.selected');
+    if (!anchor) return;
+    var next = anchor.nextElementSibling;
+    if (!next || !next.classList.contains('gitFile')) return;
+    if (extend) {
+      this.addFileToSelection(next);
+      this.selectionAnchor = next;
+      this.updateSelectionVisuals();
+      this.requestDiffForFile(next);
+      next.scrollIntoView({ block: 'nearest' });
+    } else {
+      next.click();
+    }
   }
 
   setFocusedPane(pane) {
@@ -892,6 +913,8 @@ class GitGraphView {
     var detailsEl = document.getElementById('commitDetails');
     if (!summaryHtml) return;
 
+    this.clearFileSelection();
+
     detailsEl.innerHTML =
       '<div id="commitDetailsSummary">' +
       summaryHtml +
@@ -909,13 +932,34 @@ class GitGraphView {
     detailsEl.querySelectorAll('.gitFile').forEach(function (li) {
       li.addEventListener('click', function (e) {
         if (e.isTrusted) self.setFocusedPane('files');
-        detailsEl.querySelectorAll('.gitFile').forEach(function (el) {
-          el.classList.remove('selected', 'focused');
-        });
+
+        if (e.isTrusted && (e.metaKey || e.ctrlKey)) {
+          // CMD/Ctrl+Click: toggle file in selection (same section only)
+          if (self.selectionAnchor && self.selectionAnchor.dataset.section !== li.dataset.section) return;
+          self.toggleFileSelection(li);
+          self.selectionAnchor = li;
+          self.updateSelectionVisuals();
+          self.requestDiffForFile(li);
+          return;
+        }
+
+        if (e.isTrusted && e.shiftKey && self.selectionAnchor) {
+          // SHIFT+Click: range select from anchor to clicked (same section only)
+          if (self.selectionAnchor.dataset.section !== li.dataset.section) return;
+          self.rangeSelectFiles(self.selectionAnchor, li);
+          self.updateSelectionVisuals();
+          self.requestDiffForFile(li);
+          return;
+        }
+
+        // Normal click: clear selection, single-select
+        self.clearFileSelection();
+        self.addFileToSelection(li);
+        self.selectionAnchor = li;
+
         document.querySelectorAll('.fileSection.focused').forEach(function (el) {
           el.classList.remove('focused');
         });
-        li.classList.add('selected');
         if (self.hotkeyManager.focusedPane === 'files') {
           li.classList.add('focused');
           if (li.dataset.section) {
@@ -924,24 +968,132 @@ class GitGraphView {
             if (sectionEl) sectionEl.classList.add('focused');
           }
         }
-        document.getElementById('commitDetailsDiff').innerHTML = '<em>Loading diff...</em>';
-        sendMessage({
-          command: 'requestFileDiff',
-          repo: self.currentRepo,
-          commitHash: self.expandedCommit.hash,
-          filePath: decodeURIComponent(li.dataset.filepath),
-          section: li.dataset.section || null,
-        });
+        self.requestDiffForFile(li);
       });
     });
+
+    // Double-click to stage/unstage
+    if (self.expandedCommit && self.expandedCommit.hash === '*') {
+      detailsEl.querySelectorAll('.gitFile').forEach(function (li) {
+        li.addEventListener('dblclick', function (e) {
+          e.preventDefault();
+          var section = li.dataset.section;
+          var filePath = decodeURIComponent(li.dataset.filepath);
+          if (section === 'unstaged') {
+            sendMessage({ command: 'stageFile', repo: self.currentRepo, filePath: filePath });
+          } else if (section === 'staged') {
+            sendMessage({ command: 'unstageFile', repo: self.currentRepo, filePath: filePath });
+          }
+        });
+      });
+    }
 
     var firstFile = detailsEl.querySelector('.gitFile');
     if (firstFile) firstFile.click();
   }
 
-  showFileDiff(diff) {
+  clearFileSelection() {
+    this.selectedFiles.forEach(function (el) {
+      el.classList.remove('selected', 'focused');
+    });
+    this.selectedFiles = new Set();
+    this.selectionAnchor = null;
+  }
+
+  addFileToSelection(li) {
+    li.classList.add('selected');
+    this.selectedFiles.add(li);
+  }
+
+  removeFileFromSelection(li) {
+    li.classList.remove('selected', 'focused');
+    this.selectedFiles.delete(li);
+  }
+
+  toggleFileSelection(li) {
+    if (this.selectedFiles.has(li)) {
+      this.removeFileFromSelection(li);
+    } else {
+      this.addFileToSelection(li);
+    }
+  }
+
+  rangeSelectFiles(from, to) {
+    var ul = from.closest('ul');
+    if (!ul) return;
+    var items = Array.from(ul.querySelectorAll('.gitFile'));
+    var fromIndex = items.indexOf(from);
+    var toIndex = items.indexOf(to);
+    if (fromIndex === -1 || toIndex === -1) return;
+    var start = Math.min(fromIndex, toIndex);
+    var end = Math.max(fromIndex, toIndex);
+    // Clear current selection but keep anchor
+    this.selectedFiles.forEach(function (el) {
+      el.classList.remove('selected', 'focused');
+    });
+    this.selectedFiles = new Set();
+    for (var i = start; i <= end; i++) {
+      this.addFileToSelection(items[i]);
+    }
+  }
+
+  updateSelectionVisuals() {
+    document.querySelectorAll('.gitFile.focused').forEach(function (el) {
+      el.classList.remove('focused');
+    });
+    if (this.selectionAnchor && this.hotkeyManager.focusedPane === 'files') {
+      this.selectionAnchor.classList.add('focused');
+      if (this.selectionAnchor.dataset.section) {
+        this.hotkeyManager.focusedSection = this.selectionAnchor.dataset.section;
+        document.querySelectorAll('.fileSection.focused').forEach(function (el) {
+          el.classList.remove('focused');
+        });
+        var sectionEl = this.selectionAnchor.closest('.fileSection');
+        if (sectionEl) sectionEl.classList.add('focused');
+      }
+    }
+  }
+
+  requestDiffForFile(li) {
+    document.getElementById('commitDetailsDiff').innerHTML = '<em>Loading diff...</em>';
+    sendMessage({
+      command: 'requestFileDiff',
+      repo: this.currentRepo,
+      commitHash: this.expandedCommit.hash,
+      filePath: decodeURIComponent(li.dataset.filepath),
+      section: li.dataset.section || null,
+      statusCode: li.dataset.statuscode || null,
+    });
+  }
+
+  selectAllFiles() {
+    var section = this.hotkeyManager.focusedSection;
+    if (!section) return;
+    var sectionEl = document.querySelector('.fileSection[data-section="' + section + '"]');
+    if (!sectionEl) return;
+    var self = this;
+    self.clearFileSelection();
+    sectionEl.querySelectorAll('.gitFile').forEach(function (li) {
+      self.addFileToSelection(li);
+    });
+    var items = sectionEl.querySelectorAll('.gitFile');
+    if (items.length > 0) {
+      self.selectionAnchor = items[0];
+      self.updateSelectionVisuals();
+    }
+  }
+
+  showFileDiff(diff, timedOut, permanentError, filePath, section, statusCode) {
     var el = document.getElementById('commitDetailsDiff');
     if (!el) return;
+    if (permanentError) {
+      el.innerHTML = '<em>Diff is too large to display.</em>';
+      return;
+    }
+    if (timedOut) {
+      this.showDiffTimeout(filePath, section, statusCode);
+      return;
+    }
     if (!diff) {
       el.innerHTML = '<em>No diff available</em>';
       return;
@@ -964,15 +1116,48 @@ class GitGraphView {
       .join('');
   }
 
+  showDiffTimeout(filePath, section, statusCode) {
+    var el = document.getElementById('commitDetailsDiff');
+    if (!el) return;
+    var self = this;
+    el.innerHTML = '<em>Diff is too large to load quickly.</em> <button id="loadDiffFullBtn" class="roundedBtn">Load diff</button>';
+    var btn = document.getElementById('loadDiffFullBtn');
+    if (btn) {
+      btn.addEventListener('click', function () {
+        el.innerHTML = '<em>Loading diff...</em>';
+        sendMessage({
+          command: 'requestFileDiffFull',
+          repo: self.currentRepo,
+          commitHash: self.expandedCommit.hash,
+          filePath: filePath,
+          section: section,
+          statusCode: statusCode,
+        });
+      });
+    }
+  }
+
   enterFile() {
-    var selected = document.querySelector('.gitFile.selected');
-    if (!selected || !selected.dataset.section) return;
-    var section = selected.dataset.section;
-    var filePath = decodeURIComponent(selected.dataset.filepath);
-    if (section === 'unstaged') {
-      sendMessage({ command: 'stageFile', repo: this.currentRepo, filePath: filePath });
-    } else if (section === 'staged') {
-      sendMessage({ command: 'unstageFile', repo: this.currentRepo, filePath: filePath });
+    if (this.selectedFiles.size === 0) return;
+    var unstagedPaths = [];
+    var stagedPaths = [];
+    this.selectedFiles.forEach(function (li) {
+      var section = li.dataset.section;
+      var filePath = decodeURIComponent(li.dataset.filepath);
+      if (section === 'unstaged') unstagedPaths.push(filePath);
+      else if (section === 'staged') stagedPaths.push(filePath);
+    });
+    if (unstagedPaths.length === 1 && stagedPaths.length === 0) {
+      sendMessage({ command: 'stageFile', repo: this.currentRepo, filePath: unstagedPaths[0] });
+    } else if (stagedPaths.length === 1 && unstagedPaths.length === 0) {
+      sendMessage({ command: 'unstageFile', repo: this.currentRepo, filePath: stagedPaths[0] });
+    } else {
+      if (unstagedPaths.length > 0) {
+        sendMessage({ command: 'stageFiles', repo: this.currentRepo, filePaths: unstagedPaths });
+      }
+      if (stagedPaths.length > 0) {
+        sendMessage({ command: 'unstageFiles', repo: this.currentRepo, filePaths: stagedPaths });
+      }
     }
   }
 

@@ -98,16 +98,57 @@ class DataSource {
     return this.spawnGit(['show', commitHash + ':' + filePath], repo, stdout => stdout, '');
   }
 
-  getFileDiff(repo, commitHash, filePath) {
-    return this.spawnGit(['diff-tree', '-p', '--root', '--no-commit-id', commitHash, '--', filePath], repo, stdout => stdout, '');
+  getFileDiff(repo, commitHash, filePath, timeout = 3000) {
+    return this.spawnGit(['diff-tree', '-p', '--root', '--no-commit-id', commitHash, '--', filePath], repo, stdout => stdout, '', timeout);
   }
 
-  getUnstagedFileDiff(repo, filePath) {
-    return this.spawnGit(['diff', '--', filePath], repo, stdout => stdout, '');
+  getUnstagedFileDiff(repo, filePath, timeout = 3000) {
+    return this.spawnGit(['diff', '--', filePath], repo, stdout => stdout, '', timeout);
   }
 
-  getStagedFileDiff(repo, filePath) {
-    return this.spawnGit(['diff', '--cached', '--', filePath], repo, stdout => stdout, '');
+  getStagedFileDiff(repo, filePath, timeout = 3000) {
+    return this.spawnGit(['diff', '--cached', '--', filePath], repo, stdout => stdout, '', timeout);
+  }
+
+  getUntrackedFileDiff(repo, filePath, timeout = 3000) {
+    return new Promise(resolve => {
+      let stdout = '';
+      let err = false;
+      let timedOut = false;
+      let timer;
+      const cmd = cp.spawn(configuration.gitPath, ['diff', '--no-index', '/dev/null', filePath], { cwd: repo });
+      if (timeout > 0) {
+        timer = setTimeout(() => {
+          timedOut = true;
+          cmd.kill();
+          resolve({ timedOut: true });
+        }, timeout);
+      }
+      cmd.stdout.on('data', d => {
+        stdout += d;
+      });
+      cmd.on('error', () => {
+        if (timedOut) {
+          return;
+        }
+        if (timer) {
+          clearTimeout(timer);
+        }
+        resolve('');
+        err = true;
+      });
+      cmd.on('exit', () => {
+        if (timedOut) {
+          return;
+        }
+        if (timer) {
+          clearTimeout(timer);
+        }
+        if (!err) {
+          resolve(stdout);
+        }
+      });
+    });
   }
 
   stageFile(repo, filePath) {
@@ -116,6 +157,14 @@ class DataSource {
 
   unstageFile(repo, filePath) {
     return this.runGitCommandSpawn(['reset', 'HEAD', '--', filePath], repo);
+  }
+
+  stageFiles(repo, filePaths) {
+    return this.runGitCommandSpawn(['add', '--'].concat(filePaths), repo);
+  }
+
+  unstageFiles(repo, filePaths) {
+    return this.runGitCommandSpawn(['reset', 'HEAD', '--'].concat(filePaths), repo);
   }
 
   getRemoteUrl(repo) {
@@ -328,19 +377,40 @@ class DataSource {
     });
   }
 
-  spawnGit(args, repo, successValue, errorValue) {
+  spawnGit(args, repo, successValue, errorValue, timeout = 0) {
     return new Promise(resolve => {
       let stdout = '';
       let err = false;
+      let timedOut = false;
+      let timer;
       const cmd = cp.spawn(configuration.gitPath, args, { cwd: repo });
+      if (timeout > 0) {
+        timer = setTimeout(() => {
+          timedOut = true;
+          cmd.kill();
+          resolve({ timedOut: true });
+        }, timeout);
+      }
       cmd.stdout.on('data', d => {
         stdout += d;
       });
       cmd.on('error', () => {
+        if (timedOut) {
+          return;
+        }
+        if (timer) {
+          clearTimeout(timer);
+        }
         resolve(errorValue);
         err = true;
       });
       cmd.on('exit', code => {
+        if (timedOut) {
+          return;
+        }
+        if (timer) {
+          clearTimeout(timer);
+        }
         if (err) {
           return;
         }

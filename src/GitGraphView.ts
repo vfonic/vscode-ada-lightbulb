@@ -109,14 +109,49 @@ class GitGraphView {
           case 'requestFileDiff': {
             let diff;
             if (msg.commitHash === '*') {
-              diff =
-                msg.section === 'staged'
-                  ? await this.dataSource.getStagedFileDiff(msg.repo, msg.filePath)
-                  : await this.dataSource.getUnstagedFileDiff(msg.repo, msg.filePath);
+              if (msg.section === 'staged') {
+                diff = await this.dataSource.getStagedFileDiff(msg.repo, msg.filePath);
+              } else if (msg.section === 'unstaged' && msg.statusCode === 'A') {
+                diff = await this.dataSource.getUntrackedFileDiff(msg.repo, msg.filePath);
+              } else {
+                diff = await this.dataSource.getUnstagedFileDiff(msg.repo, msg.filePath);
+              }
             } else {
               diff = await this.dataSource.getFileDiff(msg.repo, msg.commitHash, msg.filePath);
             }
-            this.sendMessage({ command: 'fileDiff', diff });
+            if (diff && diff.timedOut) {
+              this.sendMessage({
+                command: 'fileDiff',
+                diff: null,
+                timedOut: true,
+                filePath: msg.filePath,
+                section: msg.section,
+                statusCode: msg.statusCode,
+              });
+            } else {
+              this.sendMessage({ command: 'fileDiff', diff });
+            }
+            break;
+          }
+          case 'requestFileDiffFull': {
+            let diff;
+            const fullTimeout = 10000;
+            if (msg.commitHash === '*') {
+              if (msg.section === 'staged') {
+                diff = await this.dataSource.getStagedFileDiff(msg.repo, msg.filePath, fullTimeout);
+              } else if (msg.section === 'unstaged' && msg.statusCode === 'A') {
+                diff = await this.dataSource.getUntrackedFileDiff(msg.repo, msg.filePath, fullTimeout);
+              } else {
+                diff = await this.dataSource.getUnstagedFileDiff(msg.repo, msg.filePath, fullTimeout);
+              }
+            } else {
+              diff = await this.dataSource.getFileDiff(msg.repo, msg.commitHash, msg.filePath, fullTimeout);
+            }
+            if (diff && diff.timedOut) {
+              this.sendMessage({ command: 'fileDiff', diff: null, permanentError: true });
+            } else {
+              this.sendMessage({ command: 'fileDiff', diff });
+            }
             break;
           }
           case 'stageFile': {
@@ -127,6 +162,16 @@ class GitGraphView {
           case 'unstageFile': {
             const status = await this.dataSource.unstageFile(msg.repo, msg.filePath);
             this.sendMessage({ command: 'unstageFile', status });
+            break;
+          }
+          case 'stageFiles': {
+            const status = await this.dataSource.stageFiles(msg.repo, msg.filePaths);
+            this.sendMessage({ command: 'stageFiles', status });
+            break;
+          }
+          case 'unstageFiles': {
+            const status = await this.dataSource.unstageFiles(msg.repo, msg.filePaths);
+            this.sendMessage({ command: 'unstageFiles', status });
             break;
           }
           case 'copyToClipboard':

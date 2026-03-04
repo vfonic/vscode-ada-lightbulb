@@ -29,7 +29,7 @@ window.addEventListener('message', function (event) {
       gitGraph.showCommitDetails(msg.summaryHtml, msg.fileListHtml);
       break;
     case 'fileDiff':
-      gitGraph.showFileDiff(msg.diff);
+      gitGraph.showFileDiff(msg.diff, msg.timedOut, msg.permanentError, msg.filePath, msg.section, msg.statusCode);
       break;
     case 'copyToClipboard':
       if (msg.success === false) {
@@ -90,6 +90,20 @@ window.addEventListener('message', function (event) {
         gitGraph.refreshUncommittedDetails();
       } else {
         Dialog.showErrorDialog('Unable to Unstage File', msg.status, null);
+      }
+      break;
+    case 'stageFiles':
+      if (msg.status == null) {
+        gitGraph.refreshUncommittedDetails();
+      } else {
+        Dialog.showErrorDialog('Unable to Stage Files', msg.status, null);
+      }
+      break;
+    case 'unstageFiles':
+      if (msg.status == null) {
+        gitGraph.refreshUncommittedDetails();
+      } else {
+        Dialog.showErrorDialog('Unable to Unstage Files', msg.status, null);
       }
       break;
     case 'viewDiff':

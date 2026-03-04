@@ -12,12 +12,13 @@ class HotkeyManager {
     return 13;
   }
 
-  constructor(prevCommit, nextCommit, prevFile, nextFile, enterFile) {
+  constructor(prevCommit, nextCommit, prevFile, nextFile, enterFile, selectAllFiles) {
     this.prevCommit = prevCommit;
     this.nextCommit = nextCommit;
     this.prevFile = prevFile;
     this.nextFile = nextFile;
     this.enterFile = enterFile;
+    this.selectAllFiles = selectAllFiles;
     this.focusedPane = 'commits';
     this.focusedSection = null;
     this.onSectionChange = null;
@@ -25,17 +26,20 @@ class HotkeyManager {
       if (e.keyCode === HotkeyManager.ARROW_UP) {
         e.preventDefault();
         if (this.focusedPane === 'files') {
-          this.prevFile();
+          this.prevFile(e.shiftKey);
         } else {
           this.prevCommit();
         }
       } else if (e.keyCode === HotkeyManager.ARROW_DOWN) {
         e.preventDefault();
         if (this.focusedPane === 'files') {
-          this.nextFile();
+          this.nextFile(e.shiftKey);
         } else {
           this.nextCommit();
         }
+      } else if (e.keyCode === 65 && (e.metaKey || e.ctrlKey) && this.focusedPane === 'files') {
+        e.preventDefault();
+        if (this.selectAllFiles) this.selectAllFiles();
       } else if (e.keyCode === HotkeyManager.TAB && this.focusedPane === 'files' && this.focusedSection !== null) {
         e.preventDefault();
         if (e.shiftKey && this.focusedSection === 'staged') {
