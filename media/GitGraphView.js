@@ -874,8 +874,8 @@ class GitGraphView {
 
     var self = this;
     detailsEl.querySelectorAll('.gitFile').forEach(function (li) {
-      li.addEventListener('click', function () {
-        self.hotkeyManager.setFocusedPane('files');
+      li.addEventListener('click', function (e) {
+        if (e.isTrusted) self.hotkeyManager.setFocusedPane('files');
         detailsEl.querySelectorAll('.gitFile').forEach(function (el) {
           el.classList.remove('selected');
         });
