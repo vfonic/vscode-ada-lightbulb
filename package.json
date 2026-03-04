@@ -30,6 +30,17 @@
       {
         "title": "Ada Lightbulb: Open graph",
         "command": "ada-lightbulb.view"
+      },
+      {
+        "title": "Ada Lightbulb: Go to uncommitted changes",
+        "command": "ada-lightbulb.goToUncommittedChanges"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "ada-lightbulb.goToUncommittedChanges",
+        "key": "cmd+1",
+        "when": "activeWebviewPanelId == 'ada-lightbulb'"
       }
     ]
   },

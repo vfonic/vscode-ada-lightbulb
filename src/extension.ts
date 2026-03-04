@@ -15,6 +15,13 @@ export function activate(context: vscode.ExtensionContext) {
       GitGraphView.createOrShow(context.extensionPath, dataSource, extensionState, repoManager)
     )
   );
+  context.subscriptions.push(
+    vscode.commands.registerCommand('ada-lightbulb.goToUncommittedChanges', () => {
+      if (GitGraphView.currentPanel) {
+        GitGraphView.currentPanel.sendMessage({ command: 'goToUncommittedChanges' });
+      }
+    })
+  );
   context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(DiffDocProvider.scheme, new DiffDocProvider(dataSource)));
   // context.subscriptions.push(
   //   vscode.workspace.onDidChangeConfiguration(e => e.affectsConfiguration('git.path') && dataSource.registerGitPath())

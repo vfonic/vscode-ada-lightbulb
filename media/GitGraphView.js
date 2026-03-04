@@ -23,6 +23,12 @@ class GitGraphView {
     this.hotkeyManager = new HotkeyManager(this.selectPreviousCommit, this.selectNextCommit, this.selectPreviousFile, this.selectNextFile);
   }
 
+  goToUncommittedChanges() {
+    if (this.commits.length > 0 && this.commits[0].hash === '*') {
+      this.loadCommitDetails(0);
+    }
+  }
+
   selectPreviousCommit() {
     const commitIndex = this.expandedCommit ? this.expandedCommit.id : -1;
     this.loadCommitDetails(Math.max(commitIndex - 1, 0));

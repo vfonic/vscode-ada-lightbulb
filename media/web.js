@@ -66,6 +66,9 @@ window.addEventListener('message', function (event) {
     case 'renameBranch':
       refreshGraphOrDisplayError(msg.status, 'Unable to Rename Branch');
       break;
+    case 'goToUncommittedChanges':
+      gitGraph.goToUncommittedChanges();
+      break;
     case 'refresh':
       gitGraph.refresh(false);
       break;
