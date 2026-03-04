@@ -45,4 +45,4 @@ class UncommittedDetailsFetcher {
   }
 }
 
-exports.default = UncommittedDetailsFetcher;
+export default UncommittedDetailsFetcher;
