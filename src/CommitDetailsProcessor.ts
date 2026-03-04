@@ -25,4 +25,4 @@ class CommitDetailsProcessor {
     this.resolve(commitDetails);
   }
 }
-exports.default = CommitDetailsProcessor;
+export default CommitDetailsProcessor;
