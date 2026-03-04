@@ -46,6 +46,21 @@ class GitGraphView {
     if (next && next.classList.contains('gitFile')) next.click();
   }
 
+  setFocusedPane(pane) {
+    this.hotkeyManager.setFocusedPane(pane);
+    var focusedCommit = document.querySelector('.commit.focused');
+    if (focusedCommit) focusedCommit.classList.remove('focused');
+    var focusedFile = document.querySelector('.gitFile.focused');
+    if (focusedFile) focusedFile.classList.remove('focused');
+    if (pane === 'commits') {
+      var active = document.querySelector('.commit.commitDetailsOpen');
+      if (active) active.classList.add('focused');
+    } else {
+      var selected = document.querySelector('.gitFile.selected');
+      if (selected) selected.classList.add('focused');
+    }
+  }
+
   static getCommitDate(dateVal) {
     var date = new Date(dateVal * 1e3),
       value;
@@ -524,7 +539,7 @@ class GitGraphView {
 
     addListenerToClass('commit', 'click', e => {
       var sourceElem = e.target.closest('.commit');
-      this.hotkeyManager.setFocusedPane('commits');
+      this.setFocusedPane('commits');
       this.loadCommitDetails(sourceElem.dataset.id);
     });
 
@@ -835,12 +850,12 @@ class GitGraphView {
   }
 
   loadCommitDetails(commitIndex) {
-    this.hotkeyManager.setFocusedPane('commits');
     const commitData = document.querySelector('.commit[data-id="' + commitIndex + '"]').dataset;
 
     var prev = document.querySelector('.commit.commitDetailsOpen');
     if (prev) prev.classList.remove('commitDetailsOpen');
     document.querySelector('.commit[data-id="' + commitIndex + '"]').classList.add('commitDetailsOpen');
+    this.setFocusedPane('commits');
 
     this.expandedCommit = {
       id: parseInt(commitData.id),
@@ -875,11 +890,12 @@ class GitGraphView {
     var self = this;
     detailsEl.querySelectorAll('.gitFile').forEach(function (li) {
       li.addEventListener('click', function (e) {
-        if (e.isTrusted) self.hotkeyManager.setFocusedPane('files');
+        if (e.isTrusted) self.setFocusedPane('files');
         detailsEl.querySelectorAll('.gitFile').forEach(function (el) {
-          el.classList.remove('selected');
+          el.classList.remove('selected', 'focused');
         });
         li.classList.add('selected');
+        if (self.hotkeyManager.focusedPane === 'files') li.classList.add('focused');
         document.getElementById('commitDetailsDiff').innerHTML = '<em>Loading diff...</em>';
         sendMessage({
           command: 'requestFileDiff',

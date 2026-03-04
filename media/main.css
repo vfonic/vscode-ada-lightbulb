@@ -212,7 +212,10 @@ body.unableToLoad p {
   display: flex;
 }
 #commitTable tr.commit.commitDetailsOpen td {
-  background-color: rgba(128, 128, 128, 0.25);
+  background-color: rgba(128, 128, 128, 0.15);
+}
+#commitTable tr.commit.commitDetailsOpen.focused td {
+  background-color: rgba(128, 128, 128, 0.35);
 }
 #commitTable tr.commit.commitDetailsOpen:hover td {
   background-color: rgba(128, 128, 128, 0.35);
@@ -322,6 +325,10 @@ svg.fileIcon {
   background: var(--vscode-list-hoverBackground, rgba(255,255,255,0.05));
 }
 .gitFile.selected {
+  background: rgba(128, 128, 128, 0.2);
+  color: var(--vscode-list-activeSelectionForeground, #fff);
+}
+.gitFile.selected.focused {
   background: var(--vscode-list-activeSelectionBackground, #094771);
   color: var(--vscode-list-activeSelectionForeground, #fff);
 }
