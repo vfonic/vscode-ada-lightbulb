@@ -320,16 +320,15 @@ svg.fileIcon {
   gap: 4px;
   border-radius: 3px;
 }
-.gitFile:hover {
-  background: var(--vscode-list-hoverBackground, rgba(255,255,255,0.05));
-}
 .gitFile.selected {
-  background: rgba(128, 128, 128, 0.2);
-  color: var(--vscode-list-activeSelectionForeground, #fff);
+  background: rgba(128, 128, 128, 0.15);
 }
 .gitFile.selected.focused {
-  background: var(--vscode-list-activeSelectionBackground, #094771);
-  color: var(--vscode-list-activeSelectionForeground, #fff);
+  background: var(--vscode-editor-hoverHighlightBackground);
+}
+.gitFile:hover,
+.gitFile.selected:hover {
+  background: var(--vscode-editor-hoverHighlightBackground);
 }
 .gitFileIcon svg {
   width: 13px;
