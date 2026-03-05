@@ -616,7 +616,11 @@ class GitGraphView {
         return
       }
 
-      if (e.shiftKey && this.selectedCommitIds.length > 0 && this.commits[commitId].hash !== '*') {
+      if (
+        e.shiftKey &&
+        (this.selectedCommitIds.length > 0 || (this.expandedCommit && this.expandedCommit.hash !== '*')) &&
+        this.commits[commitId].hash !== '*'
+      ) {
         this.shiftSelectCommits(commitId)
         return
       }
