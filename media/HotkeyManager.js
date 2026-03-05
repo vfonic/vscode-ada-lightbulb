@@ -64,7 +64,7 @@ class HotkeyManager {
     var clearTimer = setInterval(() => {
       window.getSelection().removeAllRanges();
       if (++clearCount >= 20) clearInterval(clearTimer);
-    }, 10);
+    }, 0);
   }
 
   setFocusedPane(pane) {

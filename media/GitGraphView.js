@@ -19,6 +19,7 @@ class GitGraphView {
     this.requestLoadBranchesAndCommits(false);
     this.selectedFiles = new Set();
     this.selectionAnchor = null;
+    this.pendingFileSelection = null;
     this.diffRequestId = 0;
     this.selectPreviousCommit = this.selectPreviousCommit.bind(this);
     this.selectNextCommit = this.selectNextCommit.bind(this);
@@ -1075,6 +1076,7 @@ class GitGraphView {
       detailsEl.querySelectorAll('.gitFile').forEach(function (li) {
         li.addEventListener('dblclick', function (e) {
           e.preventDefault();
+          self.pendingFileSelection = self.getNextFileTarget(li);
           var section = li.dataset.section;
           var filePath = decodeURIComponent(li.dataset.filepath);
           if (section === 'unstaged') {
@@ -1088,8 +1090,22 @@ class GitGraphView {
 
     this.initFileListResizer();
 
-    var firstFile = detailsEl.querySelector('.gitFile');
-    if (firstFile) firstFile.click();
+    var targetFile = null;
+    if (this.pendingFileSelection) {
+      var pending = this.pendingFileSelection;
+      this.pendingFileSelection = null;
+      if (pending.filePath) {
+        targetFile = detailsEl.querySelector(
+          '.gitFile[data-filepath="' + CSS.escape(pending.filePath) + '"][data-section="' + pending.section + '"]'
+        );
+      }
+      if (!targetFile && pending.section) {
+        var sectionEl = detailsEl.querySelector('.fileSection[data-section="' + pending.section + '"]');
+        if (sectionEl) targetFile = sectionEl.querySelector('.gitFile');
+      }
+    }
+    if (!targetFile) targetFile = detailsEl.querySelector('.gitFile');
+    if (targetFile) targetFile.click();
   }
 
   clearFileSelection() {
@@ -1242,8 +1258,28 @@ class GitGraphView {
     }
   }
 
+  getNextFileTarget(anchorEl) {
+    if (!anchorEl) return null;
+    var section = anchorEl.dataset.section;
+    var oppositeSection = section === 'unstaged' ? 'staged' : 'unstaged';
+
+    // Try next sibling .gitFile below
+    var next = anchorEl.nextElementSibling;
+    while (next && !next.classList.contains('gitFile')) next = next.nextElementSibling;
+    if (next) return { filePath: next.dataset.filepath, section: section };
+
+    // Try prev sibling .gitFile above
+    var prev = anchorEl.previousElementSibling;
+    while (prev && !prev.classList.contains('gitFile')) prev = prev.previousElementSibling;
+    if (prev) return { filePath: prev.dataset.filepath, section: section };
+
+    // Section will be empty, fall back to opposite section
+    return { filePath: null, section: oppositeSection };
+  }
+
   enterFile() {
     if (this.selectedFiles.size === 0) return;
+    this.pendingFileSelection = this.getNextFileTarget(this.selectionAnchor);
     var unstagedPaths = [];
     var stagedPaths = [];
     this.selectedFiles.forEach(function (li) {
