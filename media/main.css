@@ -118,10 +118,6 @@ body.unableToLoad p {
 #commitTable tr.commit.dialogActive td {
   background-color: var(--vscode-editor-hoverHighlightBackground);
 }
-#commitTable tr.commit:hover td {
-  background-color: var(--vscode-editor-hoverHighlightBackground);
-  cursor: pointer;
-}
 #commitTable th {
   position: sticky;
 
@@ -219,9 +215,6 @@ body.unableToLoad p {
   background-color: rgba(128, 128, 128, 0.15);
 }
 #commitTable tr.commit.commitDetailsOpen.focused td {
-  background-color: var(--vscode-editor-hoverHighlightBackground);
-}
-#commitTable tr.commit.commitDetailsOpen:hover td {
   background-color: var(--vscode-editor-hoverHighlightBackground);
 }
 #commitDetailsSummary {
@@ -363,10 +356,6 @@ svg.fileIcon {
   background: rgba(128, 128, 128, 0.15);
 }
 .gitFile.selected.focused {
-  background: var(--vscode-editor-hoverHighlightBackground);
-}
-.gitFile:hover,
-.gitFile.selected:hover {
   background: var(--vscode-editor-hoverHighlightBackground);
 }
 .gitFileIcon svg {
