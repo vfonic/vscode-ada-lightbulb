@@ -118,34 +118,7 @@ class GitGraphView {
             const trackProcess = proc => {
               this._activeDiffProcess = proc;
             };
-            let diff;
-            if (msg.commitHash === '*') {
-              if (msg.section === 'staged') {
-                diff = await this.dataSource.getStagedFileDiff(msg.repo, msg.filePath, 3000, trackProcess);
-              } else if (msg.section === 'unstaged' && msg.statusCode === 'A') {
-                diff = await this.dataSource.getUntrackedFileDiff(msg.repo, msg.filePath, 3000, trackProcess);
-              } else {
-                diff = await this.dataSource.getUnstagedFileDiff(msg.repo, msg.filePath, 3000, trackProcess);
-              }
-            } else {
-              diff = await this.dataSource.getFileDiff(msg.repo, msg.commitHash, msg.filePath, 3000, trackProcess);
-            }
-            if (this._currentDiffRequestId !== requestId) {
-              break;
-            }
-            if (diff && diff.timedOut) {
-              this.sendMessage({
-                command: 'fileDiff',
-                diff: null,
-                timedOut: true,
-                filePath: msg.filePath,
-                section: msg.section,
-                statusCode: msg.statusCode,
-                requestId,
-              });
-            } else {
-              this.sendMessage({ command: 'fileDiff', diff, requestId });
-            }
+            this.fetchDiff(msg, requestId, 3000, trackProcess);
             break;
           }
           case 'requestFileDiffFull': {
@@ -158,27 +131,7 @@ class GitGraphView {
             const trackProcess = proc => {
               this._activeDiffProcess = proc;
             };
-            let diff;
-            const fullTimeout = 10000;
-            if (msg.commitHash === '*') {
-              if (msg.section === 'staged') {
-                diff = await this.dataSource.getStagedFileDiff(msg.repo, msg.filePath, fullTimeout, trackProcess);
-              } else if (msg.section === 'unstaged' && msg.statusCode === 'A') {
-                diff = await this.dataSource.getUntrackedFileDiff(msg.repo, msg.filePath, fullTimeout, trackProcess);
-              } else {
-                diff = await this.dataSource.getUnstagedFileDiff(msg.repo, msg.filePath, fullTimeout, trackProcess);
-              }
-            } else {
-              diff = await this.dataSource.getFileDiff(msg.repo, msg.commitHash, msg.filePath, fullTimeout, trackProcess);
-            }
-            if (this._currentDiffRequestId !== requestId) {
-              break;
-            }
-            if (diff && diff.timedOut) {
-              this.sendMessage({ command: 'fileDiff', diff: null, permanentError: true, requestId });
-            } else {
-              this.sendMessage({ command: 'fileDiff', diff, requestId });
-            }
+            this.fetchDiff(msg, requestId, 10000, trackProcess, true);
             break;
           }
           case 'stageFile': {
@@ -319,6 +272,39 @@ class GitGraphView {
       localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media')), vscode.Uri.file(path.join(extensionPath, 'node_modules'))],
     });
     GitGraphView.currentPanel = new GitGraphView(panel, extensionPath, dataSource, extensionState, repoManager);
+  }
+
+  async fetchDiff(msg, requestId, timeout, trackProcess, permanentOnTimeout = false) {
+    let diff;
+    if (msg.commitHash === '*') {
+      if (msg.section === 'staged') {
+        diff = await this.dataSource.getStagedFileDiff(msg.repo, msg.filePath, timeout, trackProcess);
+      } else if (msg.section === 'unstaged' && msg.statusCode === 'A') {
+        diff = await this.dataSource.getUntrackedFileDiff(msg.repo, msg.filePath, timeout, trackProcess);
+      } else {
+        diff = await this.dataSource.getUnstagedFileDiff(msg.repo, msg.filePath, timeout, trackProcess);
+      }
+    } else {
+      diff = await this.dataSource.getFileDiff(msg.repo, msg.commitHash, msg.filePath, timeout, trackProcess);
+    }
+    if (this._currentDiffRequestId !== requestId) return;
+    if (diff && diff.timedOut) {
+      if (permanentOnTimeout) {
+        this.sendMessage({ command: 'fileDiff', diff: null, permanentError: true, requestId });
+      } else {
+        this.sendMessage({
+          command: 'fileDiff',
+          diff: null,
+          timedOut: true,
+          filePath: msg.filePath,
+          section: msg.section,
+          statusCode: msg.statusCode,
+          requestId,
+        });
+      }
+    } else {
+      this.sendMessage({ command: 'fileDiff', diff, requestId });
+    }
   }
 
   sendMessage(msg) {
