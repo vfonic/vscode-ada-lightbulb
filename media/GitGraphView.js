@@ -21,6 +21,8 @@ class GitGraphView {
     this.loadRepos(this.gitRepos, lastActiveRepo)
     this.requestLoadBranchesAndCommits(false)
     this.selectedCommitIds = []
+    this.commitSelectionAnchor = null
+    this.commitSelectionCursor = null
     this.selectedFiles = new Set()
     this.selectionAnchor = null
     this.pendingFileSelection = null
@@ -50,15 +52,53 @@ class GitGraphView {
     }
   }
 
-  selectPreviousCommit() {
+  selectPreviousCommit(extend) {
+    if (extend) {
+      this.extendCommitSelection(-1)
+      return
+    }
     const commitIndex = this.expandedCommit ? this.expandedCommit.id : -1
     this.loadCommitDetails(Math.max(commitIndex - 1, 0))
   }
-  selectNextCommit() {
+  selectNextCommit(extend) {
+    if (extend) {
+      this.extendCommitSelection(1)
+      return
+    }
     const commitIndex = this.expandedCommit ? this.expandedCommit.id : -1
     const nextIndex = Math.min(commitIndex + 1, this.commits.length - 1)
     this.loadCommitDetails(nextIndex)
     if (this.moreCommitsAvailable && nextIndex >= this.commits.length - 5) {
+      this.triggerLoadMore()
+    }
+  }
+
+  extendCommitSelection(direction) {
+    // Initialize anchor/cursor from current state
+    if (this.commitSelectionAnchor === null) {
+      var anchorId = this.expandedCommit ? this.expandedCommit.id : 0
+      if (this.commits[anchorId] && this.commits[anchorId].hash === '*') return
+      this.commitSelectionAnchor = anchorId
+      this.commitSelectionCursor = anchorId
+    }
+    // Move cursor
+    var nextCursor = this.commitSelectionCursor + direction
+    if (nextCursor < 0 || nextCursor >= this.commits.length) return
+    if (this.commits[nextCursor].hash === '*') return
+    this.commitSelectionCursor = nextCursor
+    // Build selection from anchor to cursor
+    var start = Math.min(this.commitSelectionAnchor, this.commitSelectionCursor)
+    var end = Math.max(this.commitSelectionAnchor, this.commitSelectionCursor)
+    this.selectedCommitIds = []
+    for (var i = start; i <= end; i++) {
+      if (this.commits[i].hash !== '*') this.selectedCommitIds.push(i)
+    }
+    this.updateCommitSelectionVisuals()
+    this.loadSelectedCommitRange()
+    // Scroll cursor commit into view
+    var cursorRow = document.querySelector('.commit[data-id="' + this.commitSelectionCursor + '"]')
+    if (cursorRow) this.scrollCommitIntoView(cursorRow)
+    if (this.moreCommitsAvailable && this.commitSelectionCursor >= this.commits.length - 5) {
       this.triggerLoadMore()
     }
   }
@@ -1051,6 +1091,8 @@ class GitGraphView {
 
   clearCommitSelection() {
     this.selectedCommitIds = []
+    this.commitSelectionAnchor = null
+    this.commitSelectionCursor = null
     document.querySelectorAll('.commit.commitSelected').forEach(el => el.classList.remove('commitSelected'))
   }
 
@@ -1079,11 +1121,14 @@ class GitGraphView {
   }
 
   shiftSelectCommits(commitId) {
-    var lastId = this.selectedCommitIds[this.selectedCommitIds.length - 1]
-    if (lastId === undefined && this.expandedCommit) lastId = this.expandedCommit.id
-    if (lastId === undefined) return
-    var start = Math.min(lastId, commitId)
-    var end = Math.max(lastId, commitId)
+    if (this.commitSelectionAnchor === null) {
+      var anchorId = this.selectedCommitIds.length > 0 ? this.selectedCommitIds[0] : this.expandedCommit ? this.expandedCommit.id : null
+      if (anchorId === null) return
+      this.commitSelectionAnchor = anchorId
+    }
+    this.commitSelectionCursor = commitId
+    var start = Math.min(this.commitSelectionAnchor, commitId)
+    var end = Math.max(this.commitSelectionAnchor, commitId)
     this.selectedCommitIds = []
     for (var i = start; i <= end; i++) {
       if (this.commits[i].hash !== '*') this.selectedCommitIds.push(i)

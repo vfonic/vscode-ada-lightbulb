@@ -28,14 +28,14 @@ class HotkeyManager {
         if (this.focusedPane === 'files') {
           this.prevFile(e.shiftKey)
         } else {
-          this.prevCommit()
+          this.prevCommit(e.shiftKey)
         }
       } else if (e.keyCode === HotkeyManager.ARROW_DOWN) {
         e.preventDefault()
         if (this.focusedPane === 'files') {
           this.nextFile(e.shiftKey)
         } else {
-          this.nextCommit()
+          this.nextCommit(e.shiftKey)
         }
       } else if (e.keyCode === 65 && (e.metaKey || e.ctrlKey) && this.focusedPane === 'files') {
         e.preventDefault()
