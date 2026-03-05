@@ -100,7 +100,7 @@ class DataSource {
 
   getFileDiff(repo, commitHash, filePath, timeout = 3000, onProcess = null) {
     return this.spawnGit(
-      ['diff-tree', '-p', '--root', '--no-commit-id', commitHash, '--', filePath],
+      ['diff-tree', '-p', '--root', '--no-commit-id', '--no-ext-diff', '--no-color', commitHash, '--', filePath],
       repo,
       stdout => stdout,
       '',
@@ -110,11 +110,11 @@ class DataSource {
   }
 
   getUnstagedFileDiff(repo, filePath, timeout = 3000, onProcess = null) {
-    return this.spawnGit(['diff', '--', filePath], repo, stdout => stdout, '', timeout, onProcess);
+    return this.spawnGit(['diff', '--no-ext-diff', '--no-color', '--', filePath], repo, stdout => stdout, '', timeout, onProcess);
   }
 
   getStagedFileDiff(repo, filePath, timeout = 3000, onProcess = null) {
-    return this.spawnGit(['diff', '--cached', '--', filePath], repo, stdout => stdout, '', timeout, onProcess);
+    return this.spawnGit(['diff', '--cached', '--no-ext-diff', '--no-color', '--', filePath], repo, stdout => stdout, '', timeout, onProcess);
   }
 
   getUntrackedFileDiff(repo, filePath, timeout = 3000, onProcess = null) {
@@ -123,7 +123,7 @@ class DataSource {
       let err = false;
       let timedOut = false;
       let timer;
-      const cmd = cp.spawn(configuration.gitPath, ['diff', '--no-index', '/dev/null', filePath], { cwd: repo });
+      const cmd = cp.spawn(configuration.gitPath, ['diff', '--no-index', '--no-ext-diff', '--no-color', '/dev/null', filePath], { cwd: repo });
       if (onProcess) {
         onProcess(cmd);
       }
