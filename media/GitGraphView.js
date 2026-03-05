@@ -1073,6 +1073,11 @@ class GitGraphView {
           if (self.selectionAnchor.dataset.section !== li.dataset.section) return
           self.rangeSelectFiles(self.selectionAnchor, li)
           self.updateSelectionVisuals()
+          // Move focus to the clicked file (anchor stays for further shift+clicks)
+          if (self.selectionAnchor !== li) {
+            self.selectionAnchor.classList.remove('focused')
+            li.classList.add('focused')
+          }
           self.requestDiffForFile(li)
           return
         }
