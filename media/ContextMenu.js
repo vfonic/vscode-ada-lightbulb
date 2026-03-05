@@ -1,64 +1,60 @@
 class ContextMenu {
   constructor() {
-    document.addEventListener('click', ContextMenu.hideContextMenuListener);
-    document.addEventListener('contextmenu', ContextMenu.hideContextMenuListener);
-    document.addEventListener('mouseleave', ContextMenu.hideContextMenuListener);
+    document.addEventListener('click', ContextMenu.hideContextMenuListener)
+    document.addEventListener('contextmenu', ContextMenu.hideContextMenuListener)
+    document.addEventListener('mouseleave', ContextMenu.hideContextMenuListener)
   }
 
   static getContextMenuElement() {
-    return document.getElementById('contextMenu');
+    return document.getElementById('contextMenu')
   }
 
   static hideContextMenuListener() {
-    const contextMenu = ContextMenu.getContextMenuElement();
+    const contextMenu = ContextMenu.getContextMenuElement()
     if (contextMenu.classList.contains('active')) {
-      ContextMenu.hideContextMenu();
+      ContextMenu.hideContextMenu()
     }
   }
 
   static hideContextMenu() {
-    const contextMenu = ContextMenu.getContextMenuElement();
-    contextMenu.className = '';
-    contextMenu.innerHTML = '';
-    contextMenu.style.left = '0px';
-    contextMenu.style.top = '0px';
+    const contextMenu = ContextMenu.getContextMenuElement()
+    contextMenu.className = ''
+    contextMenu.innerHTML = ''
+    contextMenu.style.left = '0px'
+    contextMenu.style.top = '0px'
     if (this.contextMenuSource != null) {
-      this.contextMenuSource.classList.remove('contextMenuActive');
-      this.contextMenuSource = null;
+      this.contextMenuSource.classList.remove('contextMenuActive')
+      this.contextMenuSource = null
     }
   }
 
   static showContextMenu(e, items, sourceElem) {
-    const contextMenu = ContextMenu.getContextMenuElement();
+    const contextMenu = ContextMenu.getContextMenuElement()
     var html = '',
-      event = e;
-    const ELLIPSIS = '&#8230;';
+      event = e
+    const ELLIPSIS = '&#8230;'
     items.forEach((item, i) => {
       html +=
         item != null
           ? '<li class="contextMenuItem" data-index="' + i + '">' + item.title + ELLIPSIS + '</li>'
-          : '<li class="contextMenuDivider"></li>';
-    });
-    ContextMenu.hideContextMenuListener();
-    contextMenu.style.opacity = '0';
-    contextMenu.className = 'active';
-    contextMenu.innerHTML = html;
-    var bounds = contextMenu.getBoundingClientRect();
+          : '<li class="contextMenuDivider"></li>'
+    })
+    ContextMenu.hideContextMenuListener()
+    contextMenu.style.opacity = '0'
+    contextMenu.className = 'active'
+    contextMenu.innerHTML = html
+    var bounds = contextMenu.getBoundingClientRect()
     contextMenu.style.left =
-      (event.pageX - window.pageXOffset + bounds.width < window.innerWidth
-        ? event.pageX - 2
-        : event.pageX - bounds.width + 2) + 'px';
+      (event.pageX - window.pageXOffset + bounds.width < window.innerWidth ? event.pageX - 2 : event.pageX - bounds.width + 2) + 'px'
     contextMenu.style.top =
-      (event.pageY - window.pageYOffset + bounds.height < window.innerHeight
-        ? event.pageY - 2
-        : event.pageY - bounds.height + 2) + 'px';
-    contextMenu.style.opacity = '1';
+      (event.pageY - window.pageYOffset + bounds.height < window.innerHeight ? event.pageY - 2 : event.pageY - bounds.height + 2) + 'px'
+    contextMenu.style.opacity = '1'
     addListenerToClass('contextMenuItem', 'click', e => {
-      e.stopPropagation();
-      ContextMenu.hideContextMenu();
-      items[parseInt(e.target.dataset.index)].onClick();
-    });
-    this.contextMenuSource = sourceElem;
-    this.contextMenuSource.classList.add('contextMenuActive');
+      e.stopPropagation()
+      ContextMenu.hideContextMenu()
+      items[parseInt(e.target.dataset.index)].onClick()
+    })
+    this.contextMenuSource = sourceElem
+    this.contextMenuSource.classList.add('contextMenuActive')
   }
 }

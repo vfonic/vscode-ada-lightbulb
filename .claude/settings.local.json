@@ -1,7 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(npx eslint:*)"
-    ]
+    "allow": ["Bash(npx eslint:*)", "Bash(npx prettier:*)"]
   }
 }

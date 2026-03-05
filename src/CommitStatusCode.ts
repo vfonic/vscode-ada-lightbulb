@@ -1,2 +1,2 @@
-const CommitStatusCode = { ADDED: 'A', DELETED: 'D', RENAMED: 'R' };
-export default CommitStatusCode;
+const CommitStatusCode = { ADDED: 'A', DELETED: 'D', RENAMED: 'R' }
+export default CommitStatusCode

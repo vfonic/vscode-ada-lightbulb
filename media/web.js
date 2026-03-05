@@ -1,123 +1,123 @@
-console.warn('web.js');
+console.warn('web.js')
 
-window.vscode = acquireVsCodeApi();
+window.vscode = acquireVsCodeApi()
 
-new ContextMenu();
+new ContextMenu()
 var graphViewConfig = {
   graphColors: viewState.graphColors,
   grid: { x: 16, y: 24, offsetX: 8, offsetY: 12, expandY: 250 },
-};
-const gitGraph = new GitGraphView(viewState.repos, viewState.lastActiveRepo, graphViewConfig);
+}
+const gitGraph = new GitGraphView(viewState.repos, viewState.lastActiveRepo, graphViewConfig)
 window.addEventListener('message', function (event) {
-  var msg = event.data;
-  console.warn('Received', msg.command);
+  var msg = event.data
+  console.warn('Received', msg.command)
   switch (msg.command) {
     case 'addTag':
-      refreshGraphOrDisplayError(msg.status, 'Unable to Add Tag');
-      break;
+      refreshGraphOrDisplayError(msg.status, 'Unable to Add Tag')
+      break
     case 'checkoutBranch':
-      refreshGraphOrDisplayError(msg.status, 'Unable to Checkout Branch');
-      break;
+      refreshGraphOrDisplayError(msg.status, 'Unable to Checkout Branch')
+      break
     case 'checkoutCommit':
-      refreshGraphOrDisplayError(msg.status, 'Unable to Checkout Commit');
-      break;
+      refreshGraphOrDisplayError(msg.status, 'Unable to Checkout Commit')
+      break
     case 'cherrypickCommit':
-      refreshGraphOrDisplayError(msg.status, 'Unable to Cherry Pick Commit');
-      break;
+      refreshGraphOrDisplayError(msg.status, 'Unable to Cherry Pick Commit')
+      break
     case 'commitDetails':
-      gitGraph.commitDetails = msg.commitDetails;
-      gitGraph.showCommitDetails(msg.summaryHtml, msg.fileListHtml);
-      break;
+      gitGraph.commitDetails = msg.commitDetails
+      gitGraph.showCommitDetails(msg.summaryHtml, msg.fileListHtml)
+      break
     case 'fileDiff':
-      gitGraph.showFileDiff(msg.diff, msg.timedOut, msg.permanentError, msg.filePath, msg.section, msg.statusCode, msg.requestId);
-      break;
+      gitGraph.showFileDiff(msg.diff, msg.timedOut, msg.permanentError, msg.filePath, msg.section, msg.statusCode, msg.requestId)
+      break
     case 'copyToClipboard':
       if (msg.success === false) {
-        Dialog.showErrorDialog('Unable to Copy ' + msg.type + ' to Clipboard', null, null);
+        Dialog.showErrorDialog('Unable to Copy ' + msg.type + ' to Clipboard', null, null)
       }
-      break;
+      break
     case 'createBranch':
-      refreshGraphOrDisplayError(msg.status, 'Unable to Create Branch');
-      break;
+      refreshGraphOrDisplayError(msg.status, 'Unable to Create Branch')
+      break
     case 'deleteBranch':
-      refreshGraphOrDisplayError(msg.status, 'Unable to Delete Branch');
-      break;
+      refreshGraphOrDisplayError(msg.status, 'Unable to Delete Branch')
+      break
     case 'deleteTag':
-      refreshGraphOrDisplayError(msg.status, 'Unable to Delete Tag');
-      break;
+      refreshGraphOrDisplayError(msg.status, 'Unable to Delete Tag')
+      break
     case 'loadBranches':
-      gitGraph.loadBranches(msg.branches, msg.head, msg.hard, msg.isRepo);
-      break;
+      gitGraph.loadBranches(msg.branches, msg.head, msg.hard, msg.isRepo)
+      break
     case 'loadCommits':
-      gitGraph.loadCommits(msg.commits, msg.head, msg.moreCommitsAvailable, msg.hard);
-      break;
+      gitGraph.loadCommits(msg.commits, msg.head, msg.moreCommitsAvailable, msg.hard)
+      break
     case 'loadRepos':
-      gitGraph.loadRepos(msg.repos, msg.lastActiveRepo);
-      break;
+      gitGraph.loadRepos(msg.repos, msg.lastActiveRepo)
+      break
     case 'mergeBranch':
-      refreshGraphOrDisplayError(msg.status, 'Unable to Merge Branch');
-      break;
+      refreshGraphOrDisplayError(msg.status, 'Unable to Merge Branch')
+      break
     case 'mergeCommit':
-      refreshGraphOrDisplayError(msg.status, 'Unable to Merge Commit');
-      break;
+      refreshGraphOrDisplayError(msg.status, 'Unable to Merge Commit')
+      break
     case 'pushTag':
-      refreshGraphOrDisplayError(msg.status, 'Unable to Push Tag');
-      break;
+      refreshGraphOrDisplayError(msg.status, 'Unable to Push Tag')
+      break
     case 'renameBranch':
-      refreshGraphOrDisplayError(msg.status, 'Unable to Rename Branch');
-      break;
+      refreshGraphOrDisplayError(msg.status, 'Unable to Rename Branch')
+      break
     case 'goToUncommittedChanges':
-      gitGraph.goToUncommittedChanges();
-      break;
+      gitGraph.goToUncommittedChanges()
+      break
     case 'refresh':
-      gitGraph.refresh(false);
-      break;
+      gitGraph.refresh(false)
+      break
     case 'resetToCommit':
-      refreshGraphOrDisplayError(msg.status, 'Unable to Reset to Commit');
-      break;
+      refreshGraphOrDisplayError(msg.status, 'Unable to Reset to Commit')
+      break
     case 'revertCommit':
-      refreshGraphOrDisplayError(msg.status, 'Unable to Revert Commit');
-      break;
+      refreshGraphOrDisplayError(msg.status, 'Unable to Revert Commit')
+      break
     case 'stageFile':
       if (msg.status == null) {
-        gitGraph.refreshUncommittedDetails();
+        gitGraph.refreshUncommittedDetails()
       } else {
-        Dialog.showErrorDialog('Unable to Stage File', msg.status, null);
+        Dialog.showErrorDialog('Unable to Stage File', msg.status, null)
       }
-      break;
+      break
     case 'unstageFile':
       if (msg.status == null) {
-        gitGraph.refreshUncommittedDetails();
+        gitGraph.refreshUncommittedDetails()
       } else {
-        Dialog.showErrorDialog('Unable to Unstage File', msg.status, null);
+        Dialog.showErrorDialog('Unable to Unstage File', msg.status, null)
       }
-      break;
+      break
     case 'stageFiles':
       if (msg.status == null) {
-        gitGraph.refreshUncommittedDetails();
+        gitGraph.refreshUncommittedDetails()
       } else {
-        Dialog.showErrorDialog('Unable to Stage Files', msg.status, null);
+        Dialog.showErrorDialog('Unable to Stage Files', msg.status, null)
       }
-      break;
+      break
     case 'unstageFiles':
       if (msg.status == null) {
-        gitGraph.refreshUncommittedDetails();
+        gitGraph.refreshUncommittedDetails()
       } else {
-        Dialog.showErrorDialog('Unable to Unstage Files', msg.status, null);
+        Dialog.showErrorDialog('Unable to Unstage Files', msg.status, null)
       }
-      break;
+      break
     case 'viewDiff':
       if (msg.success === false) {
-        Dialog.showErrorDialog('Unable to view diff of file', null, null);
+        Dialog.showErrorDialog('Unable to view diff of file', null, null)
       }
-      break;
+      break
   }
-});
+})
 
 function refreshGraphOrDisplayError(status, errorMessage) {
   if (status == null) {
-    gitGraph.refresh(true);
+    gitGraph.refresh(true)
   } else {
-    Dialog.showErrorDialog(errorMessage, status, null);
+    Dialog.showErrorDialog(errorMessage, status, null)
   }
 }

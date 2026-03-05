@@ -7,11 +7,11 @@ const htmlEscapes = {
   '"': '&quot;',
   "'": '&#39;',
   '/': '&#x2F;',
-};
+}
 
-const htmlEscaper = /[&<>"'/]/g;
+const htmlEscaper = /[&<>"'/]/g
 
-export const escapeHtml = str => str.replace(htmlEscaper, match => htmlEscapes[match]);
+export const escapeHtml = str => str.replace(htmlEscaper, match => htmlEscapes[match])
 
 export const svgIcons = {
   alert:
@@ -29,4 +29,4 @@ export const svgIcons = {
   closedFolder:
     '<svg xmlns="http://www.w3.org/2000/svg" class="closedFolderIcon" viewBox="0 0 30 30"><path d="M 4 3 C 2.895 3 2 3.895 2 5 L 2 8 L 13 8 L 28 8 L 28 7 C 28 5.895 27.105 5 26 5 L 11.199219 5 L 10.582031 3.9707031 C 10.221031 3.3687031 9.5701875 3 8.8671875 3 L 4 3 z M 3 10 C 2.448 10 2 10.448 2 11 L 2 23 C 2 24.105 2.895 25 4 25 L 26 25 C 27.105 25 28 24.105 28 23 L 28 11 C 28 10.448 27.552 10 27 10 L 3 10 z"/></svg>',
   file: '<svg xmlns="http://www.w3.org/2000/svg" class="fileIcon" viewBox="0 0 30 30"><path d="M24.707,8.793l-6.5-6.5C18.019,2.105,17.765,2,17.5,2H7C5.895,2,5,2.895,5,4v22c0,1.105,0.895,2,2,2h16c1.105,0,2-0.895,2-2 V9.5C25,9.235,24.895,8.981,24.707,8.793z M18,10c-0.552,0-1-0.448-1-1V3.904L23.096,10H18z"/></svg>',
-};
+}

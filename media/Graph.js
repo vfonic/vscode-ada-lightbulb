@@ -1,163 +1,161 @@
 class Graph {
   constructor(id, config) {
-    this.svgGroup = null;
-    this.maxWidth = -1;
-    this.vertices = [];
-    this.edges = [];
-    this.availableColors = [];
-    this.config = config;
+    this.svgGroup = null
+    this.maxWidth = -1
+    this.vertices = []
+    this.edges = []
+    this.availableColors = []
+    this.config = config
 
-    const svgNamespace = 'http://www.w3.org/2000/svg';
-    this.svg = document.createElementNS(svgNamespace, 'svg');
-    this.setDimensions(0, 0);
-    document.getElementById(id).appendChild(this.svg);
+    const svgNamespace = 'http://www.w3.org/2000/svg'
+    this.svg = document.createElementNS(svgNamespace, 'svg')
+    this.setDimensions(0, 0)
+    document.getElementById(id).appendChild(this.svg)
   }
 
   loadCommits(commits, commitHead, commitLookup) {
-    this.vertices = [];
-    this.edges = [];
-    this.availableColors = [];
-    var i, j;
+    this.vertices = []
+    this.edges = []
+    this.availableColors = []
+    var i, j
     for (i = 0; i < commits.length; i++) {
-      this.vertices.push(new Vertex(i));
+      this.vertices.push(new Vertex(i))
     }
     for (i = 0; i < commits.length; i++) {
       for (j = 0; j < commits[i].parentHashes.length; j++) {
         if (typeof commitLookup[commits[i].parentHashes[j]] === 'number') {
-          this.vertices[i].addParent(this.vertices[commitLookup[commits[i].parentHashes[j]]]);
+          this.vertices[i].addParent(this.vertices[commitLookup[commits[i].parentHashes[j]]])
         }
       }
     }
     if (commits.length > 0) {
       if (commits[0].hash === '*') {
-        this.vertices[0].setCurrent();
-        this.vertices[0].setNotCommited();
+        this.vertices[0].setCurrent()
+        this.vertices[0].setNotCommited()
       } else if (commitHead != null && typeof commitLookup[commitHead] === 'number') {
-        this.vertices[commitLookup[commitHead]].setCurrent();
+        this.vertices[commitLookup[commitHead]].setCurrent()
       }
     }
     while ((i = this.findStart()) !== -1) {
-      this.determinePath(i);
+      this.determinePath(i)
     }
   }
 
   render() {
-    this.clear();
+    this.clear()
 
-    var group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    this.edges.forEach(edge => edge.draw(group, this.config));
-    this.vertices.forEach(vertex => vertex.draw(group, this.config));
-    this.svgGroup = group;
-    this.svg.appendChild(group);
+    var group = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    this.edges.forEach(edge => edge.draw(group, this.config))
+    this.vertices.forEach(vertex => vertex.draw(group, this.config))
+    this.svgGroup = group
+    this.svg.appendChild(group)
 
-    this.setDimensions(this.getWidth(), this.getHeight());
+    this.setDimensions(this.getWidth(), this.getHeight())
   }
 
   clear() {
-    emptyElement(this.svg);
-    this.setDimensions(0, 0);
+    emptyElement(this.svg)
+    this.setDimensions(0, 0)
   }
 
   getWidth() {
     var x = 0,
       i,
-      p;
+      p
     for (i = 0; i < this.vertices.length; i++) {
-      p = this.vertices[i].getNextPoint();
+      p = this.vertices[i].getNextPoint()
       if (p.x > x) {
-        x = p.x;
+        x = p.x
       }
     }
-    return x * this.config.grid.x;
+    return x * this.config.grid.x
   }
 
   getHeight() {
-    return this.vertices.length * this.config.grid.y + this.config.grid.offsetY - this.config.grid.y / 2;
+    return this.vertices.length * this.config.grid.y + this.config.grid.offsetY - this.config.grid.y / 2
   }
 
   getVertexColor(v) {
-    return this.vertices[v].getColor() % this.config.graphColors.length;
+    return this.vertices[v].getColor() % this.config.graphColors.length
   }
 
   setDimensions(width, height) {
-    this.svg.setAttribute('width', width.toString());
-    this.svg.setAttribute('height', height.toString());
+    this.svg.setAttribute('width', width.toString())
+    this.svg.setAttribute('height', height.toString())
   }
 
   determinePath(startAt) {
-    var i = startAt;
+    var i = startAt
     var vertex = this.vertices[i],
-      parentVertex = this.vertices[i].getNextParent();
+      parentVertex = this.vertices[i].getNextParent()
     var lastPoint = vertex.isNotOnEdge() ? vertex.getNextPoint() : vertex.getPoint(),
-      curPoint;
+      curPoint
     if (parentVertex != null && vertex.isMerge() && !vertex.isNotOnEdge() && !parentVertex.isNotOnEdge()) {
       var foundPointToParent = false,
-        parentEdge = parentVertex.getEdge();
+        parentEdge = parentVertex.getEdge()
       for (i = startAt + 1; i < this.vertices.length; i++) {
-        curPoint = this.vertices[i].getPointConnectingTo(parentVertex, parentEdge);
+        curPoint = this.vertices[i].getPointConnectingTo(parentVertex, parentEdge)
         if (curPoint != null) {
-          foundPointToParent = true;
+          foundPointToParent = true
         } else {
-          curPoint = this.vertices[i].getNextPoint();
+          curPoint = this.vertices[i].getNextPoint()
         }
         parentEdge.addLine(
           lastPoint,
           curPoint,
           vertex.getIsCommitted(),
-          !foundPointToParent && this.vertices[i] !== parentVertex ? lastPoint.x < curPoint.x : true
-        );
-        this.vertices[i].registerUnavailablePoint(curPoint.x, parentVertex, parentEdge);
-        lastPoint = curPoint;
+          !foundPointToParent && this.vertices[i] !== parentVertex ? lastPoint.x < curPoint.x : true,
+        )
+        this.vertices[i].registerUnavailablePoint(curPoint.x, parentVertex, parentEdge)
+        lastPoint = curPoint
         if (foundPointToParent) {
-          vertex.registerParentProcessed();
-          break;
+          vertex.registerParentProcessed()
+          break
         }
       }
     } else {
-      var edge = new Edge(this.getAvailableColor(startAt));
-      vertex.addToEdge(edge, lastPoint.x);
-      vertex.registerUnavailablePoint(lastPoint.x, vertex, edge);
+      var edge = new Edge(this.getAvailableColor(startAt))
+      vertex.addToEdge(edge, lastPoint.x)
+      vertex.registerUnavailablePoint(lastPoint.x, vertex, edge)
       for (i = startAt + 1; i < this.vertices.length; i++) {
         curPoint =
-          parentVertex === this.vertices[i] && !parentVertex.isNotOnEdge()
-            ? this.vertices[i].getPoint()
-            : this.vertices[i].getNextPoint();
-        edge.addLine(lastPoint, curPoint, vertex.getIsCommitted(), lastPoint.x < curPoint.x);
-        this.vertices[i].registerUnavailablePoint(curPoint.x, parentVertex, edge);
-        lastPoint = curPoint;
+          parentVertex === this.vertices[i] && !parentVertex.isNotOnEdge() ? this.vertices[i].getPoint() : this.vertices[i].getNextPoint()
+        edge.addLine(lastPoint, curPoint, vertex.getIsCommitted(), lastPoint.x < curPoint.x)
+        this.vertices[i].registerUnavailablePoint(curPoint.x, parentVertex, edge)
+        lastPoint = curPoint
         if (parentVertex === this.vertices[i]) {
-          vertex.registerParentProcessed();
-          var parentVertexOnEdge = !parentVertex.isNotOnEdge();
-          parentVertex.addToEdge(edge, curPoint.x);
-          vertex = parentVertex;
-          parentVertex = vertex.getNextParent();
+          vertex.registerParentProcessed()
+          var parentVertexOnEdge = !parentVertex.isNotOnEdge()
+          parentVertex.addToEdge(edge, curPoint.x)
+          vertex = parentVertex
+          parentVertex = vertex.getNextParent()
           if (parentVertexOnEdge) {
-            break;
+            break
           }
         }
       }
-      edge.setEnd(i);
-      this.edges.push(edge);
-      this.availableColors[edge.getColor()] = i;
+      edge.setEnd(i)
+      this.edges.push(edge)
+      this.availableColors[edge.getColor()] = i
     }
   }
 
   findStart() {
     for (var i = 0; i < this.vertices.length; i++) {
       if (this.vertices[i].getNextParent() != null || this.vertices[i].isNotOnEdge()) {
-        return i;
+        return i
       }
     }
-    return -1;
+    return -1
   }
 
   getAvailableColor(startAt) {
     for (var i = 0; i < this.availableColors.length; i++) {
       if (startAt > this.availableColors[i]) {
-        return i;
+        return i
       }
     }
-    this.availableColors.push(0);
-    return this.availableColors.length - 1;
+    this.availableColors.push(0)
+    return this.availableColors.length - 1
   }
 }

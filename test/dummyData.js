@@ -2,24 +2,24 @@ window.exports =
   window.exports ||
   class {
     set default(klass) {
-      window[klass.constructor.name] = klass;
+      window[klass.constructor.name] = klass
     }
-  };
-window.module = window.module || { exports: window.exports };
+  }
+window.module = window.module || { exports: window.exports }
 window.acquireVsCodeApi = () => {
-  let prevState = null;
+  let prevState = null
   return {
     getState: () => prevState,
     setState: state => (prevState = state),
     postMessage: msg => {
       if (msg.command === 'commitDetails' && msg.commitHash === '*') {
-        window.postMessage(postMessageData['uncomittedChanges']);
+        window.postMessage(postMessageData['uncomittedChanges'])
       } else {
-        window.postMessage(postMessageData[msg.command]);
+        window.postMessage(postMessageData[msg.command])
       }
     },
-  };
-};
+  }
+}
 window.viewState = {
   assetLoader: {
     extensionPath: '/Users/viktor/Developer/JavaScript/vscode-ada-lightbulb',
@@ -28,7 +28,7 @@ window.viewState = {
   graphColors: ['#0085d9', '#d9008f', '#00d90a', '#d98500', '#a300d9', '#ff0000'],
   lastActiveRepo: '/Users/viktor/Developer/gems/rails',
   repos: { '/Users/viktor/Developer/gems/rails': { columnWidths: null } },
-};
+}
 window.postMessageData = {
   loadBranches: {
     command: 'loadBranches',
@@ -811,4 +811,4 @@ window.postMessageData = {
       ],
     },
   },
-};
+}

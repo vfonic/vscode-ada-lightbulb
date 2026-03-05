@@ -1,17 +1,17 @@
 // @ts-nocheck
 class CommitDetails {
   static get REQUIRED_KEYS() {
-    return ['hash', 'parents', 'author', 'email', 'date', 'committer', 'body', 'fileChanges'];
+    return ['hash', 'parents', 'author', 'email', 'date', 'committer', 'body', 'fileChanges']
   }
 
   constructor(data) {
     CommitDetails.REQUIRED_KEYS.forEach(key => {
       if (data[key] == null) {
-        throw new Error(`Missing required key for CommitDetails: ${key}`);
+        throw new Error(`Missing required key for CommitDetails: ${key}`)
       }
-    });
-    Object.assign(this, {}, data);
+    })
+    Object.assign(this, {}, data)
   }
 }
 
-export default CommitDetails;
+export default CommitDetails

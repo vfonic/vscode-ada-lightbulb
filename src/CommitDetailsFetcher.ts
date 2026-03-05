@@ -1,16 +1,16 @@
 // @ts-nocheck
-import CommitDetails from './CommitDetails';
-import CommitDetailsProcessor from './CommitDetailsProcessor';
-import DataSource from './DataSource';
+import CommitDetails from './CommitDetails'
+import CommitDetailsProcessor from './CommitDetailsProcessor'
+import DataSource from './DataSource'
 
-const gitLogSeparator = 'XX7Nal-YARtTpjCikii9nJxER19D6diSyk-AWkPb';
-const gitCommitDetailsFormat = ['%H', '%P', '%an', '%ae', '%at', '%cn'].join(gitLogSeparator) + '%n%B';
+const gitLogSeparator = 'XX7Nal-YARtTpjCikii9nJxER19D6diSyk-AWkPb'
+const gitCommitDetailsFormat = ['%H', '%P', '%an', '%ae', '%at', '%cn'].join(gitLogSeparator) + '%n%B'
 
 class CommitDetailsFetcher {
   constructor(repo, commitHash) {
-    this.repo = repo;
-    this.commitHash = commitHash;
-    this.dataSource = DataSource;
+    this.repo = repo
+    this.commitHash = commitHash
+    this.dataSource = DataSource
   }
 
   call() {
@@ -22,11 +22,11 @@ class CommitDetailsFetcher {
             this.repo,
             (err, stdout) => {
               if (err) {
-                console.error(err);
-                reject(new Error(err));
+                console.error(err)
+                reject(new Error(err))
               } else {
-                const lines = stdout.split(this.dataSource.eolRegex).filter(Boolean);
-                const commitInfo = lines[0].split(gitLogSeparator);
+                const lines = stdout.split(this.dataSource.eolRegex).filter(Boolean)
+                const commitInfo = lines[0].split(gitLogSeparator)
                 resolve(
                   new CommitDetails({
                     hash: commitInfo[0],
@@ -37,11 +37,11 @@ class CommitDetailsFetcher {
                     committer: commitInfo[5],
                     body: lines.slice(1, lines.length - 1).join('\n'),
                     fileChanges: [],
-                  })
-                );
+                  }),
+                )
               }
-            }
-          )
+            },
+          ),
         ),
         new Promise((resolve, reject) =>
           this.dataSource.execGit(
@@ -49,22 +49,22 @@ class CommitDetailsFetcher {
             this.repo,
             (err, stdout) => {
               if (err) {
-                console.error(err);
-                reject(new Error(err));
+                console.error(err)
+                reject(new Error(err))
               } else {
-                resolve(stdout.split(this.dataSource.eolRegex).slice(1));
+                resolve(stdout.split(this.dataSource.eolRegex).slice(1))
               }
-            }
-          )
+            },
+          ),
         ),
       ])
         .then(new CommitDetailsProcessor(resolve).call)
         .catch(err => {
-          console.error(err);
-          reject(new Error(err));
-        })
-    );
+          console.error(err)
+          reject(new Error(err))
+        }),
+    )
   }
 }
 
-export default CommitDetailsFetcher;
+export default CommitDetailsFetcher

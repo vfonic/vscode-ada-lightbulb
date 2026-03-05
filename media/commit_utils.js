@@ -1,1 +1,1 @@
-const abbrevCommit = commitHash => commitHash.substring(0, 8);
+const abbrevCommit = commitHash => commitHash.substring(0, 8)

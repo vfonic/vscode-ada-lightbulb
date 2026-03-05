@@ -1,296 +1,296 @@
 // @ts-nocheck
-console.warn('GitGraphView.js');
-import { abbrevCommit, copyToClipboard } from './utils';
-import { encodeDiffDocUri } from './DiffDocProvider';
-import AssetLoader from './AssetLoader';
-import CommitDetailsFetcherFactory from './CommitDetailsFetcherFactory';
-import CommitStatusCode from './CommitStatusCode';
-import CommitView from './CommitView';
-import Config from './Config';
-import RepoFileWatcher from './RepoFileWatcher';
-import WebviewHtmlGenerator from './webviewHtmlGenerator';
-import path from 'path';
-import vscode from 'vscode';
+console.warn('GitGraphView.js')
+import { abbrevCommit, copyToClipboard } from './utils'
+import { encodeDiffDocUri } from './DiffDocProvider'
+import AssetLoader from './AssetLoader'
+import CommitDetailsFetcherFactory from './CommitDetailsFetcherFactory'
+import CommitStatusCode from './CommitStatusCode'
+import CommitView from './CommitView'
+import Config from './Config'
+import RepoFileWatcher from './RepoFileWatcher'
+import WebviewHtmlGenerator from './webviewHtmlGenerator'
+import path from 'path'
+import vscode from 'vscode'
 
-const configuration = new Config();
+const configuration = new Config()
 
 class GitGraphView {
   constructor(panel, extensionPath, dataSource, extensionState, repoManager) {
-    console.warn('GitGraphView.constructor');
-    this.disposables = [];
-    this.isGraphViewLoaded = false;
-    this.isPanelVisible = true;
-    this.currentRepo = null;
-    this._currentDiffRequestId = 0;
-    this._activeDiffProcess = null;
-    this.panel = panel;
-    this.assetLoader = new AssetLoader(extensionPath);
-    this.extensionPath = extensionPath;
-    this.dataSource = dataSource;
-    this.extensionState = extensionState;
-    this.repoManager = repoManager;
-    panel.iconPath = this.assetLoader.getUri('resources', 'webview-icon.svg');
-    this.update();
-    this.panel.onDidDispose(() => this.dispose(), null, this.disposables);
+    console.warn('GitGraphView.constructor')
+    this.disposables = []
+    this.isGraphViewLoaded = false
+    this.isPanelVisible = true
+    this.currentRepo = null
+    this._currentDiffRequestId = 0
+    this._activeDiffProcess = null
+    this.panel = panel
+    this.assetLoader = new AssetLoader(extensionPath)
+    this.extensionPath = extensionPath
+    this.dataSource = dataSource
+    this.extensionState = extensionState
+    this.repoManager = repoManager
+    panel.iconPath = this.assetLoader.getUri('resources', 'webview-icon.svg')
+    this.update()
+    this.panel.onDidDispose(() => this.dispose(), null, this.disposables)
     this.panel.onDidChangeViewState(
       () => {
         if (this.panel.visible !== this.isPanelVisible) {
           if (this.panel.visible) {
-            this.update();
+            this.update()
           } else {
-            this.currentRepo = null;
-            this.repoFileWatcher.stop();
+            this.currentRepo = null
+            this.repoFileWatcher.stop()
           }
-          this.isPanelVisible = this.panel.visible;
+          this.isPanelVisible = this.panel.visible
         }
       },
       null,
-      this.disposables
-    );
+      this.disposables,
+    )
     this.repoFileWatcher = new RepoFileWatcher(() => {
       if (this.panel.visible) {
-        this.sendMessage({ command: 'refresh' });
+        this.sendMessage({ command: 'refresh' })
       }
-    });
+    })
     this.repoManager.registerViewCallback((repos, numRepos) => {
       if (!this.panel.visible) {
-        return;
+        return
       }
       if ((numRepos === 0 && this.isGraphViewLoaded) || (numRepos > 0 && !this.isGraphViewLoaded)) {
-        this.update();
+        this.update()
       } else {
-        this.respondLoadRepos(repos);
+        this.respondLoadRepos(repos)
       }
-    });
+    })
     this.panel.webview.onDidReceiveMessage(
       async msg => {
         if (this.dataSource == null) {
-          return;
+          return
         }
 
-        this.repoFileWatcher.mute();
-        console.warn('Web view received', msg.command);
+        this.repoFileWatcher.mute()
+        console.warn('Web view received', msg.command)
         switch (msg.command) {
           case 'addTag':
             this.sendMessage({
               command: 'addTag',
               status: await this.dataSource.addTag(msg.repo, msg.tagName, msg.commitHash, msg.lightweight, msg.message),
-            });
-            break;
+            })
+            break
           case 'checkoutBranch':
             this.sendMessage({
               command: 'checkoutBranch',
               status: await this.dataSource.checkoutBranch(msg.repo, msg.branchName, msg.remoteBranch),
-            });
-            break;
+            })
+            break
           case 'checkoutCommit':
             this.sendMessage({
               command: 'checkoutCommit',
               status: await this.dataSource.checkoutCommit(msg.repo, msg.commitHash),
-            });
-            break;
+            })
+            break
           case 'cherrypickCommit':
             this.sendMessage({
               command: 'cherrypickCommit',
               status: await this.dataSource.cherrypickCommit(msg.repo, msg.commitHash, msg.parentIndex),
-            });
-            break;
+            })
+            break
           case 'commitDetails': {
-            const { commitId: id, commitHash: hash } = msg;
-            const commitDetails = await CommitDetailsFetcherFactory.initialize(msg.repo, msg.commitHash).call();
-            const expandedCommit = { id, hash, commitDetails };
-            const parts = new CommitView(expandedCommit).render();
+            const { commitId: id, commitHash: hash } = msg
+            const commitDetails = await CommitDetailsFetcherFactory.initialize(msg.repo, msg.commitHash).call()
+            const expandedCommit = { id, hash, commitDetails }
+            const parts = new CommitView(expandedCommit).render()
             this.sendMessage({
               command: 'commitDetails',
               commitDetails,
               summaryHtml: parts.summary,
               fileListHtml: parts.fileList,
-            });
-            break;
+            })
+            break
           }
           case 'requestFileDiff': {
-            const requestId = msg.requestId || 0;
-            this._currentDiffRequestId = requestId;
+            const requestId = msg.requestId || 0
+            this._currentDiffRequestId = requestId
             if (this._activeDiffProcess && !this._activeDiffProcess.killed) {
-              this._activeDiffProcess.kill();
+              this._activeDiffProcess.kill()
             }
-            this._activeDiffProcess = null;
+            this._activeDiffProcess = null
             const trackProcess = proc => {
-              this._activeDiffProcess = proc;
-            };
-            this.fetchDiff(msg, requestId, undefined, trackProcess);
-            break;
+              this._activeDiffProcess = proc
+            }
+            this.fetchDiff(msg, requestId, undefined, trackProcess)
+            break
           }
           case 'requestFileDiffFull': {
-            const requestId = msg.requestId || 0;
-            this._currentDiffRequestId = requestId;
+            const requestId = msg.requestId || 0
+            this._currentDiffRequestId = requestId
             if (this._activeDiffProcess && !this._activeDiffProcess.killed) {
-              this._activeDiffProcess.kill();
+              this._activeDiffProcess.kill()
             }
-            this._activeDiffProcess = null;
+            this._activeDiffProcess = null
             const trackProcess = proc => {
-              this._activeDiffProcess = proc;
-            };
-            this.fetchDiff(msg, requestId, 10000, trackProcess, true);
-            break;
+              this._activeDiffProcess = proc
+            }
+            this.fetchDiff(msg, requestId, 10000, trackProcess, true)
+            break
           }
           case 'stageFile': {
-            const status = await this.dataSource.stageFile(msg.repo, msg.filePath);
-            this.sendMessage({ command: 'stageFile', status });
-            break;
+            const status = await this.dataSource.stageFile(msg.repo, msg.filePath)
+            this.sendMessage({ command: 'stageFile', status })
+            break
           }
           case 'unstageFile': {
-            const status = await this.dataSource.unstageFile(msg.repo, msg.filePath);
-            this.sendMessage({ command: 'unstageFile', status });
-            break;
+            const status = await this.dataSource.unstageFile(msg.repo, msg.filePath)
+            this.sendMessage({ command: 'unstageFile', status })
+            break
           }
           case 'stageFiles': {
-            const status = await this.dataSource.stageFiles(msg.repo, msg.filePaths);
-            this.sendMessage({ command: 'stageFiles', status });
-            break;
+            const status = await this.dataSource.stageFiles(msg.repo, msg.filePaths)
+            this.sendMessage({ command: 'stageFiles', status })
+            break
           }
           case 'unstageFiles': {
-            const status = await this.dataSource.unstageFiles(msg.repo, msg.filePaths);
-            this.sendMessage({ command: 'unstageFiles', status });
-            break;
+            const status = await this.dataSource.unstageFiles(msg.repo, msg.filePaths)
+            this.sendMessage({ command: 'unstageFiles', status })
+            break
           }
           case 'copyToClipboard':
             this.sendMessage({
               command: 'copyToClipboard',
               type: msg.type,
               success: await copyToClipboard(msg.data),
-            });
-            break;
+            })
+            break
           case 'createBranch':
             this.sendMessage({
               command: 'createBranch',
               status: await this.dataSource.createBranch(msg.repo, msg.branchName, msg.commitHash),
-            });
-            break;
+            })
+            break
           case 'deleteBranch':
             this.sendMessage({
               command: 'deleteBranch',
               status: await this.dataSource.deleteBranch(msg.repo, msg.branchName, msg.forceDelete),
-            });
-            break;
+            })
+            break
           case 'deleteTag':
             this.sendMessage({
               command: 'deleteTag',
               status: await this.dataSource.deleteTag(msg.repo, msg.tagName),
-            });
-            break;
+            })
+            break
           case 'loadBranches': {
-            const branchData = await this.dataSource.getBranches(msg.repo);
-            const isRepo = branchData.error ? await this.dataSource.isGitRepository(msg.repo) : true;
+            const branchData = await this.dataSource.getBranches(msg.repo)
+            const isRepo = branchData.error ? await this.dataSource.isGitRepository(msg.repo) : true
             this.sendMessage({
               command: 'loadBranches',
               branches: branchData.branches,
               head: branchData.head,
               hard: msg.hard,
               isRepo: isRepo,
-            });
+            })
             if (msg.repo !== this.currentRepo) {
-              this.currentRepo = msg.repo;
-              this.extensionState.setLastActiveRepo(msg.repo);
-              this.repoFileWatcher.start(msg.repo);
+              this.currentRepo = msg.repo
+              this.extensionState.setLastActiveRepo(msg.repo)
+              this.repoFileWatcher.start(msg.repo)
             }
-            break;
+            break
           }
           case 'loadCommits':
             this.sendMessage(
               Object.assign({ command: 'loadCommits' }, await this.dataSource.getCommits(msg.repo, msg.branchName, msg.maxCommits), {
                 hard: msg.hard,
-              })
-            );
-            break;
+              }),
+            )
+            break
           case 'loadRepos':
             if (!msg.check || !(await this.repoManager.checkReposExist())) {
-              this.respondLoadRepos(this.repoManager.getRepos());
+              this.respondLoadRepos(this.repoManager.getRepos())
             }
-            break;
+            break
           case 'mergeBranch':
             this.sendMessage({
               command: 'mergeBranch',
               status: await this.dataSource.mergeBranch(msg.repo, msg.branchName, msg.createNewCommit),
-            });
-            break;
+            })
+            break
           case 'mergeCommit':
             this.sendMessage({
               command: 'mergeCommit',
               status: await this.dataSource.mergeCommit(msg.repo, msg.commitHash, msg.createNewCommit),
-            });
-            break;
+            })
+            break
           case 'pushTag':
             this.sendMessage({
               command: 'pushTag',
               status: await this.dataSource.pushTag(msg.repo, msg.tagName),
-            });
-            break;
+            })
+            break
           case 'renameBranch':
             this.sendMessage({
               command: 'renameBranch',
               status: await this.dataSource.renameBranch(msg.repo, msg.oldName, msg.newName),
-            });
-            break;
+            })
+            break
           case 'resetToCommit':
             this.sendMessage({
               command: 'resetToCommit',
               status: await this.dataSource.resetToCommit(msg.repo, msg.commitHash, msg.resetMode),
-            });
-            break;
+            })
+            break
           case 'revertCommit':
             this.sendMessage({
               command: 'revertCommit',
               status: await this.dataSource.revertCommit(msg.repo, msg.commitHash, msg.parentIndex),
-            });
-            break;
+            })
+            break
           case 'saveRepoState':
-            this.repoManager.setRepoState(msg.repo, msg.state);
-            break;
+            this.repoManager.setRepoState(msg.repo, msg.state)
+            break
           case 'viewDiff':
             this.sendMessage({
               command: 'viewDiff',
               success: await this.viewDiff(msg.repo, msg.commitHash, msg.filePath, msg.newFilePath, msg.statusCode),
-            });
-            break;
+            })
+            break
         }
-        this.repoFileWatcher.unmute();
+        this.repoFileWatcher.unmute()
       },
       null,
-      this.disposables
-    );
+      this.disposables,
+    )
   }
 
   static createOrShow(extensionPath, dataSource, extensionState, repoManager) {
-    const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : vscode.ViewColumn.One;
+    const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : vscode.ViewColumn.One
     if (GitGraphView.currentPanel) {
-      return GitGraphView.currentPanel.panel.reveal(column);
+      return GitGraphView.currentPanel.panel.reveal(column)
     }
 
     const panel = vscode.window.createWebviewPanel('ada-lightbulb', 'Ada Lightbulb', column, {
       enableScripts: true,
       localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'media')), vscode.Uri.file(path.join(extensionPath, 'node_modules'))],
-    });
-    GitGraphView.currentPanel = new GitGraphView(panel, extensionPath, dataSource, extensionState, repoManager);
+    })
+    GitGraphView.currentPanel = new GitGraphView(panel, extensionPath, dataSource, extensionState, repoManager)
   }
 
   async fetchDiff(msg, requestId, timeout, trackProcess, permanentOnTimeout = false) {
-    let diff;
+    let diff
     if (msg.commitHash === '*') {
       if (msg.section === 'staged') {
-        diff = await this.dataSource.getStagedFileDiff(msg.repo, msg.filePath, timeout, trackProcess);
+        diff = await this.dataSource.getStagedFileDiff(msg.repo, msg.filePath, timeout, trackProcess)
       } else if (msg.section === 'unstaged' && msg.statusCode === 'A') {
-        diff = await this.dataSource.getUntrackedFileDiff(msg.repo, msg.filePath, timeout, trackProcess);
+        diff = await this.dataSource.getUntrackedFileDiff(msg.repo, msg.filePath, timeout, trackProcess)
       } else {
-        diff = await this.dataSource.getUnstagedFileDiff(msg.repo, msg.filePath, timeout, trackProcess);
+        diff = await this.dataSource.getUnstagedFileDiff(msg.repo, msg.filePath, timeout, trackProcess)
       }
     } else {
-      diff = await this.dataSource.getFileDiff(msg.repo, msg.commitHash, msg.filePath, timeout, trackProcess);
+      diff = await this.dataSource.getFileDiff(msg.repo, msg.commitHash, msg.filePath, timeout, trackProcess)
     }
-    if (this._currentDiffRequestId !== requestId) return;
+    if (this._currentDiffRequestId !== requestId) return
     if (diff && diff.timedOut) {
       if (permanentOnTimeout) {
-        this.sendMessage({ command: 'fileDiff', diff: null, permanentError: true, requestId });
+        this.sendMessage({ command: 'fileDiff', diff: null, permanentError: true, requestId })
       } else {
         this.sendMessage({
           command: 'fileDiff',
@@ -300,24 +300,24 @@ class GitGraphView {
           section: msg.section,
           statusCode: msg.statusCode,
           requestId,
-        });
+        })
       }
     } else {
-      this.sendMessage({ command: 'fileDiff', diff, requestId });
+      this.sendMessage({ command: 'fileDiff', diff, requestId })
     }
   }
 
   sendMessage(msg) {
-    this.panel.webview.postMessage(msg);
+    this.panel.webview.postMessage(msg)
   }
 
   dispose() {
-    GitGraphView.currentPanel = undefined;
-    this.panel.dispose();
-    this.repoFileWatcher.stop();
-    this.repoManager.deregisterViewCallback();
+    GitGraphView.currentPanel = undefined
+    this.panel.dispose()
+    this.repoFileWatcher.stop()
+    this.repoManager.deregisterViewCallback()
     while (this.disposables.length) {
-      this.disposables.pop()?.dispose();
+      this.disposables.pop()?.dispose()
     }
   }
 
@@ -327,11 +327,11 @@ class GitGraphView {
       graphColors: configuration.graphColors,
       lastActiveRepo: this.extensionState.getLastActiveRepo(),
       repos: this.repoManager.getRepos(),
-    };
-    this.panel.webview.html = new WebviewHtmlGenerator(viewState).getHtmlForWebview();
+    }
+    this.panel.webview.html = new WebviewHtmlGenerator(viewState).getHtmlForWebview()
 
-    const numRepos = this.repoManager.getRepos().length;
-    this.isGraphViewLoaded = numRepos > 0;
+    const numRepos = this.repoManager.getRepos().length
+    this.isGraphViewLoaded = numRepos > 0
   }
 
   respondLoadRepos(repos) {
@@ -339,12 +339,12 @@ class GitGraphView {
       command: 'loadRepos',
       repos: repos,
       lastActiveRepo: this.extensionState.getLastActiveRepo(),
-    });
+    })
   }
 
   viewDiff(repo, commitHash, filePath, newFilePath, statusCode) {
-    const abbrevHash = abbrevCommit(commitHash);
-    const pathComponents = newFilePath.split('/');
+    const abbrevHash = abbrevCommit(commitHash)
+    const pathComponents = newFilePath.split('/')
     const title =
       pathComponents[pathComponents.length - 1] +
       ' (' +
@@ -353,7 +353,7 @@ class GitGraphView {
         : statusCode === CommitStatusCode.DELETED
           ? 'Deleted in ' + abbrevHash
           : abbrevCommit(commitHash) + '^ ↔ ' + abbrevCommit(commitHash)) +
-      ')';
+      ')'
     return new Promise(resolve => {
       vscode.commands
         .executeCommand(
@@ -361,12 +361,12 @@ class GitGraphView {
           encodeDiffDocUri(repo, filePath, commitHash + '^'),
           encodeDiffDocUri(repo, newFilePath, commitHash),
           title,
-          { preview: true }
+          { preview: true },
         )
         .then(() => resolve(true))
-        .then(() => resolve(false));
-    });
+        .then(() => resolve(false))
+    })
   }
 }
 
-export default GitGraphView;
+export default GitGraphView

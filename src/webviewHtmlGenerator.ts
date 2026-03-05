@@ -1,15 +1,15 @@
 // @ts-nocheck
 class WebviewHtmlGenerator {
   constructor(state) {
-    console.warn('WebviewHtmlGenerator.constructor');
-    this.state = state;
+    console.warn('WebviewHtmlGenerator.constructor')
+    this.state = state
   }
 
   getHtmlForWebview() {
-    const nonce = getNonce();
+    const nonce = getNonce()
     const colorParams = this.state.graphColors
       .map((_, index) => `[data-color="${index}"]{--ada-lightbulb-color:var(--ada-lightbulb-color${index});}`)
-      .join(' ');
+      .join(' ')
     return `<!DOCTYPE html>
     <html lang="en">
       <head>
@@ -22,13 +22,13 @@ class WebviewHtmlGenerator {
         <style>${colorParams}"</style>
       </head>
       ${this.getHtmlBodyForWebview(nonce)}
-    </html>`;
+    </html>`
   }
 
   getHtmlBodyForWebview(nonce) {
-    let body;
-    const numRepos = Object.keys(this.state.repos).length;
-    const colorVars = this.state.graphColors.map((graphColor, index) => '--ada-lightbulb-color' + index + ':' + graphColor + ';').join(' ');
+    let body
+    const numRepos = Object.keys(this.state.repos).length
+    const colorVars = this.state.graphColors.map((graphColor, index) => '--ada-lightbulb-color' + index + ':' + graphColor + ';').join(' ')
     if (numRepos > 0) {
       body = `<body style="${colorVars}">
       <div id="content">
@@ -60,7 +60,7 @@ class WebviewHtmlGenerator {
       <script src="${this.getMediaUri('Vertex.js')}"></script>
       <script src="${this.getMediaUri('ScrollShadow.js')}"></script>
       <script src="${this.getMediaUri('web.js')}"></script>
-      </body>`;
+      </body>`
     } else {
       body = `<body class="unableToLoad" style="${colorVars}">
       <h2>Unable to load Ada Lightbulb</h2>
@@ -69,27 +69,27 @@ class WebviewHtmlGenerator {
         If you are using a portable Git installation, make sure you have set the Visual Studio Code Setting "git.path"
         to the path of your portable installation (e.g. "C:\\Program Files\\Git\\bin\\git.exe" on Windows).
       </p>
-      </body>`;
+      </body>`
     }
-    return body;
+    return body
   }
 
   getMediaUri(file) {
-    return this.state.assetLoader.getUri('media', file).with({ scheme: 'vscode-resource' });
+    return this.state.assetLoader.getUri('media', file).with({ scheme: 'vscode-resource' })
   }
 
   getNodeModulesUri(file) {
-    return this.state.assetLoader.getUri('node_modules', file).with({ scheme: 'vscode-resource' });
+    return this.state.assetLoader.getUri('node_modules', file).with({ scheme: 'vscode-resource' })
   }
 }
 
-export default WebviewHtmlGenerator;
+export default WebviewHtmlGenerator
 
 function getNonce() {
-  let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let text = ''
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
+    text += possible.charAt(Math.floor(Math.random() * possible.length))
   }
-  return text;
+  return text
 }

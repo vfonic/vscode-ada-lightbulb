@@ -1,112 +1,119 @@
-const COMMITS_PER_PAGE = 35;
-const DIFF_TIMEOUT_MS = 3000;
+const COMMITS_PER_PAGE = 35
+const DIFF_TIMEOUT_MS = 3000
 
 class GitGraphView {
   constructor(repos, lastActiveRepo, config) {
-    console.warn('GitGraphView.constructor');
-    this.gitBranches = [];
-    this.commits = [];
-    this.commitLookup = {};
-    this.gitRepos = repos;
-    this.config = config;
-    this.maxCommits = COMMITS_PER_PAGE;
-    this.graph = new Graph('commitGraph', this.config);
-    this.tableElem = document.getElementById('commitTable');
-    this.footerElem = document.getElementById('footer');
-    this.scrollShadowElem = new ScrollShadow();
-    this.observeWindowSizeChanges();
-    this.observeWebviewScroll();
-    this.initDetailsResizer();
-    this.renderShowLoading();
-    this.loadRepos(this.gitRepos, lastActiveRepo);
-    this.requestLoadBranchesAndCommits(false);
-    this.selectedFiles = new Set();
-    this.selectionAnchor = null;
-    this.pendingFileSelection = null;
-    this.diffRequestId = 0;
-    this.diffTimeout = null;
-    this.initialLoadDone = false;
-    this.selectPreviousCommit = this.selectPreviousCommit.bind(this);
-    this.selectNextCommit = this.selectNextCommit.bind(this);
-    this.selectPreviousFile = this.selectPreviousFile.bind(this);
-    this.selectNextFile = this.selectNextFile.bind(this);
-    this.enterFile = this.enterFile.bind(this);
-    this.selectAllFiles = this.selectAllFiles.bind(this);
-    this.hotkeyManager = new HotkeyManager(this.selectPreviousCommit, this.selectNextCommit, this.selectPreviousFile, this.selectNextFile, this.enterFile, this.selectAllFiles);
-    this.hotkeyManager.onSectionChange = section => this.onSectionChange(section);
+    console.warn('GitGraphView.constructor')
+    this.gitBranches = []
+    this.commits = []
+    this.commitLookup = {}
+    this.gitRepos = repos
+    this.config = config
+    this.maxCommits = COMMITS_PER_PAGE
+    this.graph = new Graph('commitGraph', this.config)
+    this.tableElem = document.getElementById('commitTable')
+    this.footerElem = document.getElementById('footer')
+    this.scrollShadowElem = new ScrollShadow()
+    this.observeWindowSizeChanges()
+    this.observeWebviewScroll()
+    this.initDetailsResizer()
+    this.renderShowLoading()
+    this.loadRepos(this.gitRepos, lastActiveRepo)
+    this.requestLoadBranchesAndCommits(false)
+    this.selectedFiles = new Set()
+    this.selectionAnchor = null
+    this.pendingFileSelection = null
+    this.diffRequestId = 0
+    this.diffTimeout = null
+    this.initialLoadDone = false
+    this.selectPreviousCommit = this.selectPreviousCommit.bind(this)
+    this.selectNextCommit = this.selectNextCommit.bind(this)
+    this.selectPreviousFile = this.selectPreviousFile.bind(this)
+    this.selectNextFile = this.selectNextFile.bind(this)
+    this.enterFile = this.enterFile.bind(this)
+    this.selectAllFiles = this.selectAllFiles.bind(this)
+    this.hotkeyManager = new HotkeyManager(
+      this.selectPreviousCommit,
+      this.selectNextCommit,
+      this.selectPreviousFile,
+      this.selectNextFile,
+      this.enterFile,
+      this.selectAllFiles,
+    )
+    this.hotkeyManager.onSectionChange = section => this.onSectionChange(section)
   }
 
   goToUncommittedChanges() {
     if (this.commits.length > 0 && this.commits[0].hash === '*') {
-      this.loadCommitDetails(0);
+      this.loadCommitDetails(0)
     }
   }
 
   selectPreviousCommit() {
-    const commitIndex = this.expandedCommit ? this.expandedCommit.id : -1;
-    this.loadCommitDetails(Math.max(commitIndex - 1, 0));
+    const commitIndex = this.expandedCommit ? this.expandedCommit.id : -1
+    this.loadCommitDetails(Math.max(commitIndex - 1, 0))
   }
   selectNextCommit() {
-    const commitIndex = this.expandedCommit ? this.expandedCommit.id : -1;
-    const nextIndex = Math.min(commitIndex + 1, this.commits.length - 1);
-    this.loadCommitDetails(nextIndex);
+    const commitIndex = this.expandedCommit ? this.expandedCommit.id : -1
+    const nextIndex = Math.min(commitIndex + 1, this.commits.length - 1)
+    this.loadCommitDetails(nextIndex)
     if (this.moreCommitsAvailable && nextIndex >= this.commits.length - 5) {
-      this.triggerLoadMore();
+      this.triggerLoadMore()
     }
   }
 
   selectPreviousFile(extend) {
-    var anchor = this.selectionAnchor || document.querySelector('.gitFile.selected');
-    if (!anchor) return;
-    var prev = anchor.previousElementSibling;
-    if (!prev || !prev.classList.contains('gitFile')) return;
+    var anchor = this.selectionAnchor || document.querySelector('.gitFile.selected')
+    if (!anchor) return
+    var prev = anchor.previousElementSibling
+    if (!prev || !prev.classList.contains('gitFile')) return
     if (extend) {
-      this.addFileToSelection(prev);
-      this.selectionAnchor = prev;
-      this.updateSelectionVisuals();
-      this.requestDiffForFile(prev);
+      this.addFileToSelection(prev)
+      this.selectionAnchor = prev
+      this.updateSelectionVisuals()
+      this.requestDiffForFile(prev)
     } else {
-      prev.click();
+      prev.click()
     }
-    prev.scrollIntoView({ block: 'nearest' });
+    prev.scrollIntoView({ block: 'nearest' })
   }
 
   selectNextFile(extend) {
-    var anchor = this.selectionAnchor || document.querySelector('.gitFile.selected');
-    if (!anchor) return;
-    var next = anchor.nextElementSibling;
-    if (!next || !next.classList.contains('gitFile')) return;
+    var anchor = this.selectionAnchor || document.querySelector('.gitFile.selected')
+    if (!anchor) return
+    var next = anchor.nextElementSibling
+    if (!next || !next.classList.contains('gitFile')) return
     if (extend) {
-      this.addFileToSelection(next);
-      this.selectionAnchor = next;
-      this.updateSelectionVisuals();
-      this.requestDiffForFile(next);
+      this.addFileToSelection(next)
+      this.selectionAnchor = next
+      this.updateSelectionVisuals()
+      this.requestDiffForFile(next)
     } else {
-      next.click();
+      next.click()
     }
-    next.scrollIntoView({ block: 'nearest' });
+    next.scrollIntoView({ block: 'nearest' })
   }
 
   setFocusedPane(pane) {
-    this.hotkeyManager.setFocusedPane(pane);
-    var focusedCommit = document.querySelector('.commit.focused');
-    if (focusedCommit) focusedCommit.classList.remove('focused');
-    var focusedFile = document.querySelector('.gitFile.focused');
-    if (focusedFile) focusedFile.classList.remove('focused');
-    document.querySelectorAll('.fileSection.focused').forEach(el => el.classList.remove('focused'));
+    this.hotkeyManager.setFocusedPane(pane)
+    var focusedCommit = document.querySelector('.commit.focused')
+    if (focusedCommit) focusedCommit.classList.remove('focused')
+    var focusedFile = document.querySelector('.gitFile.focused')
+    if (focusedFile) focusedFile.classList.remove('focused')
+    document.querySelectorAll('.fileSection.focused').forEach(el => el.classList.remove('focused'))
     if (pane === 'commits') {
-      this.hotkeyManager.focusedSection = null;
-      var active = document.querySelector('.commit.commitDetailsOpen');
-      if (active) active.classList.add('focused');
+      this.hotkeyManager.focusedSection = null
+      var active = document.querySelector('.commit.commitDetailsOpen')
+      if (active) active.classList.add('focused')
     } else {
-      var selected = document.querySelector('.gitFile.selected');
+      var selected = document.querySelector('.gitFile.selected')
       if (selected) {
-        selected.classList.add('focused');
-        var section = selected.dataset.section || null;
-        this.hotkeyManager.focusedSection = section;
+        selected.classList.add('focused')
+        var section = selected.dataset.section || null
+        this.hotkeyManager.focusedSection = section
         if (section) {
-          var sectionEl = document.querySelector('.fileSection[data-section="' + section + '"]');
-          if (sectionEl) sectionEl.classList.add('focused');
+          var sectionEl = document.querySelector('.fileSection[data-section="' + section + '"]')
+          if (sectionEl) sectionEl.classList.add('focused')
         }
       }
     }
@@ -114,116 +121,116 @@ class GitGraphView {
 
   static getCommitDate(dateVal) {
     var date = new Date(dateVal * 1e3),
-      value;
-    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    var dateStr = date.getDate() + ' ' + MONTHS[date.getMonth()] + ' ' + date.getFullYear();
-    var timeStr = pad2(date.getHours()) + ':' + pad2(date.getMinutes());
-    value = dateStr + ' ' + timeStr;
-    return { title: value, value };
+      value
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    var dateStr = date.getDate() + ' ' + MONTHS[date.getMonth()] + ' ' + date.getFullYear()
+    var timeStr = pad2(date.getHours()) + ':' + pad2(date.getMinutes())
+    value = dateStr + ' ' + timeStr
+    return { title: value, value }
   }
 
   loadRepos(repos, lastActiveRepo) {
-    this.gitRepos = repos;
+    this.gitRepos = repos
     if (repos[this.currentRepo] == null) {
-      const repoPaths = Object.keys(repos);
-      this.currentRepo = lastActiveRepo != null && repos[lastActiveRepo] ? lastActiveRepo : repoPaths[0];
-      this.refresh(true);
+      const repoPaths = Object.keys(repos)
+      this.currentRepo = lastActiveRepo != null && repos[lastActiveRepo] ? lastActiveRepo : repoPaths[0]
+      this.refresh(true)
     }
   }
 
   loadBranches(branchOptions, branchHead, hard, isRepo) {
     if (!isRepo) {
-      this.triggerLoadBranchesCallback(false, isRepo);
-      return;
+      this.triggerLoadBranchesCallback(false, isRepo)
+      return
     }
     if (!hard && arraysEqual(this.gitBranches, branchOptions, (a, b) => a === b) && this.gitBranchHead === branchHead) {
-      this.triggerLoadBranchesCallback(false, isRepo);
-      return;
+      this.triggerLoadBranchesCallback(false, isRepo)
+      return
     }
-    this.gitBranches = branchOptions;
-    this.gitBranchHead = branchHead;
+    this.gitBranches = branchOptions
+    this.gitBranchHead = branchHead
     if (!this.currentBranch || this.gitBranches.indexOf(this.currentBranch) === -1) {
-      this.currentBranch = '';
+      this.currentBranch = ''
     }
-    this.triggerLoadBranchesCallback(true, isRepo);
+    this.triggerLoadBranchesCallback(true, isRepo)
   }
 
   triggerLoadBranchesCallback(changes, isRepo) {
     if (this.loadBranchesCallback != null) {
-      this.loadBranchesCallback(changes, isRepo);
-      this.loadBranchesCallback = null;
+      this.loadBranchesCallback(changes, isRepo)
+      this.loadBranchesCallback = null
     }
   }
 
   loadCommits(commits, commitHead, moreAvailable, hard) {
     if (!hard && this.moreCommitsAvailable === moreAvailable && this.commitHead === commitHead) {
-      this.triggerLoadCommitsCallback(false);
-      return;
+      this.triggerLoadCommitsCallback(false)
+      return
     }
-    this.moreCommitsAvailable = moreAvailable;
-    this.commits = commits;
-    this.commitHead = commitHead;
-    this.commitLookup = {};
-    this.commits.forEach((commit, i) => (this.commitLookup[commit.hash] = i));
-    this.graph.loadCommits(this.commits, this.commitHead, this.commitLookup);
-    this.render();
+    this.moreCommitsAvailable = moreAvailable
+    this.commits = commits
+    this.commitHead = commitHead
+    this.commitLookup = {}
+    this.commits.forEach((commit, i) => (this.commitLookup[commit.hash] = i))
+    this.graph.loadCommits(this.commits, this.commitHead, this.commitLookup)
+    this.render()
     if (!this.initialLoadDone) {
-      this.initialLoadDone = true;
-      if (this.commits.length > 0) this.loadCommitDetails(0);
+      this.initialLoadDone = true
+      if (this.commits.length > 0) this.loadCommitDetails(0)
     }
-    this.triggerLoadCommitsCallback(true);
+    this.triggerLoadCommitsCallback(true)
   }
 
   triggerLoadCommitsCallback(changes) {
     if (this.loadCommitsCallback != null) {
-      this.loadCommitsCallback(changes);
-      this.loadCommitsCallback = null;
+      this.loadCommitsCallback(changes)
+      this.loadCommitsCallback = null
     }
   }
 
   refresh(hard) {
     if (hard) {
       if (this.expandedCommit != null) {
-        this.expandedCommit = null;
-        document.body.style.paddingBottom = '0';
+        this.expandedCommit = null
+        document.body.style.paddingBottom = '0'
       }
-      this.renderShowLoading();
+      this.renderShowLoading()
     }
-    this.requestLoadBranchesAndCommits(hard);
+    this.requestLoadBranchesAndCommits(hard)
   }
 
   requestLoadBranches(hard, loadedCallback) {
     if (this.loadBranchesCallback != null) {
-      return;
+      return
     }
-    this.loadBranchesCallback = loadedCallback;
+    this.loadBranchesCallback = loadedCallback
     sendMessage({
       command: 'loadBranches',
       repo: this.currentRepo,
       hard: hard,
-    });
+    })
   }
 
   requestLoadCommits(hard, loadedCallback) {
     if (this.loadCommitsCallback != null) {
-      return;
+      return
     }
-    this.loadCommitsCallback = loadedCallback;
+    this.loadCommitsCallback = loadedCallback
     sendMessage({
       command: 'loadCommits',
       repo: this.currentRepo,
       branchName: this.currentBranch != null ? this.currentBranch : '',
       maxCommits: this.maxCommits,
       hard: hard,
-    });
+    })
   }
 
   triggerLoadMore() {
-    if (!this.moreCommitsAvailable || this.loadCommitsCallback != null) return;
-    var btn = document.getElementById('loadMoreCommitsBtn');
-    if (btn) btn.parentNode.innerHTML = '<h2 id="loadingHeader">' + svgIcons.loading + 'Loading ...</h2>';
-    this.maxCommits += COMMITS_PER_PAGE;
-    this.requestLoadCommits(true, () => {});
+    if (!this.moreCommitsAvailable || this.loadCommitsCallback != null) return
+    var btn = document.getElementById('loadMoreCommitsBtn')
+    if (btn) btn.parentNode.innerHTML = '<h2 id="loadingHeader">' + svgIcons.loading + 'Loading ...</h2>'
+    this.maxCommits += COMMITS_PER_PAGE
+    this.requestLoadCommits(true, () => {})
   }
 
   requestLoadBranchesAndCommits(hard) {
@@ -231,16 +238,16 @@ class GitGraphView {
       if (isRepo) {
         this.requestLoadCommits(hard, commitChanges => {
           if (!hard && (branchChanges || commitChanges)) {
-            ContextMenu.hideDialogAndContextMenu();
+            ContextMenu.hideDialogAndContextMenu()
           }
-        });
+        })
       } else {
         sendMessage({
           command: 'loadRepos',
           check: true,
-        });
+        })
       }
-    });
+    })
   }
 
   saveState() {
@@ -255,22 +262,22 @@ class GitGraphView {
       moreCommitsAvailable: this.moreCommitsAvailable,
       maxCommits: this.maxCommits,
       expandedCommit: this.expandedCommit,
-    });
+    })
   }
 
   render() {
-    this.renderTable();
-    this.renderGraph();
+    this.renderTable()
+    this.renderGraph()
   }
 
   renderGraph() {
-    var colHeadersElem = document.getElementById('tableColHeaders');
+    var colHeadersElem = document.getElementById('tableColHeaders')
     if (colHeadersElem == null) {
-      return;
+      return
     }
-    const headerHeight = colHeadersElem.clientHeight + 1;
-    this.config.grid.offsetY = headerHeight + this.config.grid.y / 2;
-    this.graph.render();
+    const headerHeight = colHeadersElem.clientHeight + 1
+    this.config.grid.offsetY = headerHeight + this.config.grid.y / 2
+    this.graph.render()
   }
 
   renderTable() {
@@ -285,7 +292,7 @@ class GitGraphView {
           </tr>
         </thead>
         <tbody>`,
-      currentHash = this.commits.length > 0 && this.commits[0].hash === '*' ? '*' : this.commitHead;
+      currentHash = this.commits.length > 0 && this.commits[0].hash === '*' ? '*' : this.commitHead
     this.commits.forEach((commit, i) => {
       var refs = '',
         message = escapeHtml(commit.message),
@@ -293,10 +300,10 @@ class GitGraphView {
         j = void 0,
         refName = void 0,
         refActive = void 0,
-        refHtml = void 0;
+        refHtml = void 0
       commit.refs.forEach(ref => {
-        refName = escapeHtml(ref.name);
-        refActive = ref.type === 'head' && ref.name === this.gitBranchHead;
+        refName = escapeHtml(ref.name)
+        refActive = ref.type === 'head' && ref.name === this.gitBranchHead
         refHtml =
           '<span class="gitRef ' +
           ref.type +
@@ -306,9 +313,9 @@ class GitGraphView {
           '">' +
           (ref.type === 'tag' ? svgIcons.tag : svgIcons.branch) +
           refName +
-          '</span>';
-        refs = refActive ? refHtml + refs : refs + refHtml;
-      });
+          '</span>'
+        refs = refActive ? refHtml + refs : refs + refHtml
+      })
       html +=
         '<tr class="commit" data-hash="' +
         commit.hash +
@@ -332,23 +339,23 @@ class GitGraphView {
         escapeHtml(commit.hash) +
         '">' +
         abbrevCommit(commit.hash) +
-        '</td></tr>';
-    });
-    this.tableElem.innerHTML = '<table>' + html + '</tbody></table>';
-    this.footerElem.innerHTML = this.moreCommitsAvailable ? '<div id="loadMoreCommitsBtn" class="roundedBtn">Load More Commits</div>' : '';
+        '</td></tr>'
+    })
+    this.tableElem.innerHTML = '<table>' + html + '</tbody></table>'
+    this.footerElem.innerHTML = this.moreCommitsAvailable ? '<div id="loadMoreCommitsBtn" class="roundedBtn">Load More Commits</div>' : ''
 
-    this.initElementResizer();
+    this.initElementResizer()
 
     if (this.moreCommitsAvailable) {
       document.getElementById('loadMoreCommitsBtn').addEventListener('click', () => {
-        this.triggerLoadMore();
-      });
+        this.triggerLoadMore()
+      })
     }
 
     addListenerToClass('commit', 'contextmenu', e => {
-      e.stopPropagation();
-      var sourceElem = e.target.closest('.commit');
-      var hash = sourceElem.dataset.hash;
+      e.stopPropagation()
+      var sourceElem = e.target.closest('.commit')
+      var hash = sourceElem.dataset.hash
       ContextMenu.showContextMenu(
         e,
         [
@@ -394,10 +401,10 @@ class GitGraphView {
                     commitHash: hash,
                     lightweight: values[1] === 'lightweight',
                     message: values[2],
-                  });
+                  })
                 },
-                sourceElem
-              );
+                sourceElem,
+              )
             },
           },
           {
@@ -413,10 +420,10 @@ class GitGraphView {
                     repo: this.currentRepo,
                     branchName: name,
                     commitHash: hash,
-                  });
+                  })
                 },
-                sourceElem
-              );
+                sourceElem,
+              )
             },
           },
           null,
@@ -432,10 +439,10 @@ class GitGraphView {
                     command: 'checkoutCommit',
                     repo: this.currentRepo,
                     commitHash: hash,
-                  });
+                  })
                 },
-                sourceElem
-              );
+                sourceElem,
+              )
             },
           },
           {
@@ -450,10 +457,10 @@ class GitGraphView {
                       repo: this.currentRepo,
                       commitHash: hash,
                       parentIndex: 0,
-                    });
+                    })
                   },
-                  sourceElem
-                );
+                  sourceElem,
+                )
               } else {
                 var options = this.commits[this.commitLookup[hash]].parentHashes.map((hash, index) => {
                   return {
@@ -461,8 +468,8 @@ class GitGraphView {
                       abbrevCommit(hash) +
                       (typeof this.commitLookup[hash] === 'number' ? ': ' + this.commits[this.commitLookup[hash]].message : ''),
                     value: (index + 1).toString(),
-                  };
-                });
+                  }
+                })
                 Dialog.showSelectDialog(
                   'Are you sure you want to cherry pick merge commit <b><i>' +
                     abbrevCommit(hash) +
@@ -476,10 +483,10 @@ class GitGraphView {
                       repo: this.currentRepo,
                       commitHash: hash,
                       parentIndex: parseInt(parentIndex),
-                    });
+                    })
                   },
-                  sourceElem
-                );
+                  sourceElem,
+                )
               }
             },
           },
@@ -495,10 +502,10 @@ class GitGraphView {
                       repo: this.currentRepo,
                       commitHash: hash,
                       parentIndex: 0,
-                    });
+                    })
                   },
-                  sourceElem
-                );
+                  sourceElem,
+                )
               } else {
                 var options = this.commits[this.commitLookup[hash]].parentHashes.map((hash, index) => {
                   return {
@@ -506,8 +513,8 @@ class GitGraphView {
                       abbrevCommit(hash) +
                       (typeof this.commitLookup[hash] === 'number' ? ': ' + this.commits[this.commitLookup[hash]].message : ''),
                     value: (index + 1).toString(),
-                  };
-                });
+                  }
+                })
                 Dialog.showSelectDialog(
                   'Are you sure you want to revert merge commit <b><i>' +
                     abbrevCommit(hash) +
@@ -521,10 +528,10 @@ class GitGraphView {
                       repo: this.currentRepo,
                       commitHash: hash,
                       parentIndex: parseInt(parentIndex),
-                    });
+                    })
                   },
-                  sourceElem
-                );
+                  sourceElem,
+                )
               }
             },
           },
@@ -543,10 +550,10 @@ class GitGraphView {
                     repo: this.currentRepo,
                     commitHash: hash,
                     createNewCommit: createNewCommit,
-                  });
+                  })
                 },
-                null
-              );
+                null,
+              )
             },
           },
           {
@@ -576,10 +583,10 @@ class GitGraphView {
                     repo: this.currentRepo,
                     commitHash: hash,
                     resetMode: mode,
-                  });
+                  })
                 },
-                sourceElem
-              );
+                sourceElem,
+              )
             },
           },
           null,
@@ -590,28 +597,28 @@ class GitGraphView {
                 command: 'copyToClipboard',
                 type: 'Commit Hash',
                 data: hash,
-              });
+              })
             },
           },
         ],
-        sourceElem
-      );
-    });
+        sourceElem,
+      )
+    })
 
     addListenerToClass('commit', 'click', e => {
-      var sourceElem = e.target.closest('.commit');
-      this.setFocusedPane('commits');
-      this.loadCommitDetails(sourceElem.dataset.id);
-    });
+      var sourceElem = e.target.closest('.commit')
+      this.setFocusedPane('commits')
+      this.loadCommitDetails(sourceElem.dataset.id)
+    })
 
     addListenerToClass('gitRef', 'contextmenu', e => {
-      e.stopPropagation();
-      var sourceElem = e.target.closest('.gitRef');
+      e.stopPropagation()
+      var sourceElem = e.target.closest('.gitRef')
       var refName = unescapeHtml(sourceElem.dataset.name),
         menu,
-        copyType;
-      console.log(sourceElem);
-      console.log(refName);
+        copyType
+      console.log(sourceElem)
+      console.log(refName)
       if (sourceElem.classList.contains('tag')) {
         menu = [
           {
@@ -624,10 +631,10 @@ class GitGraphView {
                     command: 'deleteTag',
                     repo: this.currentRepo,
                     tagName: refName,
-                  });
+                  })
                 },
-                null
-              );
+                null,
+              )
             },
           },
           {
@@ -640,25 +647,25 @@ class GitGraphView {
                     command: 'pushTag',
                     repo: this.currentRepo,
                     tagName: refName,
-                  });
-                  Dialog.showActionRunningDialog('Pushing Tag');
+                  })
+                  Dialog.showActionRunningDialog('Pushing Tag')
                 },
-                null
-              );
+                null,
+              )
             },
           },
-        ];
-        copyType = 'Tag Name';
+        ]
+        copyType = 'Tag Name'
       } else {
         if (sourceElem.classList.contains('head')) {
-          menu = [];
+          menu = []
           if (this.gitBranchHead !== refName) {
             menu.push({
               title: 'Checkout Branch',
               onClick: () => {
-                return this.checkoutBranchAction(sourceElem, refName);
+                return this.checkoutBranchAction(sourceElem, refName)
               },
-            });
+            })
           }
           menu.push({
             title: 'Rename Branch',
@@ -673,12 +680,12 @@ class GitGraphView {
                     repo: this.currentRepo,
                     oldName: refName,
                     newName: newName,
-                  });
+                  })
                 },
-                null
-              );
+                null,
+              )
             },
-          });
+          })
           if (this.gitBranchHead !== refName) {
             menu.push(
               {
@@ -695,10 +702,10 @@ class GitGraphView {
                         repo: this.currentRepo,
                         branchName: refName,
                         forceDelete: forceDelete,
-                      });
+                      })
                     },
-                    null
-                  );
+                    null,
+                  )
                 },
               },
               {
@@ -715,25 +722,25 @@ class GitGraphView {
                         repo: this.currentRepo,
                         branchName: refName,
                         createNewCommit: createNewCommit,
-                      });
+                      })
                     },
-                    null
-                  );
+                    null,
+                  )
                 },
-              }
-            );
+              },
+            )
           }
         } else {
           menu = [
             {
               title: 'Checkout Branch',
               onClick: () => {
-                return this.checkoutBranchAction(sourceElem, refName);
+                return this.checkoutBranchAction(sourceElem, refName)
               },
             },
-          ];
+          ]
         }
-        copyType = 'Branch Name';
+        copyType = 'Branch Name'
       }
       menu.push(null, {
         title: 'Copy ' + copyType + ' to Clipboard',
@@ -742,119 +749,119 @@ class GitGraphView {
             command: 'copyToClipboard',
             type: copyType,
             data: refName,
-          });
+          })
         },
-      });
-      ContextMenu.showContextMenu(e, menu, sourceElem);
-    });
+      })
+      ContextMenu.showContextMenu(e, menu, sourceElem)
+    })
 
     addListenerToClass('gitRef', 'dblclick', e => {
-      e.stopPropagation();
-      hideDialogAndContextMenu();
-      var sourceElem = e.target.closest('.gitRef');
-      this.checkoutBranchAction(sourceElem, unescapeHtml(sourceElem.dataset.name));
-    });
+      e.stopPropagation()
+      hideDialogAndContextMenu()
+      var sourceElem = e.target.closest('.gitRef')
+      this.checkoutBranchAction(sourceElem, unescapeHtml(sourceElem.dataset.name))
+    })
   }
 
   initElementResizer() {
-    const trElement = document.getElementById('tableColHeaders');
-    const thElements = document.getElementsByClassName('tableColHeader');
-    const resizeClassName = 'resizeCol';
+    const trElement = document.getElementById('tableColHeaders')
+    const thElements = document.getElementsByClassName('tableColHeader')
+    const resizeClassName = 'resizeCol'
 
-    let columnWidths = this.gitRepos[this.currentRepo].columnWidths;
+    let columnWidths = this.gitRepos[this.currentRepo].columnWidths
 
     if (columnWidths == null) {
-      this.tableElem.className = 'autoLayout';
+      this.tableElem.className = 'autoLayout'
       thElements[0].style.padding =
         '0 ' +
         Math.round((Math.max(this.graph.getWidth() + 16, ElementResizer.MIN_WIDTH_HEIGHT) - (thElements[0].offsetWidth - 24)) / 2) +
-        'px';
+        'px'
       columnWidths = [
         thElements[0].clientWidth - 24,
         thElements[2].clientWidth - 24,
         thElements[3].clientWidth - 24,
         thElements[4].clientWidth - 24,
-      ];
+      ]
     }
 
     Array.from(thElements).forEach((col, index) => {
       if (index > 0) {
-        col.innerHTML += `<span class="${resizeClassName} before" data-col="${index - 1}"></span>`;
-        col.innerHTML += `<span class="${resizeClassName} after" data-col="${index - 1}"></span>`;
+        col.innerHTML += `<span class="${resizeClassName} before" data-col="${index - 1}"></span>`
+        col.innerHTML += `<span class="${resizeClassName} after" data-col="${index - 1}"></span>`
       }
-    });
+    })
 
     // make table fixed layout
-    thElements[0].style.width = columnWidths[0] + 'px';
-    thElements[0].style.padding = '';
-    thElements[2].style.width = columnWidths[1] + 'px';
-    thElements[3].style.width = columnWidths[2] + 'px';
-    thElements[4].style.width = columnWidths[3] + 'px';
-    this.tableElem.className = 'fixedLayout';
+    thElements[0].style.width = columnWidths[0] + 'px'
+    thElements[0].style.padding = ''
+    thElements[2].style.width = columnWidths[1] + 'px'
+    thElements[3].style.width = columnWidths[2] + 'px'
+    thElements[4].style.width = columnWidths[3] + 'px'
+    this.tableElem.className = 'fixedLayout'
 
-    let columnBeingEdited;
-    let mouseX;
+    let columnBeingEdited
+    let mouseX
     const onResizeStart = mouseEvent => {
-      mouseX = mouseEvent.clientX;
-      columnBeingEdited = parseInt(mouseEvent.target.dataset.col);
-    };
+      mouseX = mouseEvent.clientX
+      columnBeingEdited = parseInt(mouseEvent.target.dataset.col)
+    }
 
     const onResize = mouseEvent => {
-      let mouseDeltaX = mouseEvent.clientX - mouseX;
+      let mouseDeltaX = mouseEvent.clientX - mouseX
       switch (columnBeingEdited) {
         case 0:
           if (columnWidths[0] + mouseDeltaX < 40) {
-            mouseDeltaX = -columnWidths[0] + 40;
+            mouseDeltaX = -columnWidths[0] + 40
           }
           if (thElements[1].clientWidth - mouseDeltaX < ElementResizer.MIN_WIDTH_HEIGHT) {
-            mouseDeltaX = thElements[1].clientWidth - ElementResizer.MIN_WIDTH_HEIGHT;
+            mouseDeltaX = thElements[1].clientWidth - ElementResizer.MIN_WIDTH_HEIGHT
           }
-          columnWidths[0] += mouseDeltaX;
-          thElements[0].style.width = columnWidths[0] + 'px';
-          break;
+          columnWidths[0] += mouseDeltaX
+          thElements[0].style.width = columnWidths[0] + 'px'
+          break
         case 1:
           if (thElements[1].clientWidth + mouseDeltaX < ElementResizer.MIN_WIDTH_HEIGHT) {
-            mouseDeltaX = -thElements[1].clientWidth + ElementResizer.MIN_WIDTH_HEIGHT;
+            mouseDeltaX = -thElements[1].clientWidth + ElementResizer.MIN_WIDTH_HEIGHT
           }
           if (columnWidths[1] - mouseDeltaX < 40) {
-            mouseDeltaX = columnWidths[1] - 40;
+            mouseDeltaX = columnWidths[1] - 40
           }
-          columnWidths[1] -= mouseDeltaX;
-          thElements[2].style.width = columnWidths[1] + 'px';
-          break;
+          columnWidths[1] -= mouseDeltaX
+          thElements[2].style.width = columnWidths[1] + 'px'
+          break
         default:
           if (columnWidths[columnBeingEdited - 1] + mouseDeltaX < 40) {
-            mouseDeltaX = -columnWidths[columnBeingEdited - 1] + 40;
+            mouseDeltaX = -columnWidths[columnBeingEdited - 1] + 40
           }
           if (columnWidths[columnBeingEdited] - mouseDeltaX < 40) {
-            mouseDeltaX = columnWidths[columnBeingEdited] - 40;
+            mouseDeltaX = columnWidths[columnBeingEdited] - 40
           }
-          columnWidths[columnBeingEdited - 1] += mouseDeltaX;
-          columnWidths[columnBeingEdited] -= mouseDeltaX;
-          thElements[columnBeingEdited].style.width = columnWidths[columnBeingEdited - 1] + 'px';
-          thElements[columnBeingEdited + 1].style.width = columnWidths[columnBeingEdited] + 'px';
+          columnWidths[columnBeingEdited - 1] += mouseDeltaX
+          columnWidths[columnBeingEdited] -= mouseDeltaX
+          thElements[columnBeingEdited].style.width = columnWidths[columnBeingEdited - 1] + 'px'
+          thElements[columnBeingEdited + 1].style.width = columnWidths[columnBeingEdited] + 'px'
       }
-      mouseX = mouseEvent.clientX;
-    };
+      mouseX = mouseEvent.clientX
+    }
 
     const onResizeEnd = () => {
-      columnBeingEdited = -1;
-      this.gitRepos[this.currentRepo].columnWidths = columnWidths;
+      columnBeingEdited = -1
+      this.gitRepos[this.currentRepo].columnWidths = columnWidths
       sendMessage({
         command: 'saveRepoState',
         repo: this.currentRepo,
         state: this.gitRepos[this.currentRepo],
-      });
-    };
+      })
+    }
 
-    new ElementResizer(trElement, resizeClassName, onResizeStart, onResize, onResizeEnd);
+    new ElementResizer(trElement, resizeClassName, onResizeStart, onResize, onResizeEnd)
   }
 
   renderShowLoading() {
-    hideDialogAndContextMenu();
-    this.graph.clear();
-    this.tableElem.innerHTML = '<h2 id="loadingHeader">' + svgIcons.loading + 'Loading ...</h2>';
-    this.footerElem.innerHTML = '';
+    hideDialogAndContextMenu()
+    this.graph.clear()
+    this.tableElem.innerHTML = '<h2 id="loadingHeader">' + svgIcons.loading + 'Loading ...</h2>'
+    this.footerElem.innerHTML = ''
   }
 
   checkoutBranchAction(sourceElem, refName) {
@@ -864,9 +871,9 @@ class GitGraphView {
         repo: this.currentRepo,
         branchName: refName,
         remoteBranch: null,
-      });
+      })
     } else if (sourceElem.classList.contains('remote')) {
-      var refNameComps = refName.split('/');
+      var refNameComps = refName.split('/')
       Dialog.showRefInputDialog(
         'Enter the name of the new branch you would like to create when checking out <b><i>' +
           escapeHtml(sourceElem.dataset.name) +
@@ -879,156 +886,156 @@ class GitGraphView {
             repo: this.currentRepo,
             branchName: newBranch,
             remoteBranch: refName,
-          });
+          })
         },
-        null
-      );
+        null,
+      )
     }
   }
 
   initDetailsResizer() {
-    this.detailsHeight = 300;
-    var detailsEl = document.getElementById('commitDetails');
-    var startY, startHeight;
+    this.detailsHeight = 300
+    var detailsEl = document.getElementById('commitDetails')
+    var startY, startHeight
 
     new ElementResizer(
       detailsEl,
       'resizeDetailsHeight',
       mouseEvent => {
-        startY = mouseEvent.clientY;
-        startHeight = this.detailsHeight;
+        startY = mouseEvent.clientY
+        startHeight = this.detailsHeight
       },
       mouseEvent => {
-        var delta = startY - mouseEvent.clientY;
-        var maxHeight = window.innerHeight * 0.8;
-        this.detailsHeight = Math.min(maxHeight, Math.max(100, startHeight + delta));
-        this.applyDetailsHeight(this.detailsHeight);
+        var delta = startY - mouseEvent.clientY
+        var maxHeight = window.innerHeight * 0.8
+        this.detailsHeight = Math.min(maxHeight, Math.max(100, startHeight + delta))
+        this.applyDetailsHeight(this.detailsHeight)
       },
       () => {
-        this.gitRepos[this.currentRepo].detailsHeight = this.detailsHeight;
+        this.gitRepos[this.currentRepo].detailsHeight = this.detailsHeight
         sendMessage({
           command: 'saveRepoState',
           repo: this.currentRepo,
           state: this.gitRepos[this.currentRepo],
-        });
-      }
-    );
+        })
+      },
+    )
   }
 
   applyDetailsHeight(height) {
-    var detailsEl = document.getElementById('commitDetails');
-    detailsEl.style.height = height + 'px';
-    document.body.style.paddingBottom = height + 'px';
+    var detailsEl = document.getElementById('commitDetails')
+    detailsEl.style.height = height + 'px'
+    document.body.style.paddingBottom = height + 'px'
   }
 
   initFileListResizer() {
-    var splitEl = document.getElementById('commitDetailsSplit');
-    var fileListEl = document.getElementById('commitDetailsFileList');
-    if (!splitEl || !fileListEl) return;
+    var splitEl = document.getElementById('commitDetailsSplit')
+    var fileListEl = document.getElementById('commitDetailsFileList')
+    if (!splitEl || !fileListEl) return
 
-    var fileListWidth = this.gitRepos[this.currentRepo].fileListWidth || 250;
-    fileListEl.style.width = fileListWidth + 'px';
+    var fileListWidth = this.gitRepos[this.currentRepo].fileListWidth || 250
+    fileListEl.style.width = fileListWidth + 'px'
 
-    var startX, startWidth;
+    var startX, startWidth
 
     new ElementResizer(
       splitEl,
       'resizeFileListWidth',
       mouseEvent => {
-        startX = mouseEvent.clientX;
-        startWidth = fileListEl.offsetWidth;
+        startX = mouseEvent.clientX
+        startWidth = fileListEl.offsetWidth
       },
       mouseEvent => {
-        var delta = mouseEvent.clientX - startX;
-        var maxWidth = splitEl.offsetWidth * 0.6;
-        var newWidth = Math.min(maxWidth, Math.max(100, startWidth + delta));
-        fileListEl.style.width = newWidth + 'px';
+        var delta = mouseEvent.clientX - startX
+        var maxWidth = splitEl.offsetWidth * 0.6
+        var newWidth = Math.min(maxWidth, Math.max(100, startWidth + delta))
+        fileListEl.style.width = newWidth + 'px'
       },
       () => {
-        this.gitRepos[this.currentRepo].fileListWidth = fileListEl.offsetWidth;
+        this.gitRepos[this.currentRepo].fileListWidth = fileListEl.offsetWidth
         sendMessage({
           command: 'saveRepoState',
           repo: this.currentRepo,
           state: this.gitRepos[this.currentRepo],
-        });
-      }
-    );
+        })
+      },
+    )
   }
 
   scrollCommitIntoView(commitRow) {
-    var rect = commitRow.getBoundingClientRect();
-    var headerHeight = 30;
-    var panelHeight = this.detailsHeight || 0;
-    var visibleBottom = window.innerHeight - panelHeight;
+    var rect = commitRow.getBoundingClientRect()
+    var headerHeight = 30
+    var panelHeight = this.detailsHeight || 0
+    var visibleBottom = window.innerHeight - panelHeight
     if (rect.bottom > visibleBottom) {
-      window.scrollBy(0, rect.bottom - visibleBottom);
+      window.scrollBy(0, rect.bottom - visibleBottom)
     } else if (rect.top < headerHeight) {
-      window.scrollBy(0, rect.top - headerHeight);
+      window.scrollBy(0, rect.top - headerHeight)
     }
   }
 
   observeWindowSizeChanges() {
     var windowWidth = window.outerWidth,
-      windowHeight = window.outerHeight;
+      windowHeight = window.outerHeight
     window.addEventListener('resize', () => {
       if (windowWidth === window.outerWidth && windowHeight === window.outerHeight) {
-        this.renderGraph();
+        this.renderGraph()
       } else {
-        windowWidth = window.outerWidth;
-        windowHeight = window.outerHeight;
-        var maxHeight = window.innerHeight * 0.8;
+        windowWidth = window.outerWidth
+        windowHeight = window.outerHeight
+        var maxHeight = window.innerHeight * 0.8
         if (this.detailsHeight > maxHeight) {
-          this.detailsHeight = Math.max(100, maxHeight);
-          this.applyDetailsHeight(this.detailsHeight);
+          this.detailsHeight = Math.max(100, maxHeight)
+          this.applyDetailsHeight(this.detailsHeight)
         }
       }
-    });
+    })
   }
 
   observeWebviewScroll() {
-    var active = window.scrollY > 0;
-    this.scrollShadowElem.className = active ? 'active' : '';
+    var active = window.scrollY > 0
+    this.scrollShadowElem.className = active ? 'active' : ''
     document.addEventListener('scroll', () => {
       if (active !== window.scrollY > 0) {
-        active = window.scrollY > 0;
-        this.scrollShadowElem.className = active ? 'active' : '';
+        active = window.scrollY > 0
+        this.scrollShadowElem.className = active ? 'active' : ''
       }
-      var btn = document.getElementById('loadMoreCommitsBtn');
+      var btn = document.getElementById('loadMoreCommitsBtn')
       if (btn && btn.getBoundingClientRect().top < window.innerHeight) {
-        this.triggerLoadMore();
+        this.triggerLoadMore()
       }
-    });
+    })
   }
 
   loadCommitDetails(commitIndex) {
-    var commitRow = document.querySelector('.commit[data-id="' + commitIndex + '"]');
-    const commitData = commitRow.dataset;
+    var commitRow = document.querySelector('.commit[data-id="' + commitIndex + '"]')
+    const commitData = commitRow.dataset
 
-    var prev = document.querySelector('.commit.commitDetailsOpen');
-    if (prev) prev.classList.remove('commitDetailsOpen');
-    commitRow.classList.add('commitDetailsOpen');
-    this.scrollCommitIntoView(commitRow);
-    this.setFocusedPane('commits');
+    var prev = document.querySelector('.commit.commitDetailsOpen')
+    if (prev) prev.classList.remove('commitDetailsOpen')
+    commitRow.classList.add('commitDetailsOpen')
+    this.scrollCommitIntoView(commitRow)
+    this.setFocusedPane('commits')
 
     this.expandedCommit = {
       id: parseInt(commitData.id),
       hash: commitData.hash,
       commitDetails: null,
-    };
+    }
     sendMessage({
       command: 'commitDetails',
       repo: this.currentRepo,
       commitHash: commitData.hash,
       commitId: commitData.id,
-    });
+    })
   }
 
   showCommitDetails(summaryHtml, fileListHtml) {
-    var detailsEl = document.getElementById('commitDetails');
-    var contentEl = document.getElementById('commitDetailsContent');
-    if (!summaryHtml) return;
+    var detailsEl = document.getElementById('commitDetails')
+    var contentEl = document.getElementById('commitDetailsContent')
+    if (!summaryHtml) return
 
-    this.clearFileSelection();
+    this.clearFileSelection()
 
     contentEl.innerHTML =
       '<div id="commitDetailsSummary">' +
@@ -1040,168 +1047,168 @@ class GitGraphView {
       '</div>' +
       '<span class="resizeFileListWidth"></span>' +
       '<div id="commitDetailsDiff"></div>' +
-      '</div>';
+      '</div>'
 
-    detailsEl.classList.add('active');
-    this.detailsHeight = this.gitRepos[this.currentRepo].detailsHeight || this.detailsHeight;
-    this.applyDetailsHeight(this.detailsHeight);
+    detailsEl.classList.add('active')
+    this.detailsHeight = this.gitRepos[this.currentRepo].detailsHeight || this.detailsHeight
+    this.applyDetailsHeight(this.detailsHeight)
 
-    var self = this;
+    var self = this
     detailsEl.querySelectorAll('.gitFile').forEach(function (li) {
       li.addEventListener('click', function (e) {
-        if (e.isTrusted) self.setFocusedPane('files');
+        if (e.isTrusted) self.setFocusedPane('files')
 
         if (e.isTrusted && (e.metaKey || e.ctrlKey)) {
           // CMD/Ctrl+Click: toggle file in selection (same section only)
-          if (self.selectionAnchor && self.selectionAnchor.dataset.section !== li.dataset.section) return;
-          self.toggleFileSelection(li);
-          self.selectionAnchor = li;
-          self.updateSelectionVisuals();
-          self.requestDiffForFile(li);
-          return;
+          if (self.selectionAnchor && self.selectionAnchor.dataset.section !== li.dataset.section) return
+          self.toggleFileSelection(li)
+          self.selectionAnchor = li
+          self.updateSelectionVisuals()
+          self.requestDiffForFile(li)
+          return
         }
 
         if (e.isTrusted && e.shiftKey && self.selectionAnchor) {
           // SHIFT+Click: range select from anchor to clicked (same section only)
-          if (self.selectionAnchor.dataset.section !== li.dataset.section) return;
-          self.rangeSelectFiles(self.selectionAnchor, li);
-          self.updateSelectionVisuals();
-          self.requestDiffForFile(li);
-          return;
+          if (self.selectionAnchor.dataset.section !== li.dataset.section) return
+          self.rangeSelectFiles(self.selectionAnchor, li)
+          self.updateSelectionVisuals()
+          self.requestDiffForFile(li)
+          return
         }
 
         // Normal click: clear selection, single-select
-        var alreadySelected = self.selectedFiles.size === 1 && self.selectedFiles.has(li);
+        var alreadySelected = self.selectedFiles.size === 1 && self.selectedFiles.has(li)
         if (!alreadySelected) {
-          self.clearFileSelection();
-          self.addFileToSelection(li);
+          self.clearFileSelection()
+          self.addFileToSelection(li)
         }
-        self.selectionAnchor = li;
+        self.selectionAnchor = li
 
         document.querySelectorAll('.fileSection.focused').forEach(function (el) {
-          el.classList.remove('focused');
-        });
+          el.classList.remove('focused')
+        })
         if (self.hotkeyManager.focusedPane === 'files') {
-          li.classList.add('focused');
+          li.classList.add('focused')
           if (li.dataset.section) {
-            self.hotkeyManager.focusedSection = li.dataset.section;
-            var sectionEl = li.closest('.fileSection');
-            if (sectionEl) sectionEl.classList.add('focused');
+            self.hotkeyManager.focusedSection = li.dataset.section
+            var sectionEl = li.closest('.fileSection')
+            if (sectionEl) sectionEl.classList.add('focused')
           }
         }
-        if (!alreadySelected) self.requestDiffForFile(li);
-      });
-    });
+        if (!alreadySelected) self.requestDiffForFile(li)
+      })
+    })
 
     // Double-click to stage/unstage
     if (self.expandedCommit && self.expandedCommit.hash === '*') {
       detailsEl.querySelectorAll('.gitFile').forEach(function (li) {
         li.addEventListener('dblclick', function (e) {
-          e.preventDefault();
-          self.pendingFileSelection = self.getNextFileTarget(li);
-          var section = li.dataset.section;
-          var filePath = decodeURIComponent(li.dataset.filepath);
+          e.preventDefault()
+          self.pendingFileSelection = self.getNextFileTarget(li)
+          var section = li.dataset.section
+          var filePath = decodeURIComponent(li.dataset.filepath)
           if (section === 'unstaged') {
-            sendMessage({ command: 'stageFile', repo: self.currentRepo, filePath: filePath });
+            sendMessage({ command: 'stageFile', repo: self.currentRepo, filePath: filePath })
           } else if (section === 'staged') {
-            sendMessage({ command: 'unstageFile', repo: self.currentRepo, filePath: filePath });
+            sendMessage({ command: 'unstageFile', repo: self.currentRepo, filePath: filePath })
           }
-        });
-      });
+        })
+      })
     }
 
-    this.initFileListResizer();
+    this.initFileListResizer()
 
-    var targetFile = null;
+    var targetFile = null
     if (this.pendingFileSelection) {
-      var pending = this.pendingFileSelection;
-      this.pendingFileSelection = null;
+      var pending = this.pendingFileSelection
+      this.pendingFileSelection = null
       if (pending.filePath) {
         targetFile = detailsEl.querySelector(
-          '.gitFile[data-filepath="' + CSS.escape(pending.filePath) + '"][data-section="' + pending.section + '"]'
-        );
+          '.gitFile[data-filepath="' + CSS.escape(pending.filePath) + '"][data-section="' + pending.section + '"]',
+        )
       }
       if (!targetFile && pending.section) {
-        var sectionEl = detailsEl.querySelector('.fileSection[data-section="' + pending.section + '"]');
-        if (sectionEl) targetFile = sectionEl.querySelector('.gitFile');
+        var sectionEl = detailsEl.querySelector('.fileSection[data-section="' + pending.section + '"]')
+        if (sectionEl) targetFile = sectionEl.querySelector('.gitFile')
       }
     }
-    if (!targetFile) targetFile = detailsEl.querySelector('.gitFile');
-    if (targetFile) targetFile.click();
+    if (!targetFile) targetFile = detailsEl.querySelector('.gitFile')
+    if (targetFile) targetFile.click()
   }
 
   clearFileSelection() {
     this.selectedFiles.forEach(function (el) {
-      el.classList.remove('selected', 'focused');
-    });
-    this.selectedFiles = new Set();
-    this.selectionAnchor = null;
+      el.classList.remove('selected', 'focused')
+    })
+    this.selectedFiles = new Set()
+    this.selectionAnchor = null
   }
 
   addFileToSelection(li) {
-    li.classList.add('selected');
-    this.selectedFiles.add(li);
+    li.classList.add('selected')
+    this.selectedFiles.add(li)
   }
 
   removeFileFromSelection(li) {
-    li.classList.remove('selected', 'focused');
-    this.selectedFiles.delete(li);
+    li.classList.remove('selected', 'focused')
+    this.selectedFiles.delete(li)
   }
 
   toggleFileSelection(li) {
     if (this.selectedFiles.has(li)) {
-      this.removeFileFromSelection(li);
+      this.removeFileFromSelection(li)
     } else {
-      this.addFileToSelection(li);
+      this.addFileToSelection(li)
     }
   }
 
   rangeSelectFiles(from, to) {
-    var ul = from.closest('ul');
-    if (!ul) return;
-    var items = Array.from(ul.querySelectorAll('.gitFile'));
-    var fromIndex = items.indexOf(from);
-    var toIndex = items.indexOf(to);
-    if (fromIndex === -1 || toIndex === -1) return;
-    var start = Math.min(fromIndex, toIndex);
-    var end = Math.max(fromIndex, toIndex);
+    var ul = from.closest('ul')
+    if (!ul) return
+    var items = Array.from(ul.querySelectorAll('.gitFile'))
+    var fromIndex = items.indexOf(from)
+    var toIndex = items.indexOf(to)
+    if (fromIndex === -1 || toIndex === -1) return
+    var start = Math.min(fromIndex, toIndex)
+    var end = Math.max(fromIndex, toIndex)
     // Clear current selection but keep anchor
     this.selectedFiles.forEach(function (el) {
-      el.classList.remove('selected', 'focused');
-    });
-    this.selectedFiles = new Set();
+      el.classList.remove('selected', 'focused')
+    })
+    this.selectedFiles = new Set()
     for (var i = start; i <= end; i++) {
-      this.addFileToSelection(items[i]);
+      this.addFileToSelection(items[i])
     }
   }
 
   updateSelectionVisuals() {
     document.querySelectorAll('.gitFile.focused').forEach(function (el) {
-      el.classList.remove('focused');
-    });
+      el.classList.remove('focused')
+    })
     if (this.selectionAnchor && this.hotkeyManager.focusedPane === 'files') {
-      this.selectionAnchor.classList.add('focused');
+      this.selectionAnchor.classList.add('focused')
       if (this.selectionAnchor.dataset.section) {
-        this.hotkeyManager.focusedSection = this.selectionAnchor.dataset.section;
+        this.hotkeyManager.focusedSection = this.selectionAnchor.dataset.section
         document.querySelectorAll('.fileSection.focused').forEach(function (el) {
-          el.classList.remove('focused');
-        });
-        var sectionEl = this.selectionAnchor.closest('.fileSection');
-        if (sectionEl) sectionEl.classList.add('focused');
+          el.classList.remove('focused')
+        })
+        var sectionEl = this.selectionAnchor.closest('.fileSection')
+        if (sectionEl) sectionEl.classList.add('focused')
       }
     }
   }
 
   requestDiffForFile(li) {
-    this.diffRequestId++;
-    if (this.diffTimeout) clearTimeout(this.diffTimeout);
-    var currentRequestId = this.diffRequestId;
-    var self = this;
+    this.diffRequestId++
+    if (this.diffTimeout) clearTimeout(this.diffTimeout)
+    var currentRequestId = this.diffRequestId
+    var self = this
     this.diffTimeout = setTimeout(function () {
       if (self.diffRequestId === currentRequestId) {
-        document.getElementById('commitDetailsDiff').innerHTML = '<em>Diff not loaded.</em>';
+        document.getElementById('commitDetailsDiff').innerHTML = '<em>Diff not loaded.</em>'
       }
-    }, DIFF_TIMEOUT_MS);
+    }, DIFF_TIMEOUT_MS)
     sendMessage({
       command: 'requestFileDiff',
       repo: this.currentRepo,
@@ -1210,71 +1217,74 @@ class GitGraphView {
       section: li.dataset.section || null,
       statusCode: li.dataset.statuscode || null,
       requestId: this.diffRequestId,
-    });
+    })
   }
 
   selectAllFiles() {
-    var section = this.hotkeyManager.focusedSection;
-    if (!section) return;
-    var sectionEl = document.querySelector('.fileSection[data-section="' + section + '"]');
-    if (!sectionEl) return;
-    var self = this;
-    self.clearFileSelection();
+    var section = this.hotkeyManager.focusedSection
+    if (!section) return
+    var sectionEl = document.querySelector('.fileSection[data-section="' + section + '"]')
+    if (!sectionEl) return
+    var self = this
+    self.clearFileSelection()
     sectionEl.querySelectorAll('.gitFile').forEach(function (li) {
-      self.addFileToSelection(li);
-    });
-    var items = sectionEl.querySelectorAll('.gitFile');
+      self.addFileToSelection(li)
+    })
+    var items = sectionEl.querySelectorAll('.gitFile')
     if (items.length > 0) {
-      self.selectionAnchor = items[0];
-      self.updateSelectionVisuals();
+      self.selectionAnchor = items[0]
+      self.updateSelectionVisuals()
     }
   }
 
   showFileDiff(diff, timedOut, permanentError, filePath, section, statusCode, requestId) {
-    if (requestId !== undefined && requestId !== this.diffRequestId) return;
-    if (this.diffTimeout) { clearTimeout(this.diffTimeout); this.diffTimeout = null; }
-    var el = document.getElementById('commitDetailsDiff');
-    if (!el) return;
+    if (requestId !== undefined && requestId !== this.diffRequestId) return
+    if (this.diffTimeout) {
+      clearTimeout(this.diffTimeout)
+      this.diffTimeout = null
+    }
+    var el = document.getElementById('commitDetailsDiff')
+    if (!el) return
     if (permanentError) {
-      el.innerHTML = '<em>Diff is too large to display.</em>';
-      return;
+      el.innerHTML = '<em>Diff is too large to display.</em>'
+      return
     }
     if (timedOut) {
-      this.showDiffTimeout(filePath, section, statusCode);
-      return;
+      this.showDiffTimeout(filePath, section, statusCode)
+      return
     }
     if (!diff) {
-      el.innerHTML = '<em>No diff available</em>';
-      return;
+      el.innerHTML = '<em>No diff available</em>'
+      return
     }
-    var lines = diff.split(/\r?\n/);
+    var lines = diff.split(/\r?\n/)
     el.innerHTML = lines
       .map(function (line) {
-        var cls = '';
+        var cls = ''
         if (line.startsWith('+++') || line.startsWith('---') || line.startsWith('diff ')) {
-          cls = ' diff-header';
+          cls = ' diff-header'
         } else if (line.startsWith('@@')) {
-          cls = ' diff-hunk';
+          cls = ' diff-hunk'
         } else if (line.startsWith('+')) {
-          cls = ' diff-add';
+          cls = ' diff-add'
         } else if (line.startsWith('-')) {
-          cls = ' diff-del';
+          cls = ' diff-del'
         }
-        return '<span class="diff-line' + cls + '">' + escapeHtml(line) + '</span>';
+        return '<span class="diff-line' + cls + '">' + escapeHtml(line) + '</span>'
       })
-      .join('');
+      .join('')
   }
 
   showDiffTimeout(filePath, section, statusCode) {
-    var el = document.getElementById('commitDetailsDiff');
-    if (!el) return;
-    var self = this;
-    el.innerHTML = '<em>Diff is too large to load quickly.</em> <button id="loadDiffFullBtn" class="roundedBtn">Load diff</button>';
-    var btn = document.getElementById('loadDiffFullBtn');
+    var el = document.getElementById('commitDetailsDiff')
+    if (!el) return
+    var self = this
+    el.innerHTML = '<em>Diff is too large to load quickly.</em> <button id="loadDiffFullBtn" class="roundedBtn">Load diff</button>'
+    var btn = document.getElementById('loadDiffFullBtn')
     if (btn) {
       btn.addEventListener('click', function () {
-        self.diffRequestId++;
-        el.innerHTML = '<em>Loading diff...</em>';
+        self.diffRequestId++
+        el.innerHTML = '<em>Loading diff...</em>'
         sendMessage({
           command: 'requestFileDiffFull',
           repo: self.currentRepo,
@@ -1283,154 +1293,154 @@ class GitGraphView {
           section: section,
           statusCode: statusCode,
           requestId: self.diffRequestId,
-        });
-      });
+        })
+      })
     }
   }
 
   getNextFileTarget(anchorEl) {
-    if (!anchorEl) return null;
-    var section = anchorEl.dataset.section;
-    var oppositeSection = section === 'unstaged' ? 'staged' : 'unstaged';
+    if (!anchorEl) return null
+    var section = anchorEl.dataset.section
+    var oppositeSection = section === 'unstaged' ? 'staged' : 'unstaged'
 
     // Try next sibling .gitFile below
-    var next = anchorEl.nextElementSibling;
-    while (next && !next.classList.contains('gitFile')) next = next.nextElementSibling;
-    if (next) return { filePath: next.dataset.filepath, section: section };
+    var next = anchorEl.nextElementSibling
+    while (next && !next.classList.contains('gitFile')) next = next.nextElementSibling
+    if (next) return { filePath: next.dataset.filepath, section: section }
 
     // Try prev sibling .gitFile above
-    var prev = anchorEl.previousElementSibling;
-    while (prev && !prev.classList.contains('gitFile')) prev = prev.previousElementSibling;
-    if (prev) return { filePath: prev.dataset.filepath, section: section };
+    var prev = anchorEl.previousElementSibling
+    while (prev && !prev.classList.contains('gitFile')) prev = prev.previousElementSibling
+    if (prev) return { filePath: prev.dataset.filepath, section: section }
 
     // Section will be empty, fall back to opposite section
-    return { filePath: null, section: oppositeSection };
+    return { filePath: null, section: oppositeSection }
   }
 
   enterFile() {
-    if (this.selectedFiles.size === 0) return;
-    this.pendingFileSelection = this.getNextFileTarget(this.selectionAnchor);
-    var unstagedPaths = [];
-    var stagedPaths = [];
+    if (this.selectedFiles.size === 0) return
+    this.pendingFileSelection = this.getNextFileTarget(this.selectionAnchor)
+    var unstagedPaths = []
+    var stagedPaths = []
     this.selectedFiles.forEach(function (li) {
-      var section = li.dataset.section;
-      var filePath = decodeURIComponent(li.dataset.filepath);
-      if (section === 'unstaged') unstagedPaths.push(filePath);
-      else if (section === 'staged') stagedPaths.push(filePath);
-    });
+      var section = li.dataset.section
+      var filePath = decodeURIComponent(li.dataset.filepath)
+      if (section === 'unstaged') unstagedPaths.push(filePath)
+      else if (section === 'staged') stagedPaths.push(filePath)
+    })
     if (unstagedPaths.length === 1 && stagedPaths.length === 0) {
-      sendMessage({ command: 'stageFile', repo: this.currentRepo, filePath: unstagedPaths[0] });
+      sendMessage({ command: 'stageFile', repo: this.currentRepo, filePath: unstagedPaths[0] })
     } else if (stagedPaths.length === 1 && unstagedPaths.length === 0) {
-      sendMessage({ command: 'unstageFile', repo: this.currentRepo, filePath: stagedPaths[0] });
+      sendMessage({ command: 'unstageFile', repo: this.currentRepo, filePath: stagedPaths[0] })
     } else {
       if (unstagedPaths.length > 0) {
-        sendMessage({ command: 'stageFiles', repo: this.currentRepo, filePaths: unstagedPaths });
+        sendMessage({ command: 'stageFiles', repo: this.currentRepo, filePaths: unstagedPaths })
       }
       if (stagedPaths.length > 0) {
-        sendMessage({ command: 'unstageFiles', repo: this.currentRepo, filePaths: stagedPaths });
+        sendMessage({ command: 'unstageFiles', repo: this.currentRepo, filePaths: stagedPaths })
       }
     }
   }
 
   onSectionChange(section) {
-    var sectionEl = document.querySelector('.fileSection[data-section="' + section + '"]');
-    if (!sectionEl) return;
-    var firstFile = sectionEl.querySelector('.gitFile');
-    if (firstFile) firstFile.click();
+    var sectionEl = document.querySelector('.fileSection[data-section="' + section + '"]')
+    if (!sectionEl) return
+    var firstFile = sectionEl.querySelector('.gitFile')
+    if (firstFile) firstFile.click()
   }
 
   refreshUncommittedDetails() {
-    if (!this.expandedCommit || this.expandedCommit.hash !== '*') return;
+    if (!this.expandedCommit || this.expandedCommit.hash !== '*') return
     sendMessage({
       command: 'commitDetails',
       repo: this.currentRepo,
       commitHash: '*',
       commitId: this.expandedCommit.id,
-    });
+    })
   }
 
   get commitDetails() {
-    return this._commitDetails;
+    return this._commitDetails
   }
   set commitDetails(value) {
-    this._expandedCommit.commitDetails = value;
-    this.saveState();
+    this._expandedCommit.commitDetails = value
+    this.saveState()
   }
   get commitHead() {
-    return this._commitHead;
+    return this._commitHead
   }
   set commitHead(value) {
-    this._commitHead = value;
-    this.saveState();
+    this._commitHead = value
+    this.saveState()
   }
   get commitLookup() {
-    return this._commitLookup;
+    return this._commitLookup
   }
   set commitLookup(value) {
-    this._commitLookup = value;
-    this.saveState();
+    this._commitLookup = value
+    this.saveState()
   }
   get commits() {
-    return this._commits;
+    return this._commits
   }
   set commits(value) {
-    this._commits = value;
-    this.saveState();
+    this._commits = value
+    this.saveState()
   }
   get currentBranch() {
-    return this._currentBranch;
+    return this._currentBranch
   }
   set currentBranch(value) {
-    this._currentBranch = value;
-    this.saveState();
+    this._currentBranch = value
+    this.saveState()
   }
   get currentRepo() {
-    return this._currentRepo;
+    return this._currentRepo
   }
   set currentRepo(value) {
-    this._currentRepo = value;
-    this.saveState();
+    this._currentRepo = value
+    this.saveState()
   }
   get expandedCommit() {
-    return this._expandedCommit;
+    return this._expandedCommit
   }
   set expandedCommit(value) {
-    this._expandedCommit = value;
-    this.saveState();
+    this._expandedCommit = value
+    this.saveState()
   }
   get gitBranches() {
-    return this._gitBranches;
+    return this._gitBranches
   }
   set gitBranches(value) {
-    this._gitBranches = value;
-    this.saveState();
+    this._gitBranches = value
+    this.saveState()
   }
   get gitBranchHead() {
-    return this._gitBranchHead;
+    return this._gitBranchHead
   }
   set gitBranchHead(value) {
-    this._gitBranchHead = value;
-    this.saveState();
+    this._gitBranchHead = value
+    this.saveState()
   }
   get gitRepos() {
-    return this._gitRepos;
+    return this._gitRepos
   }
   set gitRepos(value) {
-    this._gitRepos = value;
-    this.saveState();
+    this._gitRepos = value
+    this.saveState()
   }
   get maxCommits() {
-    return this._maxCommits;
+    return this._maxCommits
   }
   set maxCommits(value) {
-    this._maxCommits = value;
-    this.saveState();
+    this._maxCommits = value
+    this.saveState()
   }
   get moreCommitsAvailable() {
-    return this._moreCommitsAvailable;
+    return this._moreCommitsAvailable
   }
   set moreCommitsAvailable(value) {
-    this._moreCommitsAvailable = value;
-    this.saveState();
+    this._moreCommitsAvailable = value
+    this.saveState()
   }
 }

@@ -1,15 +1,15 @@
 // @ts-nocheck
-import CommitStatusCode from './CommitStatusCode';
-import { svgIcons } from './html_utils';
+import CommitStatusCode from './CommitStatusCode'
+import { svgIcons } from './html_utils'
 
 class CommitFileListView {
   constructor(gitFiles) {
-    this.gitFiles = gitFiles;
+    this.gitFiles = gitFiles
   }
 
   render() {
-    const { gitFiles } = this;
-    let html = '<ul class="gitFolderContents">';
+    const { gitFiles } = this
+    let html = '<ul class="gitFolderContents">'
     gitFiles.forEach(gitFile => {
       html +=
         '<li class="gitFile" data-filepath="' +
@@ -23,10 +23,10 @@ class CommitFileListView {
         svgIcons.file +
         '</span>' +
         (gitFile.statusCode === CommitStatusCode.RENAMED ? gitFile.newFilePath : gitFile.filePath) +
-        '</li>';
-    });
-    return html + '</ul>';
+        '</li>'
+    })
+    return html + '</ul>'
   }
 }
 
-export default CommitFileListView;
+export default CommitFileListView

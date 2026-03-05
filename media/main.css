@@ -276,11 +276,22 @@ body.unableToLoad p {
   font-size: var(--vscode-editor-font-size, 12px);
   white-space: pre;
 }
-.diff-line { display: block; }
-.diff-add { background: var(--vscode-diffEditor-insertedLineBackground, rgba(155,185,85,0.2)); }
-.diff-del { background: var(--vscode-diffEditor-removedLineBackground, rgba(255,0,0,0.2)); }
-.diff-hunk { color: var(--vscode-descriptionForeground, #888); }
-.diff-header { font-weight: bold; color: var(--vscode-descriptionForeground, #888); }
+.diff-line {
+  display: block;
+}
+.diff-add {
+  background: var(--vscode-diffEditor-insertedLineBackground, rgba(155, 185, 85, 0.2));
+}
+.diff-del {
+  background: var(--vscode-diffEditor-removedLineBackground, rgba(255, 0, 0, 0.2));
+}
+.diff-hunk {
+  color: var(--vscode-descriptionForeground, #888);
+}
+.diff-header {
+  font-weight: bold;
+  color: var(--vscode-descriptionForeground, #888);
+}
 #commitDetailsFiles {
   overflow-x: hidden;
   overflow-y: scroll;
@@ -363,13 +374,13 @@ svg.fileIcon {
   height: 13px;
   flex-shrink: 0;
 }
-[data-statuscode="A"] {
+[data-statuscode='A'] {
   color: var(--vscode-gitDecoration-addedResourceForeground);
 }
-[data-statuscode="D"] {
+[data-statuscode='D'] {
   color: var(--vscode-gitDecoration-deletedResourceForeground);
 }
-[data-statuscode="R"] {
+[data-statuscode='R'] {
   color: var(--vscode-gitDecoration-submoduleResourceForeground);
 }
 .gitFile.gitDiffPossible {
@@ -546,17 +557,17 @@ svg.fileIcon {
   text-align: center;
   width: 100%;
 }
-#dialog > table.dialogForm input[type="text"] {
+#dialog > table.dialogForm input[type='text'] {
   width: 100%;
 }
-#dialog > table.dialogForm input[type="checkbox"] {
+#dialog > table.dialogForm input[type='checkbox'] {
   vertical-align: text-top;
   outline-style: none;
 }
-#dialog > table.dialogForm.multi input[type="checkbox"] {
+#dialog > table.dialogForm.multi input[type='checkbox'] {
   margin-left: 0;
 }
-#dialog > table.dialogForm input[type="text"],
+#dialog > table.dialogForm input[type='text'],
 #dialog > table.dialogForm select {
   padding: 4px;
   box-sizing: border-box;

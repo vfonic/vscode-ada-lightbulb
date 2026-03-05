@@ -1,11 +1,11 @@
-const DIALOG_FORM_ID = 'formDialogForm';
+const DIALOG_FORM_ID = 'formDialogForm'
 
 class Dialog {
   static getDialogElement() {
-    return document.getElementById('dialog');
+    return document.getElementById('dialog')
   }
   static getDialogBackingElement() {
-    return document.getElementById('dialogBacking');
+    return document.getElementById('dialogBacking')
   }
 
   static showConfirmationDialog(message, confirmed, sourceElem) {
@@ -13,12 +13,12 @@ class Dialog {
       message,
       'Yes',
       'No',
-      function() {
-        Dialog.hideDialog();
-        confirmed();
+      function () {
+        Dialog.hideDialog()
+        confirmed()
       },
-      sourceElem
-    );
+      sourceElem,
+    )
   }
 
   static showRefInputDialog(message, defaultValue, actionName, actioned, sourceElem) {
@@ -32,11 +32,11 @@ class Dialog {
         },
       ],
       actionName,
-      function(values) {
-        return actioned(values[0]);
+      function (values) {
+        return actioned(values[0])
       },
-      sourceElem
-    );
+      sourceElem,
+    )
   }
 
   static showCheckboxDialog(message, checkboxLabel, checkboxValue, actionName, actioned, sourceElem) {
@@ -50,11 +50,11 @@ class Dialog {
         },
       ],
       actionName,
-      function(values) {
-        return actioned(values[0] === 'checked');
+      function (values) {
+        return actioned(values[0] === 'checked')
       },
-      sourceElem
-    );
+      sourceElem,
+    )
   }
 
   static showSelectDialog(message, defaultValue, options, actionName, actioned, sourceElem) {
@@ -69,22 +69,22 @@ class Dialog {
         },
       ],
       actionName,
-      function(values) {
-        return actioned(values[0]);
+      function (values) {
+        return actioned(values[0])
       },
-      sourceElem
-    );
+      sourceElem,
+    )
   }
 
   static showFormDialog(message, inputs, actionName, actioned, sourceElem) {
     var textRefInput = -1,
-      multiElementForm = inputs.length > 1;
-    var html = message + '<br><table class="dialogForm ' + (multiElementForm ? 'multi' : 'single') + '">';
+      multiElementForm = inputs.length > 1
+    var html = message + '<br><table class="dialogForm ' + (multiElementForm ? 'multi' : 'single') + '">'
     for (var i = 0; i < inputs.length; i++) {
-      var input = inputs[i];
-      html += '<tr>' + (multiElementForm ? '<td>' + input.name + '</td>' : '') + '<td>';
+      var input = inputs[i]
+      html += '<tr>' + (multiElementForm ? '<td>' + input.name + '</td>' : '') + '<td>'
       if (input.type === 'select') {
-        html += '<select form="' + DIALOG_FORM_ID + '" id="dialogInput' + i + '">';
+        html += '<select form="' + DIALOG_FORM_ID + '" id="dialogInput' + i + '">'
         for (var j = 0; j < input.options.length; j++) {
           html +=
             '<option value="' +
@@ -93,9 +93,9 @@ class Dialog {
             (input.options[j].value === input.default ? ' selected' : '') +
             '>' +
             input.options[j].name +
-            '</option>';
+            '</option>'
         }
-        html += '</select>';
+        html += '</select>'
       } else if (input.type === 'checkbox') {
         html +=
           '<span class="dialogFormCheckbox"><label><input form="' +
@@ -106,7 +106,7 @@ class Dialog {
           (input.value ? ' checked' : '') +
           '/>' +
           (multiElementForm ? '' : input.name) +
-          '</label></span>';
+          '</label></span>'
       } else {
         html +=
           '<input form="' +
@@ -117,60 +117,58 @@ class Dialog {
           input.default +
           '"' +
           (input.type === 'text' && input.placeholder != null ? ' placeholder="' + input.placeholder + '"' : '') +
-          '/>';
+          '/>'
         if (input.type === 'text-ref') {
-          textRefInput = i;
+          textRefInput = i
         }
       }
-      html += '</td></tr>';
+      html += '</td></tr>'
     }
-    html += '</table>';
+    html += '</table>'
     Dialog.showDialog(
       html,
       actionName,
       'Cancel',
-      function() {
-        const dialog = Dialog.getDialogElement();
+      function () {
+        const dialog = Dialog.getDialogElement()
         if (dialog.className === 'active noInput' || dialog.className === 'active inputInvalid') {
-          return;
+          return
         }
-        var values = [];
+        var values = []
         for (var i = 0; i < inputs.length; i++) {
           var input = inputs[i],
-            elem = document.getElementById('dialogInput' + i);
+            elem = document.getElementById('dialogInput' + i)
           if (input.type === 'select') {
-            values.push(elem.value);
+            values.push(elem.value)
           } else if (input.type === 'checkbox') {
-            values.push(elem.checked ? 'checked' : 'unchecked');
+            values.push(elem.checked ? 'checked' : 'unchecked')
           } else {
-            values.push(elem.value);
+            values.push(elem.value)
           }
         }
-        Dialog.hideDialog();
-        actioned(values);
+        Dialog.hideDialog()
+        actioned(values)
       },
-      sourceElem
-    );
+      sourceElem,
+    )
     if (textRefInput > -1) {
       var dialogInput_1 = document.getElementById('dialogInput' + textRefInput),
-        dialogAction_1 = document.getElementById('dialogAction');
-      const dialog = Dialog.getDialogElement();
+        dialogAction_1 = document.getElementById('dialogAction')
+      const dialog = Dialog.getDialogElement()
       if (dialogInput_1.value === '') {
-        dialog.className = 'active noInput';
+        dialog.className = 'active noInput'
       }
-      dialogInput_1.focus();
-      dialogInput_1.addEventListener('keyup', function() {
-        const REF_INVALID_MATCHER = /^[-\/].*|[\\" ><~^:?*[]|\.\.|\/\/|\/\.|@{|[.\/]$|\.lock$|^@$/g;
+      dialogInput_1.focus()
+      dialogInput_1.addEventListener('keyup', function () {
+        const REF_INVALID_MATCHER = /^[-\/].*|[\\" ><~^:?*[]|\.\.|\/\/|\/\.|@{|[.\/]$|\.lock$|^@$/g
         var noInput = dialogInput_1.value === '',
-          invalidInput = dialogInput_1.value.match(REF_INVALID_MATCHER) != null;
-        var newClassName = 'active' + (noInput ? ' noInput' : invalidInput ? ' inputInvalid' : '');
+          invalidInput = dialogInput_1.value.match(REF_INVALID_MATCHER) != null
+        var newClassName = 'active' + (noInput ? ' noInput' : invalidInput ? ' inputInvalid' : '')
         if (dialog.className !== newClassName) {
-          dialog.className = newClassName;
-          dialogAction_1.title = invalidInput
-            ? 'Unable to ' + actionName + ', one or more invalid characters entered.'
-            : '';
+          dialog.className = newClassName
+          dialogAction_1.title = invalidInput ? 'Unable to ' + actionName + ', one or more invalid characters entered.' : ''
         }
-      });
+      })
     }
   }
 
@@ -179,65 +177,53 @@ class Dialog {
       svgIcons.alert +
         'Error: ' +
         message +
-        (reason != null
-          ? '<br><span class="errorReason">' +
-            escapeHtml(reason)
-              .split('\n')
-              .join('<br>') +
-            '</span>'
-          : ''),
+        (reason != null ? '<br><span class="errorReason">' + escapeHtml(reason).split('\n').join('<br>') + '</span>' : ''),
       null,
       'Dismiss',
       null,
-      sourceElem
-    );
+      sourceElem,
+    )
   }
 
   static showActionRunningDialog(command) {
-    Dialog.showDialog(
-      '<span id="actionRunning">' + svgIcons.loading + command + ' ...</span>',
-      null,
-      'Dismiss',
-      null,
-      null
-    );
+    Dialog.showDialog('<span id="actionRunning">' + svgIcons.loading + command + ' ...</span>', null, 'Dismiss', null, null)
   }
 
   static showDialog(html, actionName, dismissName, actioned, sourceElem) {
-    const dialog = Dialog.getDialogElement();
-    const dialogBacking = Dialog.getDialogBackingElement();
-    dialog.className = 'active';
-    dialogBacking.className = 'active';
+    const dialog = Dialog.getDialogElement()
+    const dialogBacking = Dialog.getDialogBackingElement()
+    dialog.className = 'active'
+    dialogBacking.className = 'active'
     dialog.innerHTML =
       html +
       '<br>' +
       (actionName != null ? '<div id="dialogAction" class="roundedBtn">' + actionName + '</div>' : '') +
       '<div id="dialogDismiss" class="roundedBtn">' +
       dismissName +
-      '</div>';
-    var formEl = document.createElement('form');
-    formEl.id = DIALOG_FORM_ID;
-    dialog.appendChild(formEl);
+      '</div>'
+    var formEl = document.createElement('form')
+    formEl.id = DIALOG_FORM_ID
+    dialog.appendChild(formEl)
     if (actionName != null && actioned != null) {
-      formEl.addEventListener('submit', actioned);
-      document.getElementById('dialogAction').addEventListener('click', actioned);
+      formEl.addEventListener('submit', actioned)
+      document.getElementById('dialogAction').addEventListener('click', actioned)
     }
-    document.getElementById('dialogDismiss').addEventListener('click', Dialog.hideDialog);
-    this.dialogMenuSource = sourceElem;
+    document.getElementById('dialogDismiss').addEventListener('click', Dialog.hideDialog)
+    this.dialogMenuSource = sourceElem
     if (this.dialogMenuSource != null) {
-      this.dialogMenuSource.classList.add('dialogActive');
+      this.dialogMenuSource.classList.add('dialogActive')
     }
   }
 
   static hideDialog() {
-    const dialog = Dialog.getDialogElement();
-    const dialogBacking = Dialog.getDialogBackingElement();
-    dialog.className = '';
-    dialogBacking.className = '';
-    dialog.innerHTML = '';
+    const dialog = Dialog.getDialogElement()
+    const dialogBacking = Dialog.getDialogBackingElement()
+    dialog.className = ''
+    dialogBacking.className = ''
+    dialog.innerHTML = ''
     if (this.dialogMenuSource != null) {
-      this.dialogMenuSource.classList.remove('dialogActive');
-      this.dialogMenuSource = null;
+      this.dialogMenuSource.classList.remove('dialogActive')
+      this.dialogMenuSource = null
     }
   }
 }

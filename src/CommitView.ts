@@ -1,22 +1,22 @@
 // @ts-nocheck
-import CommitFileListView from './CommitFileListView';
-import UncommittedFileListView from './UncommittedFileListView';
-import { escapeHtml } from './html_utils';
+import CommitFileListView from './CommitFileListView'
+import UncommittedFileListView from './UncommittedFileListView'
+import { escapeHtml } from './html_utils'
 
 class CommitView {
   constructor(expandedCommit) {
-    this.expandedCommit = expandedCommit;
+    this.expandedCommit = expandedCommit
   }
 
   render() {
     if (this.expandedCommit == null) {
-      return null;
+      return null
     }
 
-    const { commitDetails } = this.expandedCommit;
+    const { commitDetails } = this.expandedCommit
 
     if (commitDetails.hash === '*') {
-      return this.renderUncommitted(commitDetails);
+      return this.renderUncommitted(commitDetails)
     }
 
     const summary = `
@@ -28,18 +28,18 @@ class CommitView {
       <b>Date: </b>${new Date(commitDetails.date * 1e3).toString()}<br>
       <b>Committer: </b>${escapeHtml(commitDetails.committer)}</span>
       </span></span><br><br>
-      ${escapeHtml(commitDetails.body).replace(/\n/g, '<br>')}`;
+      ${escapeHtml(commitDetails.body).replace(/\n/g, '<br>')}`
 
-    const fileList = new CommitFileListView(commitDetails.fileChanges).render();
+    const fileList = new CommitFileListView(commitDetails.fileChanges).render()
 
-    return { summary, fileList };
+    return { summary, fileList }
   }
 
   renderUncommitted(commitDetails) {
-    const summary = '<span class="commitDetailsSummaryTop"><b>Uncommitted Changes</b></span>';
-    const fileList = new UncommittedFileListView(commitDetails.unstagedFileChanges, commitDetails.stagedFileChanges).render();
-    return { summary, fileList };
+    const summary = '<span class="commitDetailsSummaryTop"><b>Uncommitted Changes</b></span>'
+    const fileList = new UncommittedFileListView(commitDetails.unstagedFileChanges, commitDetails.stagedFileChanges).render()
+    return { summary, fileList }
   }
 }
 
-export default CommitView;
+export default CommitView

@@ -1,17 +1,17 @@
 // @ts-nocheck
 class CommitFileChange {
   static get REQUIRED_KEYS() {
-    return ['filePath', 'newFilePath', 'statusCode'];
+    return ['filePath', 'newFilePath', 'statusCode']
   }
 
   constructor(data) {
     CommitFileChange.REQUIRED_KEYS.forEach(key => {
       if (data[key] == null) {
-        throw new Error(`Missing required key for CommitFileChange: ${key}`);
+        throw new Error(`Missing required key for CommitFileChange: ${key}`)
       }
-    });
-    Object.assign(this, {}, data);
+    })
+    Object.assign(this, {}, data)
   }
 }
 
-export default CommitFileChange;
+export default CommitFileChange
