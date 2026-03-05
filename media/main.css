@@ -630,6 +630,12 @@ svg.fileIcon {
 .roundedBtn:hover {
   background-color: rgba(128, 128, 128, 0.2);
 }
+#commitDetailsDiff .roundedBtn {
+  display: inline-block;
+  padding: 4px 12px;
+  margin-top: 6px;
+  border-radius: 4px;
+}
 
 /* General */
 #commitGraph,
