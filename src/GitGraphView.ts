@@ -118,7 +118,7 @@ class GitGraphView {
             const trackProcess = proc => {
               this._activeDiffProcess = proc;
             };
-            this.fetchDiff(msg, requestId, 3000, trackProcess);
+            this.fetchDiff(msg, requestId, undefined, trackProcess);
             break;
           }
           case 'requestFileDiffFull': {

@@ -1,4 +1,5 @@
 const COMMITS_PER_PAGE = 35;
+const DIFF_TIMEOUT_MS = 3000;
 
 class GitGraphView {
   constructor(repos, lastActiveRepo, config) {
@@ -1200,7 +1201,7 @@ class GitGraphView {
       if (self.diffRequestId === currentRequestId) {
         document.getElementById('commitDetailsDiff').innerHTML = '<em>Diff not loaded.</em>';
       }
-    }, 3000);
+    }, DIFF_TIMEOUT_MS);
     sendMessage({
       command: 'requestFileDiff',
       repo: this.currentRepo,

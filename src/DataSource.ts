@@ -6,6 +6,8 @@ const configuration = new Config();
 
 const headRegex = /^\(HEAD detached at [0-9A-Za-z]+\)/g;
 const gitLogSeparator = 'XX7Nal-YARtTpjCikii9nJxER19D6diSyk-AWkPb';
+const DIFF_TIMEOUT_MS = 3000;
+const MAX_DIFF_OUTPUT_SIZE = 1024 * 1024; // 1MB
 
 class DataSource {
   static execGit(command, repo, callback) {
@@ -98,7 +100,7 @@ class DataSource {
     return this.spawnGit(['show', commitHash + ':' + filePath], repo, stdout => stdout, '');
   }
 
-  getFileDiff(repo, commitHash, filePath, timeout = 3000, onProcess = null) {
+  getFileDiff(repo, commitHash, filePath, timeout = DIFF_TIMEOUT_MS, onProcess = null) {
     return this.spawnGit(
       ['diff-tree', '-p', '--root', '--no-commit-id', '--no-ext-diff', '--no-color', commitHash, '--', filePath],
       repo,
@@ -109,21 +111,21 @@ class DataSource {
     );
   }
 
-  getUnstagedFileDiff(repo, filePath, timeout = 3000, onProcess = null) {
+  getUnstagedFileDiff(repo, filePath, timeout = DIFF_TIMEOUT_MS, onProcess = null) {
     return this.spawnGit(['diff', '--no-ext-diff', '--no-color', '--', filePath], repo, stdout => stdout, '', timeout, onProcess);
   }
 
-  getStagedFileDiff(repo, filePath, timeout = 3000, onProcess = null) {
+  getStagedFileDiff(repo, filePath, timeout = DIFF_TIMEOUT_MS, onProcess = null) {
     return this.spawnGit(['diff', '--cached', '--no-ext-diff', '--no-color', '--', filePath], repo, stdout => stdout, '', timeout, onProcess);
   }
 
-  getUntrackedFileDiff(repo, filePath, timeout = 3000, onProcess = null) {
+  getUntrackedFileDiff(repo, filePath, timeout = DIFF_TIMEOUT_MS, onProcess = null) {
     return new Promise(resolve => {
       let stdout = '';
       let err = false;
       let timedOut = false;
       let timer;
-      const maxOutputSize = 1024 * 1024; // 1MB
+      const maxOutputSize = MAX_DIFF_OUTPUT_SIZE;
       const cmd = cp.spawn(configuration.gitPath, ['diff', '--no-index', '--no-ext-diff', '--no-color', '/dev/null', filePath], { cwd: repo });
       if (onProcess) {
         onProcess(cmd);
@@ -401,7 +403,7 @@ class DataSource {
       let err = false;
       let timedOut = false;
       let timer;
-      const maxOutputSize = 1024 * 1024; // 1MB
+      const maxOutputSize = MAX_DIFF_OUTPUT_SIZE;
       const cmd = cp.spawn(configuration.gitPath, args, { cwd: repo });
       if (onProcess) {
         onProcess(cmd);
