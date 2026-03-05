@@ -1,3 +1,5 @@
+const COMMITS_PER_PAGE = 35;
+
 class GitGraphView {
   constructor(repos, lastActiveRepo, config) {
     console.warn('GitGraphView.constructor');
@@ -6,7 +8,7 @@ class GitGraphView {
     this.commitLookup = {};
     this.gitRepos = repos;
     this.config = config;
-    this.maxCommits = 35;
+    this.maxCommits = COMMITS_PER_PAGE;
     this.graph = new Graph('commitGraph', this.config);
     this.tableElem = document.getElementById('commitTable');
     this.footerElem = document.getElementById('footer');
@@ -214,7 +216,7 @@ class GitGraphView {
     if (!this.moreCommitsAvailable || this.loadCommitsCallback != null) return;
     var btn = document.getElementById('loadMoreCommitsBtn');
     if (btn) btn.parentNode.innerHTML = '<h2 id="loadingHeader">' + svgIcons.loading + 'Loading ...</h2>';
-    this.maxCommits += 35;
+    this.maxCommits += COMMITS_PER_PAGE;
     this.requestLoadCommits(true, () => {});
   }
 
