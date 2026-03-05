@@ -123,6 +123,7 @@ class DataSource {
       let err = false;
       let timedOut = false;
       let timer;
+      const maxOutputSize = 1024 * 1024; // 1MB
       const cmd = cp.spawn(configuration.gitPath, ['diff', '--no-index', '--no-ext-diff', '--no-color', '/dev/null', filePath], { cwd: repo });
       if (onProcess) {
         onProcess(cmd);
@@ -135,7 +136,14 @@ class DataSource {
         }, timeout);
       }
       cmd.stdout.on('data', d => {
+        if (timedOut) return;
         stdout += d;
+        if (timeout > 0 && stdout.length > maxOutputSize) {
+          timedOut = true;
+          cmd.kill();
+          if (timer) clearTimeout(timer);
+          resolve({ timedOut: true });
+        }
       });
       cmd.on('error', () => {
         if (timedOut) {
@@ -393,6 +401,7 @@ class DataSource {
       let err = false;
       let timedOut = false;
       let timer;
+      const maxOutputSize = 1024 * 1024; // 1MB
       const cmd = cp.spawn(configuration.gitPath, args, { cwd: repo });
       if (onProcess) {
         onProcess(cmd);
@@ -405,7 +414,14 @@ class DataSource {
         }, timeout);
       }
       cmd.stdout.on('data', d => {
+        if (timedOut) return;
         stdout += d;
+        if (timeout > 0 && stdout.length > maxOutputSize) {
+          timedOut = true;
+          cmd.kill();
+          if (timer) clearTimeout(timer);
+          resolve({ timedOut: true });
+        }
       });
       cmd.on('error', () => {
         if (timedOut) {
