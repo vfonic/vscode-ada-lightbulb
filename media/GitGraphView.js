@@ -13,6 +13,7 @@ class GitGraphView {
     this.scrollShadowElem = new ScrollShadow();
     this.observeWindowSizeChanges();
     this.observeWebviewScroll();
+    this.initDetailsResizer();
     this.renderShowLoading();
     this.loadRepos(this.gitRepos, lastActiveRepo);
     this.requestLoadBranchesAndCommits(false);
@@ -170,6 +171,7 @@ class GitGraphView {
     if (hard) {
       if (this.expandedCommit != null) {
         this.expandedCommit = null;
+        document.body.style.paddingBottom = '0';
       }
       this.renderShowLoading();
     }
@@ -865,6 +867,75 @@ class GitGraphView {
     }
   }
 
+  initDetailsResizer() {
+    this.detailsHeight = 300;
+    var detailsEl = document.getElementById('commitDetails');
+    var startY, startHeight;
+
+    new ElementResizer(
+      detailsEl,
+      'resizeDetailsHeight',
+      mouseEvent => {
+        startY = mouseEvent.clientY;
+        startHeight = this.detailsHeight;
+      },
+      mouseEvent => {
+        var delta = startY - mouseEvent.clientY;
+        var maxHeight = window.innerHeight * 0.8;
+        this.detailsHeight = Math.min(maxHeight, Math.max(100, startHeight + delta));
+        this.applyDetailsHeight(this.detailsHeight);
+      },
+      () => {
+        this.gitRepos[this.currentRepo].detailsHeight = this.detailsHeight;
+        sendMessage({
+          command: 'saveRepoState',
+          repo: this.currentRepo,
+          state: this.gitRepos[this.currentRepo],
+        });
+      }
+    );
+  }
+
+  applyDetailsHeight(height) {
+    var detailsEl = document.getElementById('commitDetails');
+    detailsEl.style.height = height + 'px';
+    document.body.style.paddingBottom = height + 'px';
+  }
+
+  initFileListResizer() {
+    var splitEl = document.getElementById('commitDetailsSplit');
+    var fileListEl = document.getElementById('commitDetailsFileList');
+    if (!splitEl || !fileListEl) return;
+
+    var fileListWidth = this.gitRepos[this.currentRepo].fileListWidth || 250;
+    fileListEl.style.width = fileListWidth + 'px';
+
+    var startX, startWidth;
+
+    new ElementResizer(
+      splitEl,
+      'resizeFileListWidth',
+      mouseEvent => {
+        startX = mouseEvent.clientX;
+        startWidth = fileListEl.offsetWidth;
+      },
+      mouseEvent => {
+        var delta = mouseEvent.clientX - startX;
+        var maxWidth = splitEl.offsetWidth * 0.6;
+        var newWidth = Math.min(maxWidth, Math.max(100, startWidth + delta));
+        fileListEl.style.width = newWidth + 'px';
+      },
+      () => {
+        this.gitRepos[this.currentRepo].fileListWidth = fileListEl.offsetWidth;
+        sendMessage({
+          command: 'saveRepoState',
+          repo: this.currentRepo,
+          state: this.gitRepos[this.currentRepo],
+        });
+      }
+    );
+  }
+
   observeWindowSizeChanges() {
     var windowWidth = window.outerWidth,
       windowHeight = window.outerHeight;
@@ -874,6 +945,11 @@ class GitGraphView {
       } else {
         windowWidth = window.outerWidth;
         windowHeight = window.outerHeight;
+        var maxHeight = window.innerHeight * 0.8;
+        if (this.detailsHeight > maxHeight) {
+          this.detailsHeight = Math.max(100, maxHeight);
+          this.applyDetailsHeight(this.detailsHeight);
+        }
       }
     });
   }
@@ -912,11 +988,12 @@ class GitGraphView {
 
   showCommitDetails(summaryHtml, fileListHtml) {
     var detailsEl = document.getElementById('commitDetails');
+    var contentEl = document.getElementById('commitDetailsContent');
     if (!summaryHtml) return;
 
     this.clearFileSelection();
 
-    detailsEl.innerHTML =
+    contentEl.innerHTML =
       '<div id="commitDetailsSummary">' +
       summaryHtml +
       '</div>' +
@@ -924,10 +1001,13 @@ class GitGraphView {
       '<div id="commitDetailsFileList">' +
       fileListHtml +
       '</div>' +
+      '<span class="resizeFileListWidth"></span>' +
       '<div id="commitDetailsDiff"><em>Select a file to view diff</em></div>' +
       '</div>';
 
     detailsEl.classList.add('active');
+    this.detailsHeight = this.gitRepos[this.currentRepo].detailsHeight || this.detailsHeight;
+    this.applyDetailsHeight(this.detailsHeight);
 
     var self = this;
     detailsEl.querySelectorAll('.gitFile').forEach(function (li) {
@@ -988,6 +1068,8 @@ class GitGraphView {
         });
       });
     }
+
+    this.initFileListResizer();
 
     var firstFile = detailsEl.querySelector('.gitFile');
     if (firstFile) firstFile.click();

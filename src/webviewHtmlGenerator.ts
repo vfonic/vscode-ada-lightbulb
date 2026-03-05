@@ -34,7 +34,10 @@ class WebviewHtmlGenerator {
       <div id="content">
         <div id="commitGraph"></div>
         <div id="commitTable"></div>
-        <div id="commitDetails"></div>
+        <div id="commitDetails">
+          <span class="resizeRow before resizeDetailsHeight"></span>
+          <div id="commitDetailsContent"></div>
+        </div>
       </div>
       <div id="footer"></div>
       <ul id="contextMenu"></ul>

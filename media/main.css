@@ -204,11 +204,16 @@ body.unableToLoad p {
   background: var(--vscode-editor-background);
   display: none;
   flex-direction: column;
-  height: 300px;
   border-top: 1px solid rgba(128, 128, 128, 0.3);
 }
 #commitDetails.active {
   display: flex;
+}
+#commitDetailsContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 #commitTable tr.commit.commitDetailsOpen td {
   background-color: rgba(128, 128, 128, 0.15);
@@ -247,6 +252,18 @@ body.unableToLoad p {
   display: flex;
   flex: 1;
   min-height: 0;
+}
+#commitDetailsSplit.resizing {
+  cursor: col-resize;
+}
+.resizeFileListWidth {
+  width: 4px;
+  cursor: col-resize;
+  flex-shrink: 0;
+  background: rgba(128, 128, 128, 0.15);
+}
+.resizeFileListWidth:hover {
+  background: rgba(128, 128, 128, 0.4);
 }
 #commitDetailsFileList {
   width: 250px;
