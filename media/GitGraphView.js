@@ -1033,7 +1033,7 @@ class GitGraphView {
       fileListHtml +
       '</div>' +
       '<span class="resizeFileListWidth"></span>' +
-      '<div id="commitDetailsDiff"><em>Select a file to view diff</em></div>' +
+      '<div id="commitDetailsDiff"></div>' +
       '</div>';
 
     detailsEl.classList.add('active');
