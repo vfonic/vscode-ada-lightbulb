@@ -6,7 +6,7 @@ class GitGraphView {
     this.commitLookup = {};
     this.gitRepos = repos;
     this.config = config;
-    this.maxCommits = 75;
+    this.maxCommits = 35;
     this.graph = new Graph('commitGraph', this.config);
     this.tableElem = document.getElementById('commitTable');
     this.footerElem = document.getElementById('footer');
@@ -214,7 +214,7 @@ class GitGraphView {
     if (!this.moreCommitsAvailable || this.loadCommitsCallback != null) return;
     var btn = document.getElementById('loadMoreCommitsBtn');
     if (btn) btn.parentNode.innerHTML = '<h2 id="loadingHeader">' + svgIcons.loading + 'Loading ...</h2>';
-    this.maxCommits += 75;
+    this.maxCommits += 35;
     this.requestLoadCommits(true, () => {});
   }
 
