@@ -1033,6 +1033,9 @@ class GitGraphView {
           return;
         }
 
+        // Normal click: skip if already the only selected file
+        if (self.selectedFiles.size === 1 && self.selectedFiles.has(li)) return;
+
         // Normal click: clear selection, single-select
         self.clearFileSelection();
         self.addFileToSelection(li);
