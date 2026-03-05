@@ -63,9 +63,9 @@ class GitGraphView {
   }
 
   selectPreviousFile(extend) {
-    var anchor = this.selectionAnchor || document.querySelector('.gitFile.selected')
-    if (!anchor) return
-    var prev = anchor.previousElementSibling
+    var start = document.querySelector('.gitFile.focused') || this.selectionAnchor || document.querySelector('.gitFile.selected')
+    if (!start) return
+    var prev = start.previousElementSibling
     if (!prev || !prev.classList.contains('gitFile')) return
     if (extend) {
       this.addFileToSelection(prev)
@@ -79,9 +79,9 @@ class GitGraphView {
   }
 
   selectNextFile(extend) {
-    var anchor = this.selectionAnchor || document.querySelector('.gitFile.selected')
-    if (!anchor) return
-    var next = anchor.nextElementSibling
+    var start = document.querySelector('.gitFile.focused') || this.selectionAnchor || document.querySelector('.gitFile.selected')
+    if (!start) return
+    var next = start.nextElementSibling
     if (!next || !next.classList.contains('gitFile')) return
     if (extend) {
       this.addFileToSelection(next)
