@@ -40,8 +40,7 @@ class HotkeyManager {
       } else if (e.keyCode === 65 && (e.metaKey || e.ctrlKey) && this.focusedPane === 'files') {
         e.preventDefault();
         e.stopPropagation();
-        window.getSelection().removeAllRanges();
-        setTimeout(() => window.getSelection().removeAllRanges(), 0);
+        HotkeyManager.clearTextSelection();
         if (this.selectAllFiles) this.selectAllFiles();
       } else if (e.keyCode === HotkeyManager.TAB && this.focusedPane === 'files' && this.focusedSection !== null) {
         e.preventDefault();
@@ -57,6 +56,15 @@ class HotkeyManager {
         if (this.enterFile) this.enterFile();
       }
     });
+  }
+
+  static clearTextSelection() {
+    window.getSelection().removeAllRanges();
+    var clearCount = 0;
+    var clearTimer = setInterval(() => {
+      window.getSelection().removeAllRanges();
+      if (++clearCount >= 20) clearInterval(clearTimer);
+    }, 10);
   }
 
   setFocusedPane(pane) {
