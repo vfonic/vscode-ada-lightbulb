@@ -39,6 +39,8 @@ class HotkeyManager {
         }
       } else if (e.keyCode === 65 && (e.metaKey || e.ctrlKey) && this.focusedPane === 'files') {
         e.preventDefault();
+        e.stopPropagation();
+        window.getSelection().removeAllRanges();
         if (this.selectAllFiles) this.selectAllFiles();
       } else if (e.keyCode === HotkeyManager.TAB && this.focusedPane === 'files' && this.focusedSection !== null) {
         e.preventDefault();

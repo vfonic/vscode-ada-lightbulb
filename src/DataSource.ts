@@ -98,25 +98,35 @@ class DataSource {
     return this.spawnGit(['show', commitHash + ':' + filePath], repo, stdout => stdout, '');
   }
 
-  getFileDiff(repo, commitHash, filePath, timeout = 3000) {
-    return this.spawnGit(['diff-tree', '-p', '--root', '--no-commit-id', commitHash, '--', filePath], repo, stdout => stdout, '', timeout);
+  getFileDiff(repo, commitHash, filePath, timeout = 3000, onProcess = null) {
+    return this.spawnGit(
+      ['diff-tree', '-p', '--root', '--no-commit-id', commitHash, '--', filePath],
+      repo,
+      stdout => stdout,
+      '',
+      timeout,
+      onProcess
+    );
   }
 
-  getUnstagedFileDiff(repo, filePath, timeout = 3000) {
-    return this.spawnGit(['diff', '--', filePath], repo, stdout => stdout, '', timeout);
+  getUnstagedFileDiff(repo, filePath, timeout = 3000, onProcess = null) {
+    return this.spawnGit(['diff', '--', filePath], repo, stdout => stdout, '', timeout, onProcess);
   }
 
-  getStagedFileDiff(repo, filePath, timeout = 3000) {
-    return this.spawnGit(['diff', '--cached', '--', filePath], repo, stdout => stdout, '', timeout);
+  getStagedFileDiff(repo, filePath, timeout = 3000, onProcess = null) {
+    return this.spawnGit(['diff', '--cached', '--', filePath], repo, stdout => stdout, '', timeout, onProcess);
   }
 
-  getUntrackedFileDiff(repo, filePath, timeout = 3000) {
+  getUntrackedFileDiff(repo, filePath, timeout = 3000, onProcess = null) {
     return new Promise(resolve => {
       let stdout = '';
       let err = false;
       let timedOut = false;
       let timer;
       const cmd = cp.spawn(configuration.gitPath, ['diff', '--no-index', '/dev/null', filePath], { cwd: repo });
+      if (onProcess) {
+        onProcess(cmd);
+      }
       if (timeout > 0) {
         timer = setTimeout(() => {
           timedOut = true;
@@ -377,13 +387,16 @@ class DataSource {
     });
   }
 
-  spawnGit(args, repo, successValue, errorValue, timeout = 0) {
+  spawnGit(args, repo, successValue, errorValue, timeout = 0, onProcess = null) {
     return new Promise(resolve => {
       let stdout = '';
       let err = false;
       let timedOut = false;
       let timer;
       const cmd = cp.spawn(configuration.gitPath, args, { cwd: repo });
+      if (onProcess) {
+        onProcess(cmd);
+      }
       if (timeout > 0) {
         timer = setTimeout(() => {
           timedOut = true;
