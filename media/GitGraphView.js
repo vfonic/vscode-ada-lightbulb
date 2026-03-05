@@ -55,10 +55,10 @@ class GitGraphView {
       this.selectionAnchor = prev;
       this.updateSelectionVisuals();
       this.requestDiffForFile(prev);
-      prev.scrollIntoView({ block: 'nearest' });
     } else {
       prev.click();
     }
+    prev.scrollIntoView({ block: 'nearest' });
   }
 
   selectNextFile(extend) {
@@ -71,10 +71,10 @@ class GitGraphView {
       this.selectionAnchor = next;
       this.updateSelectionVisuals();
       this.requestDiffForFile(next);
-      next.scrollIntoView({ block: 'nearest' });
     } else {
       next.click();
     }
+    next.scrollIntoView({ block: 'nearest' });
   }
 
   setFocusedPane(pane) {
@@ -966,11 +966,13 @@ class GitGraphView {
   }
 
   loadCommitDetails(commitIndex) {
-    const commitData = document.querySelector('.commit[data-id="' + commitIndex + '"]').dataset;
+    var commitRow = document.querySelector('.commit[data-id="' + commitIndex + '"]');
+    const commitData = commitRow.dataset;
 
     var prev = document.querySelector('.commit.commitDetailsOpen');
     if (prev) prev.classList.remove('commitDetailsOpen');
-    document.querySelector('.commit[data-id="' + commitIndex + '"]').classList.add('commitDetailsOpen');
+    commitRow.classList.add('commitDetailsOpen');
+    commitRow.scrollIntoView({ block: 'nearest' });
     this.setFocusedPane('commits');
 
     this.expandedCommit = {
@@ -1033,12 +1035,12 @@ class GitGraphView {
           return;
         }
 
-        // Normal click: skip if already the only selected file
-        if (self.selectedFiles.size === 1 && self.selectedFiles.has(li)) return;
-
         // Normal click: clear selection, single-select
-        self.clearFileSelection();
-        self.addFileToSelection(li);
+        var alreadySelected = self.selectedFiles.size === 1 && self.selectedFiles.has(li);
+        if (!alreadySelected) {
+          self.clearFileSelection();
+          self.addFileToSelection(li);
+        }
         self.selectionAnchor = li;
 
         document.querySelectorAll('.fileSection.focused').forEach(function (el) {
@@ -1052,7 +1054,7 @@ class GitGraphView {
             if (sectionEl) sectionEl.classList.add('focused');
           }
         }
-        self.requestDiffForFile(li);
+        if (!alreadySelected) self.requestDiffForFile(li);
       });
     });
 
