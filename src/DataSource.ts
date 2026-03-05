@@ -56,9 +56,7 @@ class DataSource {
         const commits = results[0];
         const refData = results[1];
         const moreCommitsAvailable = commits.length === maxCommits + 1;
-        if (moreCommitsAvailable) {
-          commits.pop();
-        }
+        if (moreCommitsAvailable) commits.pop();
         if (refData.head != null) {
           const hasUncommittedChanges = await this.hasUncommittedChanges(repo);
           if (hasUncommittedChanges) {
@@ -127,9 +125,7 @@ class DataSource {
       let timer;
       const maxOutputSize = MAX_DIFF_OUTPUT_SIZE;
       const cmd = cp.spawn(configuration.gitPath, ['diff', '--no-index', '--no-ext-diff', '--no-color', '/dev/null', filePath], { cwd: repo });
-      if (onProcess) {
-        onProcess(cmd);
-      }
+      onProcess && onProcess(cmd);
       if (timeout > 0) {
         timer = setTimeout(() => {
           timedOut = true;
@@ -148,25 +144,15 @@ class DataSource {
         }
       });
       cmd.on('error', () => {
-        if (timedOut) {
-          return;
-        }
-        if (timer) {
-          clearTimeout(timer);
-        }
+        if (timedOut) return;
+        if (timer) clearTimeout(timer);
         resolve('');
         err = true;
       });
       cmd.on('exit', () => {
-        if (timedOut) {
-          return;
-        }
-        if (timer) {
-          clearTimeout(timer);
-        }
-        if (!err) {
-          resolve(stdout);
-        }
+        if (timedOut) return;
+        if (timer) clearTimeout(timer);
+        if (!err) resolve(stdout);
       });
     });
   }
@@ -269,9 +255,7 @@ class DataSource {
         if (!err) {
           const lines = stdout.split(DataSource.eolRegex).map(line => line.split(' '));
           lines.forEach(line => {
-            if (line.length < 2) {
-              return;
-            }
+            if (line.length < 2) return;
             const hash = line.shift();
             const ref = line.join(' ');
             if (ref.startsWith('refs/heads/')) {
@@ -317,9 +301,7 @@ class DataSource {
         const lines = stdout.split(DataSource.eolRegex).map(line => line.split(gitLogSeparator));
         const gitCommits = [];
         lines.forEach(line => {
-          if (line.length !== 6) {
-            return;
-          }
+          if (line.length !== 6) return;
           gitCommits.push({
             hash: line[0],
             parentHashes: line[1].split(' '),
@@ -384,9 +366,7 @@ class DataSource {
         err = true;
       });
       cmd.on('exit', code => {
-        if (err) {
-          return;
-        }
+        if (err) return;
         if (code === 0) {
           resolve(null);
         } else {
@@ -405,9 +385,7 @@ class DataSource {
       let timer;
       const maxOutputSize = MAX_DIFF_OUTPUT_SIZE;
       const cmd = cp.spawn(configuration.gitPath, args, { cwd: repo });
-      if (onProcess) {
-        onProcess(cmd);
-      }
+      onProcess && onProcess(cmd);
       if (timeout > 0) {
         timer = setTimeout(() => {
           timedOut = true;
@@ -426,25 +404,15 @@ class DataSource {
         }
       });
       cmd.on('error', () => {
-        if (timedOut) {
-          return;
-        }
-        if (timer) {
-          clearTimeout(timer);
-        }
+        if (timedOut) return;
+        if (timer) clearTimeout(timer);
         resolve(errorValue);
         err = true;
       });
       cmd.on('exit', code => {
-        if (timedOut) {
-          return;
-        }
-        if (timer) {
-          clearTimeout(timer);
-        }
-        if (err) {
-          return;
-        }
+        if (timedOut) return;
+        if (timer) clearTimeout(timer);
+        if (err) return;
         resolve(code === 0 ? successValue(stdout) : errorValue);
       });
     });
