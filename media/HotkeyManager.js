@@ -41,6 +41,7 @@ class HotkeyManager {
         e.preventDefault();
         e.stopPropagation();
         window.getSelection().removeAllRanges();
+        setTimeout(() => window.getSelection().removeAllRanges(), 0);
         if (this.selectAllFiles) this.selectAllFiles();
       } else if (e.keyCode === HotkeyManager.TAB && this.focusedPane === 'files' && this.focusedSection !== null) {
         e.preventDefault();
