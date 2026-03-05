@@ -44,7 +44,11 @@ class GitGraphView {
   }
   selectNextCommit() {
     const commitIndex = this.expandedCommit ? this.expandedCommit.id : -1;
-    this.loadCommitDetails(Math.min(commitIndex + 1, this.commits.length - 1));
+    const nextIndex = Math.min(commitIndex + 1, this.commits.length - 1);
+    this.loadCommitDetails(nextIndex);
+    if (this.moreCommitsAvailable && nextIndex >= this.commits.length - 5) {
+      this.triggerLoadMore();
+    }
   }
 
   selectPreviousFile(extend) {
@@ -206,6 +210,14 @@ class GitGraphView {
     });
   }
 
+  triggerLoadMore() {
+    if (!this.moreCommitsAvailable || this.loadCommitsCallback != null) return;
+    var btn = document.getElementById('loadMoreCommitsBtn');
+    if (btn) btn.parentNode.innerHTML = '<h2 id="loadingHeader">' + svgIcons.loading + 'Loading ...</h2>';
+    this.maxCommits += 75;
+    this.requestLoadCommits(true, () => {});
+  }
+
   requestLoadBranchesAndCommits(hard) {
     this.requestLoadBranches(hard, (branchChanges, isRepo) => {
       if (isRepo) {
@@ -321,10 +333,7 @@ class GitGraphView {
 
     if (this.moreCommitsAvailable) {
       document.getElementById('loadMoreCommitsBtn').addEventListener('click', () => {
-        document.getElementById('loadMoreCommitsBtn').parentNode.innerHTML =
-          '<h2 id="loadingHeader">' + svgIcons.loading + 'Loading ...</h2>';
-        this.maxCommits += 75;
-        this.requestLoadCommits(true, () => {});
+        this.triggerLoadMore();
       });
     }
 
@@ -975,6 +984,10 @@ class GitGraphView {
       if (active !== window.scrollY > 0) {
         active = window.scrollY > 0;
         this.scrollShadowElem.className = active ? 'active' : '';
+      }
+      var btn = document.getElementById('loadMoreCommitsBtn');
+      if (btn && btn.getBoundingClientRect().top < window.innerHeight) {
+        this.triggerLoadMore();
       }
     });
   }
