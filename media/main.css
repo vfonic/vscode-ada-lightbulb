@@ -635,6 +635,11 @@ svg.fileIcon {
   padding: 4px 12px;
   margin-top: 6px;
   border-radius: 4px;
+  color: var(--vscode-button-foreground, inherit);
+  background-color: var(--vscode-button-background, rgba(128, 128, 128, 0.2));
+}
+#commitDetailsDiff .roundedBtn:hover {
+  background-color: var(--vscode-button-hoverBackground, rgba(128, 128, 128, 0.3));
 }
 
 /* General */

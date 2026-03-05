@@ -24,6 +24,7 @@ class GitGraphView {
     this.pendingFileSelection = null;
     this.diffRequestId = 0;
     this.diffTimeout = null;
+    this.initialLoadDone = false;
     this.selectPreviousCommit = this.selectPreviousCommit.bind(this);
     this.selectNextCommit = this.selectNextCommit.bind(this);
     this.selectPreviousFile = this.selectPreviousFile.bind(this);
@@ -165,6 +166,10 @@ class GitGraphView {
     this.commits.forEach((commit, i) => (this.commitLookup[commit.hash] = i));
     this.graph.loadCommits(this.commits, this.commitHead, this.commitLookup);
     this.render();
+    if (!this.initialLoadDone) {
+      this.initialLoadDone = true;
+      if (this.commits.length > 0) this.loadCommitDetails(0);
+    }
     this.triggerLoadCommitsCallback(true);
   }
 
