@@ -10,11 +10,9 @@ class CommitFileListView {
   render() {
     const { gitFiles } = this;
     let html = '<ul class="gitFolderContents">';
-    gitFiles.forEach((gitFile, index) => {
+    gitFiles.forEach(gitFile => {
       html +=
-        '<li class="gitFile' +
-        (index === 0 ? ' selected' : '') +
-        '" data-filepath="' +
+        '<li class="gitFile" data-filepath="' +
         encodeURIComponent(gitFile.filePath) +
         '" data-newfilepath="' +
         encodeURIComponent(gitFile.newFilePath) +

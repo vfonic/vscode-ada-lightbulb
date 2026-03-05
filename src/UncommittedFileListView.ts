@@ -10,15 +10,12 @@ class UncommittedFileListView {
 
   render() {
     let html = '';
-    let firstFileSet = false;
 
     html += '<div class="fileSection" data-section="unstaged">';
     html += '<div class="fileSectionHeader">Unstaged Changes (' + this.unstagedFileChanges.length + ')</div>';
     html += '<ul class="gitFolderContents">';
     this.unstagedFileChanges.forEach(gitFile => {
-      const selected = !firstFileSet;
-      firstFileSet = true;
-      html += this.renderFileItem(gitFile, 'unstaged', selected);
+      html += this.renderFileItem(gitFile, 'unstaged');
     });
     html += '</ul></div>';
 
@@ -26,20 +23,16 @@ class UncommittedFileListView {
     html += '<div class="fileSectionHeader">Staged Changes (' + this.stagedFileChanges.length + ')</div>';
     html += '<ul class="gitFolderContents">';
     this.stagedFileChanges.forEach(gitFile => {
-      const selected = !firstFileSet;
-      firstFileSet = true;
-      html += this.renderFileItem(gitFile, 'staged', selected);
+      html += this.renderFileItem(gitFile, 'staged');
     });
     html += '</ul></div>';
 
     return html;
   }
 
-  renderFileItem(gitFile, section, selected) {
+  renderFileItem(gitFile, section) {
     return (
-      '<li class="gitFile' +
-      (selected ? ' selected' : '') +
-      '" data-section="' +
+      '<li class="gitFile" data-section="' +
       section +
       '" data-filepath="' +
       encodeURIComponent(gitFile.filePath) +
