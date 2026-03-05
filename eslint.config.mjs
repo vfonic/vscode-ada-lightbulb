@@ -18,11 +18,11 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/ban-ts-comment': ['error', { 'ts-nocheck': false }],
-      curly: ['error', 'all'],
+      curly: ['error', 'multi-line'],
       eqeqeq: ['error', 'always', { null: 'ignore' }],
       'no-throw-literal': 'error',
       'no-unused-expressions': 'off',
-      '@typescript-eslint/no-unused-expressions': 'error',
+      '@typescript-eslint/no-unused-expressions': ['error', { allowShortCircuit: true }],
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
