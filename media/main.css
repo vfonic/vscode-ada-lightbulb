@@ -211,6 +211,9 @@ body.unableToLoad p {
   flex: 1;
   min-height: 0;
 }
+#commitTable tr.commit.commitSelected td {
+  background-color: rgba(128, 128, 128, 0.1);
+}
 #commitTable tr.commit.commitDetailsOpen td {
   background-color: rgba(128, 128, 128, 0.15);
 }

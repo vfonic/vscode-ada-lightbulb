@@ -4,6 +4,7 @@ import { abbrevCommit, copyToClipboard } from './utils'
 import { encodeDiffDocUri } from './DiffDocProvider'
 import AssetLoader from './AssetLoader'
 import CommitDetailsFetcherFactory from './CommitDetailsFetcherFactory'
+import CommitFileChange from './CommitFileChange'
 import CommitStatusCode from './CommitStatusCode'
 import CommitView from './CommitView'
 import Config from './Config'
@@ -106,6 +107,48 @@ class GitGraphView {
               summaryHtml: parts.summary,
               fileListHtml: parts.fileList,
             })
+            break
+          }
+          case 'commitDetailsRange': {
+            const fileLines = await this.dataSource.getFileChangesRange(msg.repo, msg.fromHash, msg.toHash)
+            const fileChanges = []
+            fileLines.forEach(line => {
+              const parts = line.split('\t')
+              if (parts.length < 2) return
+              fileChanges.push(
+                new CommitFileChange({
+                  filePath: parts[1],
+                  newFilePath: parts[parts.length - 1],
+                  statusCode: parts[0][0],
+                }),
+              )
+            })
+            const commitCount = msg.commitCount || 0
+            const parts = CommitView.renderRange(msg.fromHash, msg.toHash, commitCount, fileChanges)
+            this.sendMessage({
+              command: 'commitDetailsRange',
+              summaryHtml: parts.summary,
+              fileListHtml: parts.fileList,
+            })
+            break
+          }
+          case 'requestFileDiffRange': {
+            const requestId = msg.requestId || 0
+            this._currentDiffRequestId = requestId
+            if (this._activeDiffProcess && !this._activeDiffProcess.killed) {
+              this._activeDiffProcess.kill()
+            }
+            this._activeDiffProcess = null
+            const trackProcess = proc => {
+              this._activeDiffProcess = proc
+            }
+            const diff = await this.dataSource.getFileDiffRange(msg.repo, msg.fromHash, msg.toHash, msg.filePath, undefined, trackProcess)
+            if (this._currentDiffRequestId !== requestId) break
+            if (diff && diff.timedOut) {
+              this.sendMessage({ command: 'fileDiff', diff: null, timedOut: true, filePath: msg.filePath, requestId })
+            } else {
+              this.sendMessage({ command: 'fileDiff', diff, requestId })
+            }
             break
           }
           case 'requestFileDiff': {

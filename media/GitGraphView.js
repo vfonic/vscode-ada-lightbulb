@@ -20,6 +20,7 @@ class GitGraphView {
     this.renderShowLoading()
     this.loadRepos(this.gitRepos, lastActiveRepo)
     this.requestLoadBranchesAndCommits(false)
+    this.selectedCommitIds = []
     this.selectedFiles = new Set()
     this.selectionAnchor = null
     this.pendingFileSelection = null
@@ -607,8 +608,21 @@ class GitGraphView {
 
     addListenerToClass('commit', 'click', e => {
       var sourceElem = e.target.closest('.commit')
+      var commitId = parseInt(sourceElem.dataset.id)
       this.setFocusedPane('commits')
-      this.loadCommitDetails(sourceElem.dataset.id)
+
+      if ((e.metaKey || e.ctrlKey) && this.commits[commitId].hash !== '*') {
+        this.toggleCommitSelection(commitId)
+        return
+      }
+
+      if (e.shiftKey && this.selectedCommitIds.length > 0 && this.commits[commitId].hash !== '*') {
+        this.shiftSelectCommits(commitId)
+        return
+      }
+
+      this.clearCommitSelection()
+      this.loadCommitDetails(commitId)
     })
 
     addListenerToClass('gitRef', 'contextmenu', e => {
@@ -1011,6 +1025,7 @@ class GitGraphView {
     var commitRow = document.querySelector('.commit[data-id="' + commitIndex + '"]')
     const commitData = commitRow.dataset
 
+    this.clearCommitSelection()
     var prev = document.querySelector('.commit.commitDetailsOpen')
     if (prev) prev.classList.remove('commitDetailsOpen')
     commitRow.classList.add('commitDetailsOpen')
@@ -1027,6 +1042,78 @@ class GitGraphView {
       repo: this.currentRepo,
       commitHash: commitData.hash,
       commitId: commitData.id,
+    })
+  }
+
+  clearCommitSelection() {
+    this.selectedCommitIds = []
+    document.querySelectorAll('.commit.commitSelected').forEach(el => el.classList.remove('commitSelected'))
+  }
+
+  updateCommitSelectionVisuals() {
+    document.querySelectorAll('.commit.commitSelected').forEach(el => el.classList.remove('commitSelected'))
+    document.querySelectorAll('.commit.commitDetailsOpen').forEach(el => el.classList.remove('commitDetailsOpen'))
+    this.selectedCommitIds.forEach(id => {
+      var row = document.querySelector('.commit[data-id="' + id + '"]')
+      if (row) row.classList.add('commitSelected')
+    })
+  }
+
+  toggleCommitSelection(commitId) {
+    var idx = this.selectedCommitIds.indexOf(commitId)
+    if (idx !== -1) {
+      this.selectedCommitIds.splice(idx, 1)
+    } else {
+      // If starting multi-select and we have a single expanded commit, include it
+      if (this.selectedCommitIds.length === 0 && this.expandedCommit && !this.expandedCommit.isRange && this.expandedCommit.hash !== '*') {
+        this.selectedCommitIds.push(this.expandedCommit.id)
+      }
+      this.selectedCommitIds.push(commitId)
+    }
+    this.updateCommitSelectionVisuals()
+    this.loadSelectedCommitRange()
+  }
+
+  shiftSelectCommits(commitId) {
+    var lastId = this.selectedCommitIds[this.selectedCommitIds.length - 1]
+    if (lastId === undefined && this.expandedCommit) lastId = this.expandedCommit.id
+    if (lastId === undefined) return
+    var start = Math.min(lastId, commitId)
+    var end = Math.max(lastId, commitId)
+    this.selectedCommitIds = []
+    for (var i = start; i <= end; i++) {
+      if (this.commits[i].hash !== '*') this.selectedCommitIds.push(i)
+    }
+    this.updateCommitSelectionVisuals()
+    this.loadSelectedCommitRange()
+  }
+
+  loadSelectedCommitRange() {
+    if (this.selectedCommitIds.length === 0) {
+      // All deselected — hide details
+      var detailsEl = document.getElementById('commitDetails')
+      detailsEl.classList.remove('active')
+      document.body.style.paddingBottom = '0'
+      this.expandedCommit = null
+      return
+    }
+    if (this.selectedCommitIds.length === 1) {
+      this.loadCommitDetails(this.selectedCommitIds[0])
+      return
+    }
+    // 2+ selected — range mode
+    var sorted = this.selectedCommitIds.slice().sort((a, b) => a - b)
+    var fromId = sorted[sorted.length - 1] // highest index = oldest commit (git log order)
+    var toId = sorted[0] // lowest index = newest commit
+    var fromHash = this.commits[fromId].hash
+    var toHash = this.commits[toId].hash
+    this.expandedCommit = { id: -1, hash: null, fromHash: fromHash, toHash: toHash, fromId: fromId, toId: toId, isRange: true }
+    sendMessage({
+      command: 'commitDetailsRange',
+      repo: this.currentRepo,
+      fromHash: fromHash,
+      toHash: toHash,
+      commitCount: sorted.length,
     })
   }
 
@@ -1214,15 +1301,26 @@ class GitGraphView {
         document.getElementById('commitDetailsDiff').innerHTML = '<em>Diff not loaded.</em>'
       }
     }, DIFF_TIMEOUT_MS)
-    sendMessage({
-      command: 'requestFileDiff',
-      repo: this.currentRepo,
-      commitHash: this.expandedCommit.hash,
-      filePath: decodeURIComponent(li.dataset.filepath),
-      section: li.dataset.section || null,
-      statusCode: li.dataset.statuscode || null,
-      requestId: this.diffRequestId,
-    })
+    if (this.expandedCommit && this.expandedCommit.isRange) {
+      sendMessage({
+        command: 'requestFileDiffRange',
+        repo: this.currentRepo,
+        fromHash: this.expandedCommit.fromHash,
+        toHash: this.expandedCommit.toHash,
+        filePath: decodeURIComponent(li.dataset.filepath),
+        requestId: this.diffRequestId,
+      })
+    } else {
+      sendMessage({
+        command: 'requestFileDiff',
+        repo: this.currentRepo,
+        commitHash: this.expandedCommit.hash,
+        filePath: decodeURIComponent(li.dataset.filepath),
+        section: li.dataset.section || null,
+        statusCode: li.dataset.statuscode || null,
+        requestId: this.diffRequestId,
+      })
+    }
   }
 
   selectAllFiles() {
@@ -1290,15 +1388,26 @@ class GitGraphView {
       btn.addEventListener('click', function () {
         self.diffRequestId++
         el.innerHTML = '<em>Loading diff...</em>'
-        sendMessage({
-          command: 'requestFileDiffFull',
-          repo: self.currentRepo,
-          commitHash: self.expandedCommit.hash,
-          filePath: filePath,
-          section: section,
-          statusCode: statusCode,
-          requestId: self.diffRequestId,
-        })
+        if (self.expandedCommit && self.expandedCommit.isRange) {
+          sendMessage({
+            command: 'requestFileDiffRange',
+            repo: self.currentRepo,
+            fromHash: self.expandedCommit.fromHash,
+            toHash: self.expandedCommit.toHash,
+            filePath: filePath,
+            requestId: self.diffRequestId,
+          })
+        } else {
+          sendMessage({
+            command: 'requestFileDiffFull',
+            repo: self.currentRepo,
+            commitHash: self.expandedCommit.hash,
+            filePath: filePath,
+            section: section,
+            statusCode: statusCode,
+            requestId: self.diffRequestId,
+          })
+        }
       })
     }
   }

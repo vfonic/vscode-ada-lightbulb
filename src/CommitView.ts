@@ -40,6 +40,19 @@ class CommitView {
     const fileList = new UncommittedFileListView(commitDetails.unstagedFileChanges, commitDetails.stagedFileChanges).render()
     return { summary, fileList }
   }
+
+  static renderRange(fromHash, toHash, commitCount, fileChanges) {
+    const summary =
+      '<span class="commitDetailsSummaryTop"><b>Showing changes across ' +
+      commitCount +
+      ' commits</b> (' +
+      escapeHtml(fromHash.substring(0, 7)) +
+      '..' +
+      escapeHtml(toHash.substring(0, 7)) +
+      ')</span>'
+    const fileList = new CommitFileListView(fileChanges).render()
+    return { summary, fileList }
+  }
 }
 
 export default CommitView

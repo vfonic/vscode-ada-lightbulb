@@ -109,6 +109,30 @@ class DataSource {
     )
   }
 
+  getFileChangesRange(repo, fromHash, toHash) {
+    return new Promise((resolve, reject) =>
+      DataSource.execGit('diff --name-status --find-renames --diff-filter=AMDR ' + fromHash + '^..' + toHash, repo, (err, stdout) => {
+        if (err) {
+          console.error(err)
+          reject(new Error(err))
+        } else {
+          resolve(stdout.split(DataSource.eolRegex))
+        }
+      }),
+    )
+  }
+
+  getFileDiffRange(repo, fromHash, toHash, filePath, timeout = DIFF_TIMEOUT_MS, onProcess = null) {
+    return this.spawnGit(
+      ['diff', '--no-ext-diff', '--no-color', fromHash + '^..' + toHash, '--', filePath],
+      repo,
+      stdout => stdout,
+      '',
+      timeout,
+      onProcess,
+    )
+  }
+
   getUnstagedFileDiff(repo, filePath, timeout = DIFF_TIMEOUT_MS, onProcess = null) {
     return this.spawnGit(['diff', '--no-ext-diff', '--no-color', '--', filePath], repo, stdout => stdout, '', timeout, onProcess)
   }
