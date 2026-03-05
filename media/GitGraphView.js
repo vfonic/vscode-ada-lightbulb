@@ -936,6 +936,18 @@ class GitGraphView {
     );
   }
 
+  scrollCommitIntoView(commitRow) {
+    var rect = commitRow.getBoundingClientRect();
+    var headerHeight = 30;
+    var panelHeight = this.detailsHeight || 0;
+    var visibleBottom = window.innerHeight - panelHeight;
+    if (rect.bottom > visibleBottom) {
+      window.scrollBy(0, rect.bottom - visibleBottom);
+    } else if (rect.top < headerHeight) {
+      window.scrollBy(0, rect.top - headerHeight);
+    }
+  }
+
   observeWindowSizeChanges() {
     var windowWidth = window.outerWidth,
       windowHeight = window.outerHeight;
@@ -972,7 +984,7 @@ class GitGraphView {
     var prev = document.querySelector('.commit.commitDetailsOpen');
     if (prev) prev.classList.remove('commitDetailsOpen');
     commitRow.classList.add('commitDetailsOpen');
-    commitRow.scrollIntoView({ block: 'nearest' });
+    this.scrollCommitIntoView(commitRow);
     this.setFocusedPane('commits');
 
     this.expandedCommit = {

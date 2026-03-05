@@ -273,6 +273,7 @@ body.unableToLoad p {
   padding: 4px 0;
   box-sizing: border-box;
   flex-shrink: 0;
+  user-select: none;
 }
 #commitDetailsDiff {
   flex: 1;
