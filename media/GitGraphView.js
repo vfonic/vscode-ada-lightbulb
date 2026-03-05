@@ -21,6 +21,7 @@ class GitGraphView {
     this.selectionAnchor = null;
     this.pendingFileSelection = null;
     this.diffRequestId = 0;
+    this.diffTimeout = null;
     this.selectPreviousCommit = this.selectPreviousCommit.bind(this);
     this.selectNextCommit = this.selectNextCommit.bind(this);
     this.selectPreviousFile = this.selectPreviousFile.bind(this);
@@ -1172,7 +1173,14 @@ class GitGraphView {
 
   requestDiffForFile(li) {
     this.diffRequestId++;
-    document.getElementById('commitDetailsDiff').innerHTML = '<em>Loading diff...</em>';
+    if (this.diffTimeout) clearTimeout(this.diffTimeout);
+    var currentRequestId = this.diffRequestId;
+    var self = this;
+    this.diffTimeout = setTimeout(function () {
+      if (self.diffRequestId === currentRequestId) {
+        document.getElementById('commitDetailsDiff').innerHTML = '<em>Diff not loaded.</em>';
+      }
+    }, 3000);
     sendMessage({
       command: 'requestFileDiff',
       repo: this.currentRepo,
@@ -1203,6 +1211,7 @@ class GitGraphView {
 
   showFileDiff(diff, timedOut, permanentError, filePath, section, statusCode, requestId) {
     if (requestId !== undefined && requestId !== this.diffRequestId) return;
+    if (this.diffTimeout) { clearTimeout(this.diffTimeout); this.diffTimeout = null; }
     var el = document.getElementById('commitDetailsDiff');
     if (!el) return;
     if (permanentError) {
